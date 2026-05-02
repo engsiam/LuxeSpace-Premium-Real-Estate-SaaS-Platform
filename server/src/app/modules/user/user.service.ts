@@ -1,0 +1,175 @@
+import prisma from '../../../prisma/client';
+import bcrypt from 'bcrypt';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
+import env from '../../../config';
+import ApiError from '../../utils/ApiError';
+import { Role } from '@prisma/client';
+
+export interface IUpdateUserData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
+  role?: Role;
+  isActive?: boolean;
+}
+
+export const registerUser = async (data: {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  role?: string;
+}) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { email: data.email },
+  });
+
+  if (existingUser) {
+    throw new ApiError(409, 'Email already registered');
+  }
+
+  const hashedPassword = await bcrypt.hash(data.password, 12);
+  
+  const user = await prisma.user.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      phone: data.phone,
+      role: (data.role as Role) || 'USER',
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      phone: true,
+      avatar: true,
+      createdAt: true,
+    },
+  });
+
+  const accessToken = jwt.sign(
+    { id: user.id, role: user.role },
+    env.JWT_SECRET as Secret,
+    { expiresIn: env.JWT_EXPIRES_IN } as SignOptions
+  );
+
+  const refreshToken = jwt.sign(
+    { id: user.id },
+    env.JWT_REFRESH_SECRET as Secret,
+    { expiresIn: '30d' } as SignOptions
+  );
+
+  return { user, accessToken, refreshToken };
+};
+
+export const loginUser = async (email: string, password: string) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    throw new ApiError(401, 'Invalid email or password');
+  }
+
+  if (!user.isActive) {
+    throw new ApiError(403, 'Account is deactivated');
+  }
+
+  const { password: _, ...userWithoutPassword } = user;
+
+  const accessToken = jwt.sign(
+    { id: user.id, role: user.role },
+    env.JWT_SECRET as Secret,
+    { expiresIn: env.JWT_EXPIRES_IN } as SignOptions
+  );
+
+  const refreshToken = jwt.sign(
+    { id: user.id },
+    env.JWT_REFRESH_SECRET as Secret,
+    { expiresIn: '30d' } as SignOptions
+  );
+
+  return { user: userWithoutPassword, accessToken, refreshToken };
+};
+
+export const refreshToken = async (token: string) => {
+  try {
+    const decoded = jwt.verify(token, env.JWT_REFRESH_SECRET as Secret) as { id: string };
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user || !user.isActive) {
+      throw new ApiError(401, 'Invalid refresh token');
+    }
+
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      env.JWT_SECRET as Secret,
+      { expiresIn: env.JWT_EXPIRES_IN } as SignOptions
+    );
+
+    return { accessToken };
+  } catch (error) {
+    throw new ApiError(401, 'Invalid refresh token');
+  }
+};
+
+export const getUsers = async () => {
+  return prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+    },
+  });
+};
+
+export const getUserById = async (id: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      phone: true,
+      avatar: true,
+      isActive: true,
+      createdAt: true,
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  return user;
+};
+
+export const updateUser = async (id: string, data: IUpdateUserData) => {
+  return prisma.user.update({
+    where: { id },
+    data,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      phone: true,
+      avatar: true,
+    },
+  });
+};
+
+export const deleteUser = async (id: string) => {
+  await prisma.user.delete({
+    where: { id },
+  });
+};

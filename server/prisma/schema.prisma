@@ -1,0 +1,118 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  USER
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  BOOKED
+  SOLD
+}
+
+enum BookingStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(USER)
+  phone         String?
+  avatar        String?
+  isActive      Boolean   @default(true)
+  properties    Property[]
+  bookings      Booking[]
+  reviews       Review[]
+  blogs         Blog[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Property {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String
+  price         Float
+  location      String
+  city          String
+  area          String
+  bhk           Int
+  size          Int
+  type          String          // Apartment, Villa, Commercial, etc.
+  images        String[]
+  amenities     String[]
+  status        PropertyStatus  @default(AVAILABLE)
+  isFeatured    Boolean         @default(false)
+  agentId       String          @db.ObjectId
+  agent         User            @relation(fields: [agentId], references: [id])
+  bookings      Booking[]
+  reviews       Review[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Booking {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String        @db.ObjectId
+  user            User          @relation(fields: [userId], references: [id])
+  propertyId      String        @db.ObjectId
+  property        Property      @relation(fields: [propertyId], references: [id])
+  bKashTrxId      String?
+  bKashPaymentID  String?
+  amount          Float
+  status          BookingStatus @default(PENDING)
+  visitDate       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Review {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  propertyId  String    @db.ObjectId
+  property    Property  @relation(fields: [propertyId], references: [id])
+  rating      Int       // 1-5
+  comment     String
+  createdAt   DateTime  @default(now())
+}
+
+model Blog {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String    @unique
+  content     String
+  coverImage  String
+  category    String
+  tags        String[]
+  authorId    String    @db.ObjectId
+  author      User      @relation(fields: [authorId], references: [id])
+  isPublished Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Contact {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  subject   String
+  message   String
+  isRead    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+}

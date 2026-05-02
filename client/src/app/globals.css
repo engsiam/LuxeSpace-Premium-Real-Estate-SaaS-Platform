@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/* Tailwind v4 dark mode - toggles via .dark class on <html> */
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Design System Tokens
+  - @theme inline defines the DEFAULT (light) values
+  - .dark overrides for dark mode (LuxeSpace premium dark)
+*/
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: 0.75rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+}
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #0B0F1A;
+  --card: #FFFFFF;
+  --card-foreground: #0B0F1A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0B0F1A;
+  --primary: #C9A74D;
+  --primary-foreground: #0B0F1A;
+  --secondary: #F8F9FA;
+  --secondary-foreground: #0B0F1A;
+  --muted: #F1F5F9;
+  --muted-foreground: #6B7280;
+  --accent: #F1F5F9;
+  --accent-foreground: #0B0F1A;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #C9A74D;
+}
+
+/* === DARK MODE (LuxeSpace Premium Dark) === */
+.dark {
+  --background: #0B0F1A;
+  --foreground: #FFFFFF;
+  --card: #121826;
+  --card-foreground: #FFFFFF;
+  --popover: #121826;
+  --popover-foreground: #FFFFFF;
+  --primary: #C9A74D;
+  --primary-foreground: #0B0F1A;
+  --secondary: #121826;
+  --secondary-foreground: #FFFFFF;
+  --muted: #121826;
+  --muted-foreground: #9CA3AF;
+  --accent: #121826;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #1E293B;
+  --input: #1E293B;
+  --ring: #C9A74D;
+}
+
+/* Smooth theme transition - top to bottom effect */
+html, body {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+/* Force dark background when .dark is present */
+html.dark {
+  background-color: #0B0F1A !important;
+  color: #FFFFFF !important;
+}
+
+html:not(.dark) {
+  background-color: #FFFFFF !important;
+  color: #0B0F1A !important;
+}
