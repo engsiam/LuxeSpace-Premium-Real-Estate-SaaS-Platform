@@ -37,10 +37,13 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
 
-  const fillDemoCredentials = (role: 'admin' | 'user') => {
+  const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
     if (role === 'admin') {
       form.setValue('email', 'admin@luxespace.com');
       form.setValue('password', 'Admin@123');
+    } else if (role === 'agent') {
+      form.setValue('email', 'agent@luxespace.com');
+      form.setValue('password', 'Agent@123');
     } else {
       form.setValue('email', 'user1@luxespace.com');
       form.setValue('password', 'User@123');
@@ -60,10 +63,7 @@ export default function LoginPage() {
         toast.error('Invalid email or password');
       } else {
         toast.success('Login successful!');
-        const session = await getSession();
-        const role = session?.user?.role || 'USER';
-        router.push(`/dashboard/${role.toLowerCase()}`);
-        router.refresh();
+        router.push('/dashboard');
       }
     } catch (error) {
       toast.error('Login failed');
@@ -162,20 +162,27 @@ export default function LoginPage() {
                   <span className="bg-card px-4 text-muted-foreground">Demo Accounts</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <Button
                   variant="outline"
                   className="h-12 rounded-xl font-black text-xs border-primary/20 text-primary hover:bg-primary hover:text-secondary transition-all"
                   onClick={() => fillDemoCredentials('admin')}
                 >
-                  ADMIN ACCESS
+                  ADMIN
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-12 rounded-xl font-black text-xs border-primary/20 text-primary hover:bg-primary hover:text-secondary transition-all"
+                  onClick={() => fillDemoCredentials('agent')}
+                >
+                  AGENT
                 </Button>
                 <Button
                   variant="outline"
                   className="h-12 rounded-xl font-black text-xs border-primary/20 text-primary hover:bg-primary hover:text-secondary transition-all"
                   onClick={() => fillDemoCredentials('user')}
                 >
-                  USER ACCESS
+                  USER
                 </Button>
               </div>
             </div>

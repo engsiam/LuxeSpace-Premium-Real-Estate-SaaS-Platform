@@ -100,7 +100,7 @@ export function Grid({ children, className, cols = 3 }: GridProps) {
   } as const;
 
   return (
-    <div className={cn('grid gap-6', gridCols[cols], className)}>
+    <div className={cn('grid gap-6 items-stretch', gridCols[cols], className)}>
       {children}
     </div>
   );
@@ -132,8 +132,8 @@ export function PropertyCard({
   };
 
   return (
-    <Link href={`/properties/${id}`} className={cn('block', className)}>
-      <div className="overflow-hidden h-full bg-card border border-border rounded-2xl hover:border-primary/30 hover:shadow-2xl transition-all duration-500 group flex flex-col">
+    <Link href={`/properties/${id}`} className={cn('flex flex-col h-full', className)}>
+      <div className="overflow-hidden flex flex-col h-full bg-card border border-border rounded-2xl hover:border-primary/30 hover:shadow-2xl transition-all duration-500 group">
         {/* Image - Fixed 16:9 Ratio */}
         <div className="relative aspect-video overflow-hidden shrink-0">
           {images?.[0] ? (

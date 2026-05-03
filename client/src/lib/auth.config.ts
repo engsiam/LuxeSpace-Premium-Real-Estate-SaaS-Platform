@@ -1,6 +1,8 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import axiosInstance from './axiosInstance';
+import axios from 'axios';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -12,7 +14,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const response = await axiosInstance.post('/auth/login', {
+          const response = await axios.post(`${BASE_URL}/auth/login`, {
             email: credentials?.email,
             password: credentials?.password,
           });
@@ -30,7 +32,8 @@ export const authOptions: NextAuthOptions = {
             };
           }
           return null;
-        } catch (error) {
+        } catch (error: any) {
+          console.error('Authorize error:', error?.response?.data || error.message);
           return null;
         }
       },
@@ -46,9 +49,11 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      session.refreshToken = token.refreshToken;
-      session.user.role = token.role;
+      session.accessToken = token.accessToken as string;
+      session.refreshToken = token.refreshToken as string;
+      if (token.role) {
+        session.user.role = token.role as string;
+      }
       return session;
     },
   },
@@ -57,5 +62,18 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
 };

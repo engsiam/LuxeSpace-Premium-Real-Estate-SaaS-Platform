@@ -16,7 +16,7 @@ export function PropertyCardWrapper({ property, index = 0 }: PropertyCardWrapper
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1 }}
-      className="h-full"
+      className="h-full flex flex-col"
     >
       <PropertyCard
         id={property.id}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,6 +28,7 @@ const reviewSchema = z.object({
 export default function PropertyDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { status } = useSession();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -133,13 +135,13 @@ export default function PropertyDetailsPage() {
               <h2 className="text-2xl font-black text-foreground mb-8">Property <span className="text-primary italic">Overview</span></h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
                 {[
-                  { icon: Maximize, label: 'Area', value: property.area + ' sq.ft.' },
-                  { icon: BedDouble, label: 'BHK', value: property.bhk },
+                  { icon: Maximize, label: 'Total Size', value: property.size + ' sq.ft.' },
+                  { icon: BedDouble, label: 'Bedrooms', value: property.bhk + ' BHK' },
                   { icon: Building2, label: 'Type', value: property.type },
-                  { icon: MapPin, label: 'Location', value: property.city },
+                  { icon: MapPin, label: 'Location', value: property.area || property.city },
                 ].map((item, index) => (
-                  <motion.div key={index} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className="p-6 bg-background rounded-2xl border border-border text-center">
-                    <item.icon className="mx-auto mb-3 text-primary" size={24} />
+                  <motion.div key={index} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className="p-6 bg-background rounded-2xl border border-border text-center group hover:border-primary/50 transition-all">
+                    <item.icon className="mx-auto mb-3 text-primary transition-transform group-hover:scale-110" size={24} />
                     <p className="text-xs text-muted-foreground font-black uppercase tracking-widest">{item.label}</p>
                     <p className="text-lg font-black text-foreground">{item.value}</p>
                   </motion.div>
@@ -225,7 +227,19 @@ export default function PropertyDetailsPage() {
           <div className="space-y-8">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-card rounded-3xl border border-border p-8 sticky top-32">
               <h3 className="text-2xl font-black text-foreground mb-6">Interested in this <span className="text-primary italic">Property?</span></h3>
-              <Button onClick={() => setIsBookingOpen(true)} className="w-full h-16 bg-primary text-secondary font-black text-lg rounded-2xl hover:bg-foreground hover:text-background transition-all mb-6">Schedule a Viewing</Button>
+              <Button 
+                onClick={() => {
+                  if (status !== 'authenticated') {
+                    toast.error('Please login to book a viewing');
+                    router.push(`/login?callbackUrl=/properties/${id}`);
+                  } else {
+                    setIsBookingOpen(true);
+                  }
+                }} 
+                className="w-full h-16 bg-primary text-secondary font-black text-lg rounded-2xl hover:bg-foreground hover:text-background transition-all mb-6"
+              >
+                Reserve This Property
+              </Button>
               <div className="space-y-6 pt-6 border-t border-border">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary"><User size={20} /></div>

@@ -58,10 +58,6 @@ export default function DashboardSidebar({ role }: { role: string }) {
   const items = role === 'ADMIN' ? adminItems : role === 'AGENT' ? agentItems : userItems;
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-    }
     signOut({ callbackUrl: '/' });
   };
 
