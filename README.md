@@ -1,8 +1,13 @@
 # 🏡 LuxeSpace - Premium Real Estate Platform
 
-[![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://luxespace.vercel.app)
-[![Backend API](https://img.shields.io/badge/API-Render-blue)](https://luxespace-api.onrender.com)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](https://github.com/engsiam/luxspace/blob/main/README.md)
+# Live Demo
+[![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://luxspace-beta.vercel.app)
+
+# Backend API 
+[![Backend API](https://img.shields.io/badge/API-Render-blue)](https://luxspace-backend.onrender.com/api/v1)
+
+# Project Screenshot
+![Alt Text](https://i.ibb.co.com/d4Kp0ysx/Chat-GPT-Image-May-3-2026-07-21-51-PM.png)
 
 A full-stack premium real estate platform for Bangladesh, connecting property buyers with exclusive listings through an elegant, modern interface.
 
