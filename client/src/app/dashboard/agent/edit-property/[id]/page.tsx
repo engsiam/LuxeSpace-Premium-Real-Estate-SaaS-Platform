@@ -136,7 +136,7 @@ export default function EditProperty() {
   };
 
   const toggleAmenity = (amenity: string) => {
-    const current = form.getValues('amenities');
+    const current = form.getValues('amenities') || [];
     if (current.includes(amenity)) {
       form.setValue('amenities', current.filter((a) => a !== amenity), { shouldValidate: true, shouldDirty: true });
     } else {
@@ -284,7 +284,12 @@ export default function EditProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground uppercase tracking-widest text-[10px] font-black">Valuation (BDT)</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" />
+                      <Input 
+                        type="number"
+                        value={field.value as number | string} 
+                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))} 
+                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -320,7 +325,12 @@ export default function EditProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground uppercase tracking-widest text-[10px] font-black">Dimension (sqft)</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" />
+                      <Input 
+                        type="number" 
+                        value={field.value as number | string}
+                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -364,7 +374,12 @@ export default function EditProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground uppercase tracking-widest text-[10px] font-black">Bedrooms</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" />
+                      <Input 
+                        type="number"
+                        value={field.value as number | string}
+                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -385,7 +400,7 @@ export default function EditProperty() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {AMENITIES_LIST.map((amenity) => {
-                  const isSelected = form.watch('amenities').includes(amenity);
+                  const isSelected = form.watch('amenities')?.includes(amenity) || false;
                   return (
                     <motion.button
                       key={amenity}

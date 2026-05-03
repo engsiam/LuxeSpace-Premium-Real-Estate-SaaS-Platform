@@ -25,7 +25,7 @@ export default function DashboardHeader() {
   return (
     <div className="absolute top-6 right-10 z-50 flex items-center justify-end">
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger>
           <Button variant="ghost" className="relative h-12 w-12 rounded-full ring-2 ring-primary/20 hover:ring-primary/50 transition-all p-0">
             <Avatar className="h-12 w-12 border-2 border-background shadow-lg">
               <AvatarImage src={userImage} alt={session.user?.name || 'User'} className="object-cover" />

@@ -313,7 +313,8 @@ export default function AddProperty() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {AMENITIES_LIST.map((amenity) => {
-                  const isSelected = form.watch('amenities').includes(amenity);
+                  const selectedAmenities = form.watch('amenities') || [];
+                  const isSelected = Array.isArray(selectedAmenities) && selectedAmenities.includes(amenity);
                   return (
                     <motion.button
                       key={amenity}

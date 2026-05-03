@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,6 +23,7 @@ import { useChatStore } from '@/store/useChatStore';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -142,17 +144,13 @@ export default function Navbar() {
                     </DropdownMenuLabel>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator className="bg-border/50 my-2" />
-                  <DropdownMenuItem asChild>
-                    <Link href={getDashboardLink()} className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors">
-                      <LayoutDashboard size={18} />
-                      <span className="font-bold text-sm">Dashboard</span>
-                    </Link>
+                  <DropdownMenuItem onClick={() => router.push(getDashboardLink())}>
+                    <LayoutDashboard size={18} />
+                    <span className="font-bold text-sm">Dashboard</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={`${getDashboardLink()}/profile`} className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors">
-                      <User size={18} />
-                      <span className="font-bold text-sm">My Profile</span>
-                    </Link>
+                  <DropdownMenuItem onClick={() => router.push(`${getDashboardLink()}/profile`)}>
+                    <User size={18} />
+                    <span className="font-bold text-sm">My Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-border/50 my-2" />
                   <DropdownMenuItem 
