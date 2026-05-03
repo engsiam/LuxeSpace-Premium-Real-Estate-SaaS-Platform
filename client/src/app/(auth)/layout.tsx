@@ -1,7 +1,5 @@
-
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
-import { Container } from '@/components/shared/LayoutComponents';
 
 export default function AuthLayout({
   children,
@@ -9,13 +7,23 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="min-h-screen bg-background flex flex-col overflow-hidden">
+
+      {/* NAVBAR */}
       <Navbar />
-      <main className="flex-grow w-full">
-        <Container className="py-20 flex justify-center items-center min-h-[calc(100vh-200px)]">
-          {children}
-        </Container>
+
+      {/* AUTH CONTENT */}
+      <main className="flex-1 flex items-center justify-center px-4 py-12 lg:px-8 lg:py-16">
+
+        {/* PROFESSIONAL CENTER CONTAINER */}
+        <main className="flex-1 px-4 py-10 lg:px-8">
+  <div className="mx-auto w-full max-w-7xl">
+    {children}
+  </div>
+</main>
       </main>
+
+      {/* FOOTER */}
       <Footer />
     </div>
   );

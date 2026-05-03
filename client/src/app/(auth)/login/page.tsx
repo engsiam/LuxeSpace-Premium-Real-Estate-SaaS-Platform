@@ -19,7 +19,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Globe, ShieldCheck, User as UserIcon, Lock, Github, Twitter, Chrome } from 'lucide-react';
+import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Eye, EyeOff, Building2, TrendingUp } from 'lucide-react';
+import Image from 'next/image';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -31,6 +32,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -48,6 +50,7 @@ export default function LoginPage() {
       form.setValue('email', 'user1@luxespace.com');
       form.setValue('password', 'User@123');
     }
+    toast.success(`${role.toUpperCase()} credentials loaded`);
   };
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -62,174 +65,300 @@ export default function LoginPage() {
       if (result?.error) {
         toast.error('Invalid email or password');
       } else {
-        toast.success('Login successful!');
+        toast.success('Welcome back!');
         router.push('/dashboard');
       }
     } catch (error) {
-      toast.error('Login failed');
+      toast.error('Authentication failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-background flex items-center justify-center p-4 md:p-10 relative overflow-hidden transition-colors duration-500">
-      {/* Decorative Gradient Blurs (Theme Aware) */}
-      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className="relative w-full max-w-7xl mx-auto overflow-hidden rounded-[40px] border border-white/10 bg-[#020817]/90 backdrop-blur-2xl shadow-[0_30px_120px_rgba(0,0,0,0.45)] border rounded-3xl mt-20"
+    >
+      <div style={{ display: 'flex', minHeight: '850px' }}>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-5xl bg-card border border-border shadow-2xl rounded-[3rem] overflow-hidden relative z-10"
-      >
-        <div className="flex flex-col md:flex-row min-h-[600px]">
-          {/* Left Side - Visual Branding */}
-          <div className="md:w-1/2 bg-primary flex flex-col justify-between p-12 lg:p-16 relative overflow-hidden group">
-            {/* Abstract Pattern Overlay */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none">
-              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent scale-[2]" />
+        {/* LEFT SIDE - Image Panel */}
+        <div className="relative overflow-hidden" style={{ width: '58%', flexShrink: 0 }}>
+
+          {/* IMAGE */}
+          <Image
+            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075&auto=format&fit=crop"
+            alt="Luxury Property"
+            fill
+            priority
+            className="object-cover"
+          />
+
+          {/* OVERLAYS */}
+          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/30 to-[#020817]/80" />
+
+          {/* GOLD GLOW */}
+          <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[140px]" />
+
+          {/* CONTENT */}
+          <div className="relative z-10 flex h-full flex-col justify-between p-16">
+
+            {/* TOP */}
+            <div className="space-y-10">
+
+              <Link href="/" className="inline-flex items-center gap-3">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
+                  <Globe className="h-7 w-7 text-white" />
+                </div>
+
+                <div>
+                  <p className="text-2xl font-black tracking-tight text-white">
+                    LuxeSpace
+                  </p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+                    Elite Property Network
+                  </p>
+                </div>
+              </Link>
+
+              <div className="max-w-[560px] space-y-8">
+
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-5 py-3 backdrop-blur-xl">
+                  <Sparkles className="h-4 w-4 text-yellow-400" />
+                  <span className="text-[11px] font-black uppercase tracking-[0.35em] text-white">
+                    Elite Access
+                  </span>
+                </div>
+
+                <h1 className="text-7xl font-black leading-[0.95] tracking-[-0.05em] text-white">
+                  Welcome
+                  <br />
+                  <span className="italic text-white/70">
+                    Back.
+                  </span>
+                </h1>
+
+                <p className="max-w-[480px] text-lg leading-relaxed text-white/70">
+                  Access Bangladesh’s most exclusive luxury real estate network and manage your premium property portfolio seamlessly.
+                </p>
+              </div>
             </div>
 
-            <Link href="/" className="z-10 group/logo">
-              <div className="w-14 h-14 bg-secondary rounded-[1.25rem] flex items-center justify-center shadow-2xl transition-all duration-500 group-hover/logo:rotate-[360deg] group-hover/logo:scale-110">
-                <Globe className="text-primary w-8 h-8" />
-              </div>
-            </Link>
+            {/* BOTTOM CARDS */}
+            <div className="space-y-6">
 
-            <div className="z-10 space-y-6">
-              <motion.h1 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-6xl font-black text-secondary-foreground leading-tight tracking-tighter"
-              >
-                Welcome<br /><span className="text-secondary-foreground/80 italic">Back.</span>
-              </motion.h1>
-              <p className="text-secondary-foreground/60 text-lg font-medium leading-relaxed max-w-xs">
-                Unlock the gateway to Bangladesh's most prestigious real estate network.
-              </p>
-              <div className="flex items-center gap-3 pt-4">
-                <div className="h-1 w-16 bg-secondary-foreground/20 rounded-full" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-secondary-foreground/40">Elite Protocol</span>
-              </div>
-            </div>
+              <div className="grid grid-cols-2 gap-5 max-w-[500px]">
 
-            <div className="z-10 flex items-center gap-4 text-xs font-black uppercase tracking-widest text-secondary-foreground/50">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-primary bg-secondary/20 backdrop-blur-sm" />
-                ))}
+                <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
+                  <Building2 className="mb-4 h-7 w-7 text-yellow-400" />
+                  <h3 className="text-3xl font-black text-white">
+                    2.5B+
+                  </h3>
+                  <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.25em] text-white/50">
+                    Property Volume
+                  </p>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
+                  <TrendingUp className="mb-4 h-7 w-7 text-emerald-400" />
+                  <h3 className="text-3xl font-black text-white">
+                    98%
+                  </h3>
+                  <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.25em] text-white/50">
+                    Client Success
+                  </p>
+                </div>
               </div>
-              <span>Trusted by 5k+ Clients</span>
+
+              <div className="max-w-[520px] rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+                <p className="text-sm leading-relaxed text-white/70">
+                  Trusted by elite investors, premium agents, and luxury property developers across Bangladesh.
+                </p>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Right Side - Authentication Form */}
-          <div className="md:w-1/2 p-12 lg:p-16 flex flex-col justify-center space-y-10 bg-card">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-black text-foreground tracking-tight">Access Account</h2>
-              <p className="text-muted-foreground text-sm font-medium">Please enter your distinguished credentials below</p>
+        {/* RIGHT SIDE - Form Panel */}
+        <div className="flex items-center justify-center bg-[#020817] px-8 py-16 lg:px-16" style={{ flex: 1 }}>
+
+          <div className="w-full max-w-[480px]">
+
+            <div className="space-y-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.35em] text-primary">
+                Secure Login
+              </p>
+
+              <h2 className="text-5xl font-black tracking-[-0.04em] text-white">
+                Access Your Account
+              </h2>
+
+              <p className="text-base leading-relaxed text-white/50">
+                Enter your credentials to unlock premium features.
+              </p>
             </div>
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 ml-1">Identity (Email)</FormLabel>
-                      <FormControl>
-                        <div className="relative group">
-                          <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-5 h-5 group-focus-within:text-primary transition-colors" />
-                          <Input 
-                            placeholder="rahul@example.com" 
-                            {...field} 
-                            className="h-14 bg-background/50 border-white/10 rounded-2xl pl-14 text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20 text-base transition-all" 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-xs font-bold" />
-                    </FormItem>
-                  )}
-                />
+            <div className="mt-12">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-7"
+                >
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 ml-1">Secure Key</FormLabel>
-                        <Link href="#" className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-foreground transition-colors">Forgot?</Link>
+                  {/* EMAIL */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="text-[11px] font-black uppercase tracking-[0.25em] text-white/60">
+                          Email Address
+                        </FormLabel>
+
+                        <FormControl>
+                          <div className="relative">
+                            <UserIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
+
+                            <Input
+                              {...field}
+                              placeholder="you@example.com"
+                              className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                            />
+                          </div>
+                        </FormControl>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* PASSWORD */}
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-[11px] font-black uppercase tracking-[0.25em] text-white/60">
+                            Password
+                          </FormLabel>
+
+                          <Link
+                            href="#"
+                            className="text-xs font-bold text-primary hover:text-primary/80"
+                          >
+                            Forgot password?
+                          </Link>
+                        </div>
+
+                        <FormControl>
+                          <div className="relative">
+                            <Lock className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
+
+                            <Input
+                              {...field}
+                              type={showPassword ? 'text' : 'password'}
+                              placeholder="••••••••"
+                              className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-14 text-base text-white placeholder:text-white/20 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                              ) : (
+                                <Eye className="h-5 w-5" />
+                              )}
+                            </button>
+                          </div>
+                        </FormControl>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* BUTTON */}
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)] transition-all hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(255,215,0,0.35)]"
+                  >
+                    {loading ? (
+                      "AUTHENTICATING..."
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span>SIGN IN</span>
+                        <ChevronRight className="h-5 w-5" />
                       </div>
-                      <FormControl>
-                        <div className="relative group">
-                          <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-5 h-5 group-focus-within:text-primary transition-colors" />
-                          <Input 
-                            type="password" 
-                            placeholder="••••••••" 
-                            {...field} 
-                            className="h-14 bg-background/50 border-white/10 rounded-2xl pl-14 text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20 text-base transition-all" 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-xs font-bold" />
-                    </FormItem>
-                  )}
-                />
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </div>
 
-                <Button type="submit" disabled={loading} className="w-full h-16 text-lg font-black bg-primary text-secondary rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all overflow-hidden relative group/btn">
-                  <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700 skew-x-[45deg]" />
-                  {loading ? 'AUTHENTICATING...' : 'SIGN IN TO NETWORK'}
-                </Button>
-              </form>
-            </Form>
+            {/* QUICK ACCESS */}
+            <div className="mt-10 border-t border-white/10 py-8">
 
-            <div className="space-y-6">
-              <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <span className="relative bg-card px-4 text-[10px] uppercase tracking-[0.4em] font-black text-muted-foreground/60">Fast Access Portals</span>
-              </div>
-              
-              <div className="grid grid-cols-3 gap-4">
+              <p className="mb-5 text-center text-[11px] font-black uppercase tracking-[0.3em] text-white/40 mt-5">
+                Quick Access
+              </p>
+
+              <div className="flex gap-4">
                 {[
-                  { id: 'admin', label: 'ADMIN', icon: ShieldCheck },
-                  { id: 'agent', label: 'AGENT', icon: UserIcon },
-                  { id: 'user', label: 'USER', icon: Globe },
+                  { id: 'admin', label: 'Admin', icon: ShieldCheck },
+                  { id: 'agent', label: 'Agent', icon: UserIcon },
+                  { id: 'user', label: 'User', icon: Globe },
                 ].map((demo) => (
                   <button
                     key={demo.id}
                     type="button"
-                    className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-muted/20 border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group/demo"
                     onClick={() => fillDemoCredentials(demo.id as any)}
+                    className="
+          group
+          flex-1
+          rounded-2xl
+          border
+          border-white/10
+          bg-white/[0.03]
+          p-5
+          transition-all
+          hover:border-primary/40
+          hover:bg-primary/10
+        "
                   >
-                    <demo.icon className="w-5 h-5 text-muted-foreground group-hover/demo:text-primary group-hover/demo:scale-110 transition-all" />
-                    <span className="text-[10px] font-black text-muted-foreground group-hover/demo:text-foreground transition-colors">{demo.label}</span>
+                    <demo.icon className="mx-auto mb-3 h-5 w-5 text-white/40 transition group-hover:text-primary" />
+
+                    <p className="text-center text-[11px] font-black uppercase tracking-[0.25em] text-white/60 group-hover:text-white">
+                      {demo.label}
+                    </p>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-6">
-              <p className="text-sm text-muted-foreground font-medium">
-                Not a member?{' '}
-                <Link href="/register" className="text-primary font-black hover:underline underline-offset-4 decoration-primary/30 transition-all">
-                  Apply for Access
+            {/* REGISTER */}
+            <div className="mt-10 text-center">
+              <p className="text-sm text-white/40">
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/register"
+                  className="font-bold text-primary transition hover:text-primary/80"
+                >
+                  Create Account
                 </Link>
               </p>
-              <div className="flex items-center gap-3 bg-muted/30 px-4 py-2.5 rounded-full border border-border">
-                <ShieldCheck size={14} className="text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">256-Bit SSL Secured</span>
-              </div>
             </div>
           </div>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </motion.div>
   );
 }
