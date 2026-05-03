@@ -50,7 +50,7 @@ export default function UserBookings() {
         <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">My <span className="text-primary italic">Bookings</span></h1>
       </div>
 
-      <div className="bg-card border border-border shadow-xl rounded-2xl overflow-hidden p-8">
+      <div className="bg-card border border-border shadow-xl rounded-[2.5rem] overflow-hidden p-8 max-w-5xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
             <Calendar size={24} />

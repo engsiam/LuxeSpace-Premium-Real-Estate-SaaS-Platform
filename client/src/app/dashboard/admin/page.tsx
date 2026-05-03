@@ -130,7 +130,7 @@ export default function AdminDashboard() {
           transition={{ delay: 0.4 }}
           className="lg:col-span-2"
         >
-          <div className="border border-border bg-card shadow-2xl rounded-2xl overflow-hidden">
+          <div className="bg-card border border-border shadow-xl rounded-[2.5rem] overflow-hidden p-10 max-w-4xl mx-auto">
             <div className="p-8 border-b border-border flex flex-row justify-between items-center bg-background/30">
               <div>
                 <h2 className="text-2xl font-black tracking-tight text-white">Financial Growth</h2>
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <div className="border border-border bg-card shadow-2xl rounded-2xl overflow-hidden h-full">
+          <div className="border border-border bg-card shadow-2xl rounded-[2.5rem] overflow-hidden h-full">
             <div className="p-8 border-b border-border bg-background/30">
               <h2 className="text-2xl font-black tracking-tight text-white">Recent Activity</h2>
               <p className="text-sm text-muted-foreground font-medium">Global platform events</p>
@@ -180,9 +180,11 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
-              <Button variant="ghost" className="w-full mt-12 rounded-xl font-black tracking-widest text-xs text-primary hover:bg-primary/10 py-6">
-                VIEW ALL ACTIVITY
-              </Button>
+              <div className="flex justify-center mt-12">
+                <Button variant="ghost" className="rounded-xl font-black tracking-widest text-xs text-primary hover:bg-primary/10 py-6 px-10">
+                  VIEW ALL ACTIVITY
+                </Button>
+              </div>
             </div>
           </div>
         </motion.div>

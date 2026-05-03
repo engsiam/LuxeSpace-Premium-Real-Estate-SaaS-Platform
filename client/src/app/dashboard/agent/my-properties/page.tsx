@@ -45,7 +45,7 @@ export default function AgentProperties() {
         </Link>
       </div>
 
-      <div className="bg-card border border-border shadow-xl rounded-2xl overflow-hidden p-8">
+      <div className="bg-card border border-border shadow-xl rounded-[2.5rem] overflow-hidden p-8 max-w-6xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
             <Building2 size={24} />

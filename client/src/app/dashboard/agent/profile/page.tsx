@@ -3,115 +3,197 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axiosInstance';
-import type { User } from '@/types';
 import { toast } from 'sonner';
-import { User as UserIcon, Mail, Phone } from 'lucide-react';
+import { User as UserIcon, Mail, Phone, ShieldCheck, CheckCircle2, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+
+const profileSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().optional(),
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function AgentProfile() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(false);
+
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: '',
+      phone: '',
+    },
+  });
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await axiosInstance.get('/users/me');
-        setUser(response.data.data || null);
-        setError(null);
+        const user = response.data.data;
+        form.reset({
+          name: user.name,
+          phone: user.phone || '',
+        });
       } catch (error) {
-        setError('Failed to fetch profile');
         toast.error('Failed to fetch profile');
       } finally {
         setLoading(false);
       }
     };
     fetchProfile();
-  }, []);
+  }, [form]);
+
+  const onSubmit = async (data: ProfileFormValues) => {
+    setUpdating(true);
+    try {
+      await axiosInstance.patch('/users/me', data);
+      toast.success('Profile updated successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (loading) {
     return (
-      <div className="p-10">
-        <div className="h-10 w-64 bg-card animate-pulse rounded-xl mb-8" />
-        <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-12 bg-card animate-pulse rounded-xl" />
-          ))}
+      <div className="p-10 space-y-10 bg-background min-h-screen">
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-10 w-64 rounded-xl" />
+          <Skeleton className="h-4 w-48 rounded-xl" />
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-10">
-        <div className="text-center py-12">
-          <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Retry
-          </Button>
-        </div>
+        <Skeleton className="h-[400px] w-full max-w-4xl rounded-[2.5rem]" />
       </div>
     );
   }
 
   return (
     <div className="p-10 space-y-12 bg-background min-h-screen">
-      <div>
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-0.5 bg-primary rounded-full" />
-          <span className="text-primary font-black uppercase tracking-[0.4em] text-xs">Account</span>
+          <span className="text-primary font-black uppercase tracking-[0.4em] text-xs">Agent Portal</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">My <span className="text-primary italic">Profile</span></h1>
-      </div>
+        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">Identity <span className="text-primary italic">Settings</span></h1>
+      </motion.div>
 
-      <div className="bg-card border border-border shadow-xl rounded-2xl overflow-hidden p-8 max-w-4xl">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <UserIcon size={24} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 max-w-6xl">
+        {/* Left - Profile Preview */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] p-8 text-center relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-primary/20 group-hover:scale-110 transition-transform duration-500">
+              <Sparkles size={48} className="text-primary" />
             </div>
-          <div>
-            <h2 className="text-xl font-bold text-white">Profile Information</h2>
+            <h2 className="text-2xl font-black text-white">{form.getValues().name}</h2>
+            <p className="text-sm text-muted-foreground font-medium mb-6 italic">Certified Elite Agent</p>
+            
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 py-2 rounded-full border border-emerald-500/20">
+                <CheckCircle2 size={12} />
+                <span>Verified Professional</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-primary p-8 rounded-[2.5rem] shadow-xl text-secondary-foreground space-y-4">
+            <h3 className="font-black uppercase tracking-widest text-xs opacity-60">Security Protocol</h3>
+            <div className="flex items-center gap-3">
+              <ShieldCheck size={20} />
+              <p className="text-sm font-bold">Encrypted Connection Active</p>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <Label className="text-muted-foreground">Name</Label>
-            <div className="flex items-center gap-3 mt-2 p-4 bg-background border border-border rounded-xl">
-              <UserIcon size={18} className="text-primary" />
-              <p className="text-lg text-white">{user?.name}</p>
+        {/* Right - Edit Form */}
+        <div className="lg:col-span-2">
+          <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden">
+            <div className="p-8 border-b border-border bg-background/20 flex items-center gap-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                <UserIcon size={20} />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-white tracking-tight">Edit Identity</h3>
+                <p className="text-xs text-muted-foreground font-medium">Update your professional details</p>
+              </div>
+            </div>
+
+            <div className="p-10">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">Full Name</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
+                              <Input {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-xs font-bold" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">Phone Connection</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
+                              <Input placeholder="+880 1XXX XXXXXX" {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-xs font-bold" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button 
+                      type="submit" 
+                      disabled={updating}
+                      className="h-14 px-10 bg-primary text-secondary-foreground rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      {updating ? 'SAVING CHANGES...' : 'UPDATE IDENTITY'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </div>
           </div>
-          <div>
-            <Label className="text-muted-foreground">Email</Label>
-            <div className="flex items-center gap-3 mt-2 p-4 bg-background border border-border rounded-xl">
-              <Mail size={18} className="text-primary" />
-              <p className="text-lg text-white">{user?.email}</p>
-            </div>
-          </div>
-          <div>
-            <Label className="text-muted-foreground">Phone</Label>
-            <div className="flex items-center gap-3 mt-2 p-4 bg-background border border-border rounded-xl">
-              <Phone size={18} className="text-primary" />
-              <p className="text-lg text-white">{user?.phone || 'Not provided'}</p>
-            </div>
-          </div>
-          <div>
-            <Label className="text-muted-foreground">Role</Label>
-            <div className="flex items-center gap-3 mt-2 p-4 bg-background border border-border rounded-xl">
-              <p className="text-lg text-white">{user?.role}</p>
-            </div>
-          </div>
-          <Button onClick={() => router.push('/dashboard/agent')} className="bg-primary text-secondary-foreground hover:bg-white rounded-xl font-bold">
-            Back to Dashboard
-          </Button>
         </div>
       </div>
     </div>
   );
+}
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`bg-card animate-pulse ${className}`} />;
 }

@@ -26,7 +26,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import axiosInstance from '@/lib/axiosInstance';
 import { motion } from 'framer-motion';
-import { Globe, User as UserIcon, Mail, Lock, ShieldCheck, Briefcase, ArrowRight, Sparkles } from 'lucide-react';
+import { Globe, User as UserIcon, Mail, Lock, ShieldCheck, Briefcase, Sparkles, ChevronRight } from 'lucide-react';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -76,103 +76,117 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-background flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-card relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
-        <div className="absolute top-10 left-10 z-10">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 transition-transform group-hover:rotate-12">
-              <Globe className="text-secondary w-7 h-7" />
-            </div>
-            <span className="text-3xl font-black tracking-tighter text-foreground">
-              LUXE<span className="text-primary">SPACE</span>
-            </span>
-          </Link>
-        </div>
+    <div className="min-h-screen w-full bg-background flex items-center justify-center p-4 md:p-10 relative overflow-hidden transition-colors duration-500">
+      {/* Decorative Elements */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col justify-center px-16 space-y-8">
-          <div className="space-y-4">
-            <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center">
-              <Sparkles className="text-primary w-10 h-10" />
-            </div>
-            <h2 className="text-5xl font-black text-foreground leading-none">
-              Join the<br /><span className="text-primary">Elite Circle</span>
-            </h2>
-            <p className="text-muted-foreground text-lg font-medium leading-relaxed">
-              Unlock access to Bangladesh's most exclusive luxury real estate portfolio.
-            </p>
-          </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="w-full max-w-6xl bg-card border border-border shadow-2xl rounded-[3rem] overflow-hidden relative z-10"
+      >
+        <div className="flex flex-col md:flex-row min-h-[700px]">
+          {/* Left Side - Visual Branding */}
+          <div className="md:w-[40%] bg-primary p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden group">
+            {/* Pattern Overlay */}
+            <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
 
-          <div className="space-y-4">
-            {[
-              { icon: ShieldCheck, text: 'Verified & Secure' },
-              { icon: Sparkles, text: 'Premium Listings' },
-              { icon: Globe, text: 'Global Network' },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.2 }}
-                className="flex items-center gap-4"
-              >
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <item.icon size={20} className="text-primary" />
-                </div>
-                <span className="text-foreground font-bold">{item.text}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        <div className="absolute bottom-10 left-10 text-xs text-muted-foreground font-black uppercase tracking-widest">
-          © 2026 LuxeSpace. All Rights Reserved.
-        </div>
-      </div>
-
-      {/* Right Panel - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="w-full max-w-lg"
-        >
-          {/* Mobile Logo */}
-          <div className="flex justify-center mb-8 lg:hidden">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <Globe className="text-secondary w-8 h-8" />
+            <Link href="/" className="z-10 group/logo">
+              <div className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 group-hover/logo:rotate-[360deg] group-hover/logo:scale-110">
+                <Globe className="text-primary w-8 h-8" />
               </div>
-              <span className="text-4xl font-black tracking-tighter text-foreground">
-                LUXE<span className="text-primary">SPACE</span>
-              </span>
             </Link>
-          </div>
 
-          <div className="bg-card border border-border shadow-2xl rounded-3xl overflow-hidden">
-            <div className="p-10 space-y-3 text-center border-b border-border">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Briefcase className="text-primary w-8 h-8" />
+            <div className="z-10 space-y-8">
+              <div className="space-y-4">
+                <motion.h1 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-6xl font-black text-secondary-foreground leading-[0.9] tracking-tighter"
+                >
+                  Join The<br />Network.
+                </motion.h1>
+                <div className="h-1.5 w-20 bg-secondary-foreground/20 rounded-full" />
               </div>
-              <h2 className="text-3xl font-black text-foreground tracking-tight">Create Account</h2>
-              <p className="text-muted-foreground font-medium text-sm">Join the elite network of property enthusiasts</p>
+              
+              <div className="space-y-6 pt-4">
+                {[
+                  { icon: ShieldCheck, title: 'Secure Protocol', desc: 'Enterprise-grade encryption' },
+                  { icon: Sparkles, title: 'Elite Access', desc: 'Off-market luxury listings' },
+                  { icon: Briefcase, title: 'Professional Tools', desc: 'Advanced analytics for agents' },
+                ].map((item, i) => (
+                  <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + (i * 0.1) }}
+                    className="flex items-start gap-4 group/item"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-secondary/10 backdrop-blur-sm flex items-center justify-center border border-secondary/20 group-hover/item:bg-secondary group-hover/item:border-transparent transition-all duration-300">
+                      <item.icon size={20} className="text-secondary-foreground group-hover/item:text-primary transition-colors" />
+                    </div>
+                    <div>
+                      <h4 className="text-secondary-foreground font-black text-sm uppercase tracking-widest">{item.title}</h4>
+                      <p className="text-secondary-foreground/50 text-xs font-medium">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
-            <div className="p-10 space-y-6">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="z-10 text-[10px] font-black uppercase tracking-[0.5em] text-secondary-foreground/30">
+              © 2026 LUXESPACE • ESTABLISHED PRESTIGE
+            </div>
+          </div>
+
+          {/* Right Side - Registration Form */}
+          <div className="md:w-[60%] p-12 lg:p-16 flex flex-col justify-center space-y-10 bg-card">
+            <div className="space-y-2 text-center md:text-left">
+              <h2 className="text-3xl font-black text-foreground tracking-tight">Create Profile</h2>
+              <p className="text-muted-foreground text-sm font-medium">Experience the pinnacle of real estate in Bangladesh</p>
+            </div>
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 ml-1">Legal Identity</FormLabel>
+                      <FormControl>
+                        <div className="relative group">
+                          <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                          <Input 
+                            placeholder="John Doe" 
+                            {...field} 
+                            className="h-14 bg-background/50 border-white/10 rounded-2xl pl-14 text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20 text-base transition-all" 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-xs font-bold" />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
-                    name="name"
+                    name="email"
                     render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Full Name</FormLabel>
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 ml-1">Email Connection</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-                            <Input placeholder="John Doe" {...field} className="h-14 bg-secondary border-border rounded-2xl pl-12 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary text-base transition-all" />
+                          <div className="relative group">
+                            <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                            <Input 
+                              placeholder="john@example.com" 
+                              {...field} 
+                              className="h-14 bg-background/50 border-white/10 rounded-2xl pl-14 text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20 text-base transition-all" 
+                            />
                           </div>
                         </FormControl>
                         <FormMessage className="text-xs font-bold" />
@@ -180,108 +194,100 @@ export default function RegisterPage() {
                     )}
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Email</FormLabel>
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 ml-1">Membership Tier</FormLabel>
+                        <Select onValueChange={(val: string | null) => field.onChange(val || 'USER')} defaultValue={field.value}>
                           <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-                              <Input placeholder="john@example.com" {...field} className="h-14 bg-secondary border-border rounded-2xl pl-12 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary text-base transition-all" />
+                            <div className="relative group">
+                              <Briefcase className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-5 h-5 z-10 group-focus-within:text-primary transition-colors" />
+                              <SelectTrigger className="h-14 bg-background/50 border-white/10 rounded-2xl pl-14 text-foreground text-sm font-bold focus:ring-primary/20">
+                                <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
                             </div>
                           </FormControl>
-                          <FormMessage className="text-xs font-bold" />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="role"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Membership</FormLabel>
-                          <Select onValueChange={(val: string | null) => field.onChange(val || 'USER')} defaultValue={field.value}>
-                            <FormControl>
-                              <div className="relative">
-                                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5 z-10" />
-                                <SelectTrigger className="h-14 bg-secondary border-border rounded-2xl pl-12 text-foreground font-bold focus:ring-primary/40">
-                                  <SelectValue placeholder="Select role" />
-                                </SelectTrigger>
-                              </div>
-                            </FormControl>
-                            <SelectContent className="bg-card border-border rounded-2xl">
-                              <SelectItem value="USER" className="text-foreground focus:bg-primary/10">User (Buyer/Renter)</SelectItem>
-                              <SelectItem value="AGENT" className="text-foreground focus:bg-primary/10">Agent (Lister)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage className="text-xs font-bold" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Password</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-                              <Input type="password" placeholder="••••••••" {...field} className="h-14 bg-secondary border-border rounded-2xl pl-12 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary text-base transition-all" />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-xs font-bold" />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Confirm</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-                              <Input type="password" placeholder="••••••••" {...field} className="h-14 bg-secondary border-border rounded-2xl pl-12 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary text-base transition-all" />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-xs font-bold" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <Button type="submit" disabled={loading} className="w-full h-16 text-lg font-black bg-primary text-secondary rounded-2xl shadow-xl shadow-primary/20 hover:bg-foreground hover:text-background transition-all group">
-                    {loading ? 'Creating Account...' : <><span>REGISTER NOW</span><ArrowRight size={20} className="transition-transform group-hover:translate-x-1" /></>}
-                  </Button>
-                </form>
-              </Form>
-
-              <div className="pt-6 border-t border-border text-center space-y-4">
-                <p className="text-sm text-muted-foreground font-medium">
-                  Already part of the network?{' '}
-                  <Link href="/login" className="text-primary font-black hover:underline underline-offset-4 decoration-primary/30 transition-all">
-                    Sign In
-                  </Link>
-                </p>
-                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground font-black uppercase tracking-widest">
-                  <ShieldCheck size={14} className="text-primary" />
-                  <span>100% Secure Registration</span>
+                          <SelectContent className="bg-card border-border rounded-2xl">
+                            <SelectItem value="USER" className="text-foreground hover:bg-muted transition-colors">Client (Buyer/Renter)</SelectItem>
+                            <SelectItem value="AGENT" className="text-foreground hover:bg-muted transition-colors">Partner (Agent/Broker)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-xs font-bold" />
+                      </FormItem>
+                    )}
+                  />
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 ml-1">Create Secure Key</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                            <Input 
+                              type="password" 
+                              placeholder="••••••••" 
+                              {...field} 
+                              className="h-14 bg-background/50 border-white/10 rounded-2xl pl-14 text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20 text-base transition-all" 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-xs font-bold" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 ml-1">Verify Key</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                            <Input 
+                              type="password" 
+                              placeholder="••••••••" 
+                              {...field} 
+                              className="h-14 bg-muted/30 border-border rounded-2xl pl-14 text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20 text-base transition-all" 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-xs font-bold" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button type="submit" disabled={loading} className="w-full h-16 text-lg font-black bg-primary text-secondary rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all group/btn overflow-hidden relative">
+                  <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700 skew-x-[45deg]" />
+                  {loading ? 'INITIALIZING...' : <div className="flex items-center justify-center gap-3"><span>INITIALIZE MEMBERSHIP</span><ChevronRight size={22} className="transition-transform group-hover/btn:translate-x-1" /></div>}
+                </Button>
+              </form>
+            </Form>
+
+            <div className="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-6 text-center md:text-left">
+              <p className="text-sm text-muted-foreground font-medium">
+                Already have an account?{' '}
+                <Link href="/login" className="text-primary font-black hover:underline underline-offset-4 decoration-primary/30 transition-all">
+                  Sign In
+                </Link>
+              </p>
+              <div className="flex items-center gap-3 bg-muted/30 px-4 py-2.5 rounded-full border border-border">
+                <ShieldCheck size={14} className="text-primary" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Verified 256-Bit Encryption</span>
               </div>
             </div>
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

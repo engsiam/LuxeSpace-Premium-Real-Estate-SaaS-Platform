@@ -6,9 +6,21 @@ import { propertyFilterSchema } from './property.validation';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 
 export const createProperty = catchAsync(async (req: AuthRequest, res) => {
-  const data = req.body;
-  if (req.files && Array.isArray(req.files)) {
-    data.images = (req.files as any[]).map((file) => file.path);
+  const data = { ...req.body };
+  
+  // Convert string values to numbers
+  if (data.price) data.price = parseFloat(data.price);
+  if (data.bhk) data.bhk = parseInt(data.bhk);
+  if (data.size) data.size = parseInt(data.size);
+  
+  // Handle images from file upload
+  if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+    data.images = (req.files as any[]).map((file: any) => file.path || file.secure_url);
+  }
+  
+  // Ensure images is at least an empty array
+  if (!data.images) {
+    data.images = [];
   }
 
   const result = await propertyService.createProperty(data, req.user!.id);

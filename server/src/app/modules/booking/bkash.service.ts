@@ -32,7 +32,7 @@ export const getBkashToken = async () => {
 
 export const createPayment = async (amount: number, invoiceNumber: string, userId: string) => {
   const token = await getBkashToken();
-  const callbackURL = `${env.BKASH_BASE_URL?.replace('tokenized.', '')}/callback`;
+  const callbackURL = `${env.SERVER_URL || 'http://localhost:5000'}/api/v1/bookings/callback`;
 
   const response = await axios.post(
     `${env.BKASH_BASE_URL}/tokenized/checkout/create`,

@@ -30,6 +30,17 @@ export const executeBooking = catchAsync(async (req, res) => {
   });
 });
 
+export const bkashCallback = catchAsync(async (req, res) => {
+  const { paymentID } = req.body;
+  const result = await bookingService.executeBooking(paymentID);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Payment executed',
+    data: result,
+  });
+});
+
 export const getMyBookings = catchAsync(async (req: AuthRequest, res) => {
   const result = await bookingService.getMyBookings(req.user!.id);
   sendResponse(res, {

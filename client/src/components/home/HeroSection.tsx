@@ -31,7 +31,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section className="relative min-[90vh] flex items-center overflow-hidden py-20">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
@@ -40,10 +40,10 @@ export default function HeroSection() {
           muted
           loop
           playsInline
-          poster="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop"
+          poster="https://images.pexels.com/photos/34281368/pexels-photo-34281368.jpeg"
           className="w-full h-full object-cover"
         >
-          <source src="https://videos.pexels.com/video-files/3571264/3571264-hd_1920_1080_30fps.mp4" type="video/mp4" />
+          <source src="https://www.pexels.com/download/video/14016414/" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-background/70" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-background/60" />
@@ -75,7 +75,7 @@ export default function HeroSection() {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-xl">
+          <p className="text-lg text-white mb-10 leading-relaxed max-w-xl">
             Connecting distinguished individuals with Bangladesh's most extraordinary architectural masterpieces. Experience luxury living redefined.
           </p>
 
@@ -83,7 +83,7 @@ export default function HeroSection() {
           <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-10">
             <div className="flex-1 relative group">
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary h-5 w-5 group-focus-within:text-foreground transition-colors" />
-              <input 
+              <input
                 type="text"
                 placeholder="Where would you like to live?"
                 className="w-full h-14 pl-14 pr-6 rounded-xl bg-card/60 border border-border text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D] text-base backdrop-blur-xl transition-all duration-300"

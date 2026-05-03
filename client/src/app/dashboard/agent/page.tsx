@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { GenericChart } from '@/components/dashboard/GenericChart';
 
 export default function AgentDashboard() {
   const [stats, setStats] = useState({
@@ -83,6 +84,45 @@ export default function AgentDashboard() {
         <OverviewCard title="Inquiries" value={stats.totalInquiries} icon={MessageSquare} trend="+3 new" index={2} />
         <OverviewCard title="Revenue" value={`৳${stats.totalRevenue.toLocaleString()}`} icon={TrendingUp} trend="+24% from last month" index={3} />
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden"
+      >
+        <div className="p-10 border-b border-border flex justify-between items-center bg-background/20">
+          <div>
+            <h2 className="text-2xl font-black text-white tracking-tight">Property Engagement</h2>
+            <p className="text-sm text-muted-foreground font-medium">Monthly views and inquiries performance</p>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-primary" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Views</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-secondary" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Inquiries</span>
+            </div>
+          </div>
+        </div>
+        <div className="p-10">
+          <GenericChart 
+            data={[
+              { name: 'Jan', value1: 400, value2: 240 },
+              { name: 'Feb', value1: 300, value2: 139 },
+              { name: 'Mar', value1: 200, value2: 980 },
+              { name: 'Apr', value1: 278, value2: 390 },
+              { name: 'May', value1: 189, value2: 480 },
+              { name: 'Jun', value1: 239, value2: 380 },
+              { name: 'Jul', value1: 349, value2: 430 },
+            ]} 
+            label1="Views" 
+            label2="Inquiries" 
+          />
+        </div>
+      </motion.div>
     </div>
   );
 }

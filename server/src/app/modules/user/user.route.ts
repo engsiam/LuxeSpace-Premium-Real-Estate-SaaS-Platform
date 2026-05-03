@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authGuard } from '../../middlewares/auth.middleware';
 import * as userController from './user.controller';
-import { registerSchema, loginSchema } from './user.validation';
+import { registerSchema, loginSchema, updateUserSchema } from './user.validation';
 import { validateRequest } from '../../middlewares/validate.middleware';
 
 const router = Router();
@@ -14,7 +14,7 @@ router.post('/refresh-token', userController.refreshToken);
 // User routes
 router.get('/', authGuard('ADMIN'), userController.getUsers);
 router.get('/me', authGuard(), userController.getMe);
-router.patch('/me', authGuard(), validateRequest(loginSchema), userController.updateMe);
+router.patch('/me', authGuard(), validateRequest(updateUserSchema), userController.updateMe);
 router.delete('/:id', authGuard('ADMIN'), userController.deleteUser);
 
 // Also export for auth routes

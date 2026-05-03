@@ -8,6 +8,7 @@ import { useWishlistStore } from '@/store/useWishlistStore';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { GenericChart } from '@/components/dashboard/GenericChart';
 
 interface UserStats {
   totalBookings: number;
@@ -97,6 +98,45 @@ export default function UserDashboard() {
         <OverviewCard title="Total Spent" value={`৳${stats.totalSpent.toLocaleString()}`} icon={DollarSign} trend="+24% from last month" index={2} />
         <OverviewCard title="Active Bookings" value={stats.activeBookings} icon={Building2} trend="Action required" index={3} />
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden"
+      >
+        <div className="p-10 border-b border-border flex justify-between items-center bg-background/20">
+          <div>
+            <h2 className="text-2xl font-black text-white tracking-tight">Personal Growth</h2>
+            <p className="text-sm text-muted-foreground font-medium">Monthly spending and booking frequency</p>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-primary" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Investment</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-secondary" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Bookings</span>
+            </div>
+          </div>
+        </div>
+        <div className="p-10">
+          <GenericChart 
+            data={[
+              { name: 'Jan', value1: 200, value2: 120 },
+              { name: 'Feb', value1: 500, value2: 240 },
+              { name: 'Mar', value1: 300, value2: 380 },
+              { name: 'Apr', value1: 600, value2: 450 },
+              { name: 'May', value1: 400, value2: 300 },
+              { name: 'Jun', value1: 800, value2: 500 },
+              { name: 'Jul', value1: 700, value2: 550 },
+            ]} 
+            label1="Investment" 
+            label2="Bookings" 
+          />
+        </div>
+      </motion.div>
     </div>
   );
 }
