@@ -2,98 +2,276 @@
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://luxespace.vercel.app)
 [![Backend API](https://img.shields.io/badge/API-Render-blue)](https://luxespace-api.onrender.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](https://github.com/engsiam/luxspace/blob/main/README.md)
 
-LuxeSpace is a full-stack real estate platform for Bangladesh, connecting property buyers with premium listings through an elegant, modern interface. Built with Next.js 16, Express.js, MongoDB, and integrated with bKash payments.
+A full-stack premium real estate platform for Bangladesh, connecting property buyers with exclusive listings through an elegant, modern interface.
+
+---
+
+## 📱 Project Overview
+
+**Project Name:** LuxeSpace  
+**Type:** Real Estate Web Application  
+**Target Users:** Property buyers, agents, and administrators in Bangladesh  
+**Core Functionality:** Property listings, advanced search, booking system with bKash payments, AI recommendations
+
+### Key Screenshots
+
+| Page | Description |
+|------|-------------|
+| Home | 9 sections: Hero, Featured, Categories, How It Works, Stats, Testimonials, Blog, FAQ, CTA, Newsletter |
+| Explore | Filterable property grid with search, pagination |
+| Property Details | Image gallery, specifications, reviews, booking modal |
+| Dashboard | Role-based (User/Agent/Admin) with analytics |
+| Profile | Edit identity, upload avatar |
 
 ---
 
 ## ✨ Features
 
-### For Users
-- 🔍 Advanced property search with filters (city, type, price, BHK)
-- 🏠 Interactive property details with image gallery
-- 💳 Secure bKash payment integration
-- ⭐ Review and rating system
-- ❤️ Wishlist management
-- 📱 Fully responsive design with dark mode
+### 🔑 Core Features
+- **Property Search** - Advanced filters (city, type, price range, BHK, bedrooms)
+- **Property Listings** - Grid view with cards (image, title, price, location)
+- **Property Details** - Image gallery slider, specifications, reviews, related properties
+- **Booking System** - bKash payment integration
+- **User Dashboard** - My bookings, wishlist, transactions
+- **Agent Dashboard** - Add/edit properties, analytics
+- **Admin Dashboard** - User management, property moderation, blogs, messages
+- **Contact Form** - Stores to database
+- **AI Chat** - Property recommendations
 
-### For Agents
-- 🏢 List and manage properties
-- 📊 Dashboard with property analytics
-- 💼 Profile management
+### 🛡️ Security Features
+- JWT authentication (access + refresh tokens)
+- Role-based route protection
+- Password hashing with bcrypt
+- Input validation (client + server)
+- CORS configuration
 
-### For Admins
-- 👥 User and agent management
-- 📈 Advanced analytics dashboard with charts
-- 📝 Blog management system
-- 📧 Contact message management
-- 🤖 AI-powered property recommendations
+### 🎨 UI/UX Features
+- Dark/Light mode toggle
+- Fully responsive (mobile, tablet, desktop)
+- Smooth animations (GSAP, Framer Motion)
+- Lenis smooth scrolling
+- Skeleton loaders
+- Toast notifications
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Backend (`/server`)
-- **Runtime:** Node.js 20+
-- **Framework:** Express.js with TypeScript
-- **ORM:** Prisma
-- **Database:** MongoDB (Atlas)
-- **Auth:** JWT (access + refresh tokens)
-- **Validation:** Zod
-- **File Upload:** Multer + Cloudinary
-- **Payment:** bKash PGW V2
-- **AI:** OpenAI / Google Gemini SDK
-
 ### Frontend (`/client`)
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript (strict mode)
-- **Styling:** Tailwind CSS v4 + CSS Variables
-- **UI Library:** shadcn/ui
-- **Animations:** GSAP + Framer Motion
-- **Smooth Scroll:** Lenis
-- **Forms:** React Hook Form + Zod
-- **Auth:** NextAuth.js
-- **HTTP:** Axios with interceptors
-- **State:** Zustand + React Query
-- **Charts:** shadcn/ui Charts (Recharts)
+
+| Technology | Purpose |
+|------------|---------|
+| Next.js 16 | App Router framework |
+| TypeScript | Type safety |
+| Tailwind CSS v4 | Styling |
+| shadcn/ui | Components library |
+| GSAP + Framer Motion | Animations |
+| Lenis | Smooth scroll |
+| React Hook Form + Zod | Forms |
+| NextAuth.js | Authentication |
+| Zustand + React Query | State management |
+| Recharts | Charts |
+| Axios | HTTP client |
+
+### Backend (`/server`)
+
+| Technology | Purpose |
+|------------|---------|
+| Node.js 20 | Runtime |
+| Express.js | API framework |
+| TypeScript | Type safety |
+| Prisma | ORM |
+| MongoDB (Atlas) | Database |
+| JWT | Authentication |
+| Zod | Validation |
+| Multer + Cloudinary | Image upload |
+| bKash PGW V2 | Payments |
+| OpenAI/Gemini | AI recommendations |
 
 ---
 
-## 🚀 Quick Start
+## 📁 Project Structure
+
+```
+luxespace/                    # Root directory
+│
+├── client/                   # Next.js Frontend
+│   ├── src/
+│   │   ├── app/              # App Router pages
+│   │   │   ├── (auth)/       # Auth pages (login, register)
+│   │   │   ├── (public)/     # Public pages (home, explore, about, contact, blog)
+│   │   │   ├── dashboard/   # Private dashboards
+│   │   │   ├── payment/     # Payment status pages
+│   │   │   └── api/         # API routes
+│   │   │
+│   │   ├── components/       # Reusable components
+│   │   │   ├── ui/         # shadcn/ui components
+│   │   │   ├── home/       # Home page sections
+│   │   │   ├── property/   # Property components
+│   │   │   ├── dashboard/  # Dashboard components
+│   │   │   └── shared/    # Shared components
+│   │   │
+│   │   ├── lib/            # Utilities
+│   │   │   ├── axiosInstance.ts
+│   │   │   ├── auth.config.ts
+│   │   │   └── utils.ts
+│   │   │
+│   │   ├── store/           # Zustand stores
+│   │   ├── hooks/          # Custom hooks
+│   │   ├── types/          # TypeScript types
+│   │   └── public/         # Static assets
+│   │
+│   ├── .env.example
+│   ├── package.json
+│   ├── tailwind.config.ts
+│   └── next.config.ts
+│
+└── server/                   # Express Backend
+    ├── src/
+    │   ├── app/
+    │   │   ├── modules/    # Feature modules
+    │   │   │   ├── user/       # User auth & profile
+    │   │   │   ├── property/   # Property CRUD
+    │   │   │   ├── booking/    # Booking & payments
+    │   │   │   ├── review/    # Property reviews
+    │   │   │   ├── blog/     # Blog CMS
+    │   │   │   ├── contact/  # Contact forms
+    │   │   │   ├── ai/      # AI chat
+    │   │   │   └── stats/   # Dashboard stats
+    │   │   │
+    │   │   ├── middlewares/  # Express middleware
+    │   │   └── utils/      # Utilities
+    │   │
+    │   ├── config/         # Environment config
+    │   └── prisma/        # Database client
+    │
+    ├── prisma/
+    │   ├── schema.prisma  # Database schema
+    │   └── seed.ts      # Demo data seeder
+    │
+    ├── .env.example
+    ├── package.json
+    └── tsconfig.json
+```
+
+---
+
+## 🚀 Installation Guide
 
 ### Prerequisites
-- Node.js 20+
-- MongoDB Atlas account
-- Cloudinary account
-- bKash PGW credentials
-- OpenAI API key (optional)
 
-### Backend Setup
+Install these on your PC:
+
+| Tool | Version | Download |
+|------|---------|----------|
+| Node.js | 20+ | [nodejs.org](https://nodejs.org) |
+| Git | Latest | [git-scm.com](https://git-scm.com) |
+| MongoDB | Atlas | [mongodb.com](https://mongodb.com) (cloud) |
+
+### Step 1: Clone the Project
+
+```bash
+git clone https://github.com/engsiam/luxspace.git
+cd luxespace
+```
+
+### Step 2: Backend Setup
 
 ```bash
 cd server
+
+# Install dependencies
 npm install
+
+# Create environment file
 cp .env.example .env
-# Edit .env with your credentials
+```
+
+Edit `.env` with your credentials:
+
+```env
+# Required
+DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/luxespace"
+JWT_SECRET=your-super-secret-key
+JWT_REFRESH_SECRET=your-refresh-secret
+PORT=5000
+
+# Cloudinary (for image upload)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+
+# bKash Payment (optional)
+BKASH_USERNAME=your-username
+BKASH_PASSWORD=your-password
+BKASH_APP_KEY=your-app-key
+BKASH_APP_SECRET=your-app-secret
+
+# Google OAuth (optional)
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+
+# OpenAI (optional)
+OPENAI_API_KEY=your-openai-key
+```
+
+Generate Prisma client and sync database:
+
+```bash
 npx prisma generate
 npx prisma db push
-npm run prisma:seed  # Creates demo users
+npm run prisma:seed    # Creates demo users
+```
+
+Start the backend:
+
+```bash
 npm run dev
 ```
 
-Server runs on `http://localhost:5000`
+Backend runs on: `http://localhost:5000`
 
-### Frontend Setup
+### Step 3: Frontend Setup
+
+Open a new terminal:
 
 ```bash
 cd client
+
+# Install dependencies
 npm install
+
+# Create environment file
 cp .env.example .env.local
-# Edit .env.local with API URL
+```
+
+Edit `.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXTAUTH_SECRET=your-super-secret-key
+NEXTAUTH_URL=http://localhost:3000
+```
+
+Start the frontend:
+
+```bash
 npm run dev
 ```
 
-Client runs on `http://localhost:3000`
+Client runs on: `http://localhost:3000`
+
+### Step 4: Access the App
+
+| URL | Page |
+|-----|------|
+| http://localhost:3000 | Home |
+| http://localhost:3000/explore | Properties |
+| http://localhost:3000/login | Login |
+| http://localhost:3000/dashboard | User Dashboard |
+| http://localhost:3000/dashboard/admin | Admin Dashboard |
 
 ---
 
@@ -101,128 +279,108 @@ Client runs on `http://localhost:3000`
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | `admin@luxespace.com` | `Admin@123` |
-| Agent | `agent1@luxespace.com` | `Agent@123` |
-| User | `user1@luxespace.com` | `User@123` |
-
----
-
-## 📁 Project Structure
-
-```
-luxespace/
-├── client/         ← Next.js 16 Frontend
-│   ├── src/
-│   │   ├── app/              # App Router pages
-│   │   ├── components/       # Reusable components
-│   │   ├── lib/             # Utilities
-│   │   ├── hooks/           # Custom hooks
-│   │   ├── store/           # Zustand stores
-│   │   └── types/           # TypeScript types
-│   └── public/
-│
-└── server/         ← Express + TypeScript Backend
-    ├── src/
-    │   ├── app/             # Express app setup
-    │   │   ├── middlewares/
-    │   │   ├── routes/
-    │   │   └── utils/
-    │   ├── config/          # Environment config
-    │   └── modules/         # Feature modules
-    │       ├── user/
-    │       ├── property/
-    │       ├── booking/
-    │       ├── review/
-    │       ├── blog/
-    │       ├── contact/
-    │       └── ai/
-    └── prisma/              # Database schema
-```
+| Admin | admin@luxespace.com | Admin@123 |
+| Agent | agent1@luxespace.com | Agent@123 |
+| User | user1@luxespace.com | User@123 |
 
 ---
 
 ## 🌐 API Endpoints
 
-### Auth
-- `POST /api/v1/auth/register` - Register
+### Authentication
+- `POST /api/v1/auth/register` - Register new user
 - `POST /api/v1/auth/login` - Login
 - `POST /api/v1/auth/refresh-token` - Refresh JWT
+- `POST /api/v1/auth/google` - Google OAuth
 
 ### Properties
-- `GET /api/v1/properties` - List + filter
+- `GET /api/v1/properties` - List with filters
 - `POST /api/v1/properties` - Create (AGENT/ADMIN)
-- `GET /api/v1/properties/:id` - Detail
-- `PATCH /api/v1/properties/:id` - Update (AGENT/ADMIN)
-- `DELETE /api/v1/properties/:id` - Delete (AGENT/ADMIN)
+- `GET /api/v1/properties/:id` - Details
+- `PATCH /api/v1/properties/:id` - Update
+- `DELETE /api/v1/properties/:id` - Delete
 
 ### Bookings
-- `POST /api/v1/bookings/init` - Initiate bKash (USER)
+- `POST /api/v1/bookings/init` - Initiate payment
 - `POST /api/v1/bookings/execute` - Execute payment
 - `GET /api/v1/bookings` - My bookings
-- `GET /api/v1/bookings/all` - All bookings (ADMIN)
+
+### Users
+- `GET /api/v1/users/me` - My profile
+- `PATCH /api/v1/users/me` - Update profile
+- `POST /api/v1/users/avatar` - Upload avatar
+- `GET /api/v1/users` - All users (ADMIN)
 
 ### Others
-- `POST /api/v1/reviews` - Create review (USER)
+- `POST /api/v1/reviews` - Add review
 - `GET /api/v1/blogs` - List blogs
-- `POST /api/v1/blogs` - Create blog (ADMIN)
 - `POST /api/v1/contact` - Submit contact
-- `POST /api/v1/ai/chat` - AI property chat
+- `POST /api/v1/ai/chat` - AI chat
 
 ---
 
 ## 🎨 Design System
 
-### Brand Colors
-- **Primary (Gold):** `#D4AF37`
-- **Secondary (Deep Navy):** `#0F172A`
-- **Background:** `#FFFFFF` (light) / `#0B0F19` (dark)
+### Colors
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Primary (Gold) | #D4AF37 | Buttons, accents |
+| Secondary (Navy) | #0F172A | Text, backgrounds |
+| Background | #FFFFFF / #0B0F19 | Light/Dark mode |
 
 ### Typography
 - **Font:** Plus Jakarta Sans
-- **H1:** `text-4xl md:text-5xl font-bold`
-- **H2:** `text-3xl font-bold`
-- **Body:** `text-base text-[var(--color-text-muted)]`
+- **Headings:** Bold, tracking-tight
+- **Body:** Base, muted
+
+### Components
+- Rounded corners: `rounded-xl`
+- Shadows: Multi-layer with gold tint
+- Cards: Border with glow effect
 
 ---
 
 ## 📦 Deployment
 
 ### Frontend (Vercel)
-1. Push code to GitHub
+
+1. Push to GitHub
 2. Import project in Vercel
-3. Set environment variables
+3. Add environment variables:
+   - `NEXT_PUBLIC_API_URL`
+   - `NEXTAUTH_SECRET`
+   - `NEXTAUTH_URL`
 4. Deploy
 
 ### Backend (Render/Railway)
-1. Push code to GitHub
-2. Create new web service
-3. Set environment variables
-4. Deploy
+
+1. Push to GitHub
+2. Create web service
+3. Add environment variables
+4. Set build command: `npm run build`
+5. Set start command: `node dist/server.js`
 
 ---
 
-## ✅ Compliance Checklist
+## ✅ Checklist
 
-- [x] No `any` types
-- [x] No `console.log` in production
-- [x] Real data from MongoDB (no dummy data)
+- [x] No console.log in production
+- [x] Real MongoDB data (no dummy content)
 - [x] Environment variables for all URLs
-- [x] Responsive design (375px, 768px, 1280px)
-- [x] Comprehensive error handling
+- [x] Responsive (375px, 768px, 1280px)
 - [x] Form validation (client + server)
-- [x] Loading skeletons for all sections
-- [x] Dark mode works everywhere
-- [x] Role-based route protection
-- [x] shadcn/ui components used exclusively
-- [x] Lenis smooth scroll on public pages
-- [x] shadcn charts with ChartContainer wrapper
+- [x] Loading skeletons
+- [x] Dark mode everywhere
+- [x] Role-based protection
+- [x] shadcn/ui components
+- [x] Smooth scroll (Lenis)
 
 ---
 
 ## 📄 License
 
-MIT License - feel free to use this project for learning or commercial purposes.
+MIT License - Free for learning and commercial use.
 
 ---
 
-**Built with ❤️ following the LuxeSpace Master AI Coding Agent Instructions**
+**Built with ❤️ following LuxeSpace Master AI Coding Agent**
