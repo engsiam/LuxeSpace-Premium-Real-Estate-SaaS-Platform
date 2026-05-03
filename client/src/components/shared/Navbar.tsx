@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, User, LogOut, LayoutDashboard, Globe, X, ChevronRight, Sparkles, Settings, Home } from 'lucide-react';
+import { Menu, User, LogOut, LayoutDashboard, Globe, X, ChevronRight, Sparkles, Settings, Home, Bot } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useChatStore } from '@/store/useChatStore';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -48,6 +49,8 @@ export default function Navbar() {
     if (userRole === 'AGENT') return '/dashboard/agent';
     return '/dashboard/user';
   };
+
+  const { toggleChat } = useChatStore();
 
   return (
     <nav 
@@ -86,6 +89,23 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-4 shrink-0">
+          <button 
+            onClick={toggleChat}
+            className={cn(
+              'flex items-center gap-2 h-10 px-4 rounded-xl border transition-all group relative overflow-hidden shrink-0 shadow-lg',
+              scrolled 
+                ? 'bg-primary border-primary text-secondary-foreground hover:bg-primary/90' 
+                : 'bg-primary/20 border-primary/40 text-white hover:bg-primary/30 backdrop-blur-md'
+            )}
+          >
+            <Bot size={18} className="group-hover:rotate-12 transition-transform" />
+            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Ask AI</span>
+            <div className="hidden lg:flex items-center gap-1 bg-black/30 px-1.5 py-0.5 rounded-md text-[8px] border border-white/10 group-hover:bg-white/20 transition-colors ml-1">
+              <span className="opacity-60">CTRL</span>
+              <span className="font-black text-white">K</span>
+            </div>
+          </button>
+
           <div className={cn('p-1 rounded-full border transition-colors', scrolled ? 'border-border bg-card/50' : 'border-white/10 bg-white/5')}>
             <ThemeToggle />
           </div>
@@ -227,6 +247,16 @@ export default function Navbar() {
                         <span>DASHBOARD</span>
                       </Button>
                     </Link>
+                    <Button 
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        toggleChat();
+                      }}
+                      className="w-full h-16 rounded-2xl bg-primary/10 text-primary border border-primary/20 font-black tracking-widest text-[10px] uppercase flex items-center justify-center gap-3"
+                    >
+                      <Sparkles size={20} />
+                      <span>ASK LUXE AI</span>
+                    </Button>
                     <Button 
                       variant="outline" 
                       onClick={() => signOut()}
