@@ -57,58 +57,58 @@ export default function Navbar() {
   return (
     <nav 
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
+        'fixed top-0 left-0 right-0 z-[100] transition-all duration-300',
         scrolled 
-          ? 'bg-background/80 backdrop-blur-xl border-b border-border/50 py-3 shadow-2xl' 
-          : 'bg-transparent py-6'
+          ? 'bg-background/90 backdrop-blur-md border-b border-border/50 py-2' 
+          : 'bg-transparent py-3'
       )}
     >
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-[#C9A74D]/20 transition-transform group-hover:rotate-12">
-            <Globe className="text-secondary-foreground w-6 h-6" />
+      <div className="max-w-7xl mx-auto px-2 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-1.5 group shrink-0 z-50">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+            <Globe className="text-secondary-foreground w-4 h-4" />
           </div>
-          <span className={cn('text-2xl font-black tracking-tighter transition-colors', scrolled ? 'text-foreground' : 'text-white')}>
+          <span className={cn('text-lg font-black tracking-tighter', scrolled ? 'text-foreground' : 'text-white')}>
             LUXE<span className="text-primary">SPACE</span>
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center gap-8">
+        {/* Desktop Navigation - Center */}
+        <div className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                'text-xs font-bold uppercase tracking-[0.2em] hover:text-primary transition-colors relative group',
+                'text-xs font-bold uppercase tracking-[0.2em] hover:text-primary transition-colors relative group px-3',
                 scrolled ? 'text-foreground' : 'text-white'
               )}
             >
               {link.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
             </Link>
           ))}
         </div>
 
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <button 
             onClick={toggleChat}
             className={cn(
-              'flex items-center gap-2 h-10 px-4 rounded-xl border transition-all group relative overflow-hidden shrink-0 shadow-lg',
+              'hidden sm:flex items-center gap-2 h-9 px-3 rounded-lg border transition-all group relative overflow-hidden shrink-0',
               scrolled 
                 ? 'bg-primary border-primary text-secondary-foreground hover:bg-primary/90' 
-                : 'bg-primary/20 border-primary/40 text-white hover:bg-primary/30 backdrop-blur-md'
+                : 'bg-primary/20 border-primary/40 text-white hover:bg-primary/30'
             )}
           >
-            <Bot size={18} className="group-hover:rotate-12 transition-transform" />
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Ask AI</span>
+            <Bot size={16} className="group-hover:rotate-12 transition-transform" />
+            <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">Ask AI</span>
             <div className="hidden lg:flex items-center gap-1 bg-black/30 px-1.5 py-0.5 rounded-md text-[8px] border border-white/10 group-hover:bg-white/20 transition-colors ml-1">
               <span className="opacity-60">CTRL</span>
               <span className="font-black text-white">K</span>
             </div>
           </button>
 
-          <div className={cn('p-1 rounded-full border transition-colors', scrolled ? 'border-border bg-card/50' : 'border-white/10 bg-white/5')}>
+          <div className={cn('p-0.5 rounded-full border transition-colors', scrolled ? 'border-border bg-card/50' : 'border-white/10 bg-white/5')}>
             <ThemeToggle />
           </div>
          
@@ -182,11 +182,11 @@ export default function Navbar() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className={cn(
-              'lg:hidden rounded-xl border transition-colors p-2',
+              'lg:hidden rounded-md border transition-colors p-1.5 z-50',
               scrolled ? 'text-foreground border-border' : 'text-white border-white/10'
             )}
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </div>
@@ -198,51 +198,51 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden absolute top-full left-0 w-full bg-card border-b border-border shadow-2xl overflow-hidden"
+            className="lg:hidden absolute top-full left-0 right-0 z-[90] bg-card border-b border-border shadow-xl overflow-y-auto max-h-[calc(100vh-60px)]"
           >
-            <div className="p-8 space-y-6">
+            <div className="p-3 space-y-2">
               {navLinks.map((link, index) => (
                 <motion.div
                   key={link.href}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ delay: index * 0.03 }}
                 >
                   <Link
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between p-6 rounded-3xl bg-background/30 border border-border/50 group hover:bg-primary hover:border-primary transition-all duration-300"
+                    className="flex items-center justify-between p-3 rounded-xl bg-background/30 border border-border/50 group hover:bg-primary hover:border-primary transition-all"
                   >
-                    <span className="text-2xl font-black tracking-tight group-hover:text-secondary-foreground">{link.label}</span>
-                    <ChevronRight className="text-primary group-hover:text-secondary-foreground group-hover:translate-x-2 transition-all" />
+                    <span className="text-base font-bold group-hover:text-secondary-foreground">{link.label}</span>
+                    <ChevronRight className="w-4 h-4 text-primary group-hover:translate-x-1" />
                   </Link>
                 </motion.div>
               ))}
 
-              <div className="pt-6 border-t border-border/50">
+              <div className="pt-2 border-t border-border/50">
                 {status === 'loading' ? (
-                  <div className="flex justify-center p-4">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  <div className="flex justify-center p-2">
+                    <Loader2 className="w-5 h-5 text-primary animate-spin" />
                   </div>
                 ) : !isLoggedIn ? (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-2">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full">
-                      <Button variant="outline" className="w-full h-16 rounded-2xl font-black tracking-widest text-[10px] uppercase">
-                        LOGIN
+                      <Button variant="outline" className="w-full h-10 rounded-lg font-bold text-xs uppercase">
+                        Login
                       </Button>
                     </Link>
                     <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="w-full">
-                      <Button className="w-full h-16 rounded-2xl font-black tracking-widest text-[10px] uppercase">
-                        JOIN NOW
+                      <Button className="w-full h-10 rounded-lg font-bold text-xs uppercase">
+                        Join Now
                       </Button>
                     </Link>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     <Link href={getDashboardLink()} onClick={() => setMobileMenuOpen(false)} className="w-full">
-                      <Button className="w-full h-16 rounded-2xl font-black tracking-widest text-[10px] uppercase flex items-center justify-center gap-3">
-                        <LayoutDashboard size={20} />
-                        <span>DASHBOARD</span>
+                      <Button className="w-full h-10 rounded-lg font-bold text-xs uppercase flex items-center justify-center gap-2">
+                        <LayoutDashboard size={16} />
+                        <span>Dashboard</span>
                       </Button>
                     </Link>
                     <Button 
@@ -250,17 +250,17 @@ export default function Navbar() {
                         setMobileMenuOpen(false);
                         toggleChat();
                       }}
-                      className="w-full h-16 rounded-2xl bg-primary/10 text-primary border border-primary/20 font-black tracking-widest text-[10px] uppercase flex items-center justify-center gap-3"
+                      className="w-full h-10 rounded-lg bg-primary/10 text-primary border border-primary/20 font-bold text-xs uppercase flex items-center justify-center gap-2"
                     >
-                      <Sparkles size={20} />
-                      <span>ASK LUXE AI</span>
+                      <Sparkles size={14} />
+                      <span>Ask AI</span>
                     </Button>
                     <Button 
                       variant="outline" 
                       onClick={() => signOut()}
-                      className="w-full h-16 rounded-2xl font-black tracking-widest text-[10px] uppercase text-rose-500 border-rose-500/20"
+                      className="w-full h-10 rounded-lg font-bold text-xs uppercase text-rose-500 border-rose-500/20"
                     >
-                      SIGN OUT
+                      Sign Out
                     </Button>
                   </div>
                 )}
