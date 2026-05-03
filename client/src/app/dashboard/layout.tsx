@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
+import DashboardHeader from '@/components/shared/DashboardHeader';
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -67,6 +68,8 @@ export default function DashboardLayout({
         {/* Decorative background glow */}
         <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
         
+        <DashboardHeader />
+
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}

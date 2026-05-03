@@ -27,6 +27,26 @@ export const login = catchAsync(async (req, res) => {
   });
 });
 
+export const uploadAvatar = catchAsync(async (req: AuthRequest, res) => {
+  if (!req.file) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: 'No file uploaded',
+      data: null,
+    });
+  }
+  const fileUrl = req.file.path;
+  const result = await userService.updateUser(req.user!.id, { avatar: fileUrl });
+  
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Avatar uploaded successfully',
+    data: result,
+  });
+});
+
 export const googleAuth = catchAsync(async (req, res) => {
   const validated = googleAuthSchema.parse(req.body);
   const result = await userService.googleAuth(validated);

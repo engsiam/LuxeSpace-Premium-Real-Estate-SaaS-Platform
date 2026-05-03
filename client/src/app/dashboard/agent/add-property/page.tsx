@@ -96,7 +96,7 @@ export default function AddProperty() {
   };
 
   const toggleAmenity = (amenity: string) => {
-    const current = form.getValues('amenities');
+    const current = form.getValues('amenities') || [];
     if (current.includes(amenity)) {
       form.setValue('amenities', current.filter((a) => a !== amenity));
     } else {

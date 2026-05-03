@@ -1,0 +1,59 @@
+'use client';
+
+import { useSession, signOut } from 'next-auth/react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { LogOut, User as UserIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+export default function DashboardHeader() {
+  const { data: session } = useSession();
+
+  if (!session) return null;
+
+  const userInitial = session.user?.name ? session.user.name.charAt(0).toUpperCase() : 'U';
+  const userImage = session.user?.avatar || '';
+
+  return (
+    <div className="absolute top-6 right-10 z-50 flex items-center justify-end">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-12 w-12 rounded-full ring-2 ring-primary/20 hover:ring-primary/50 transition-all p-0">
+            <Avatar className="h-12 w-12 border-2 border-background shadow-lg">
+              <AvatarImage src={userImage} alt={session.user?.name || 'User'} className="object-cover" />
+              <AvatarFallback className="bg-primary/10 text-primary font-black text-lg">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56 bg-card border-border/50 shadow-2xl rounded-2xl mt-2" align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="p-4 border-b border-border/50 bg-background/30">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-black text-white leading-none tracking-tight">{session.user?.name}</p>
+                <p className="text-xs text-muted-foreground font-medium truncate">{session.user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator className="bg-border/50" />
+          <DropdownMenuItem 
+            className="p-3 text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer rounded-xl m-1 transition-colors font-bold"
+            onClick={() => signOut({ callbackUrl: '/login' })}
+          >
+            <LogOut className="mr-3 h-4 w-4" />
+            <span>Log out Securely</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}

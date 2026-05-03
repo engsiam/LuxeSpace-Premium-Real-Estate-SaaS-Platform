@@ -32,6 +32,7 @@ export const authOptions: NextAuthOptions = {
               email: user.email,
               name: user.name,
               role: user.role,
+              avatar: user.avatar,
               accessToken,
               refreshToken,
             };
@@ -57,11 +58,11 @@ export const authOptions: NextAuthOptions = {
 
           if (response.data.success) {
             const backendData = response.data.data;
-            // Attach backend credentials to the NextAuth user object
             user.accessToken = backendData.accessToken;
             user.refreshToken = backendData.refreshToken;
             user.role = backendData.user.role;
             user.id = backendData.user.id;
+            user.avatar = backendData.user.avatar || user.image;
             return true;
           }
           return false;
@@ -72,11 +73,19 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === 'update' && session) {
+        token.avatar = session.avatar;
+        token.name = session.name;
+      }
       if (user) {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         token.role = user.role;
+        // if user has an avatar from backend
+        if ((user as any).avatar) {
+           token.avatar = (user as any).avatar;
+        }
       }
       return token;
     },
@@ -85,6 +94,9 @@ export const authOptions: NextAuthOptions = {
       session.refreshToken = token.refreshToken as string;
       if (token.role) {
         session.user.role = token.role as string;
+      }
+      if (token.avatar) {
+        session.user.avatar = token.avatar as string;
       }
       return session;
     },
