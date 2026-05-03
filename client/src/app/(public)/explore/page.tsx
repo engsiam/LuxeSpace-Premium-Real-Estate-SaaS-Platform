@@ -16,12 +16,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounce } from '@/hooks/useDebounce';
 import axiosInstance from '@/lib/axiosInstance';
 import { Property } from '@/types';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Funnel } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const cities = ['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi'];
-const propertyTypes = ['Luxury Apartment', 'Penthouse', 'Commercial Space', 'Villa'];
+const cities = ['All Cities', 'Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi'];
+const propertyTypes = ['All Types', 'Luxury Apartment', 'Penthouse', 'Commercial Space', 'Villa'];
 const sortOptions = [
+  { value: '', label: 'Sort By' },
   { value: 'price-asc', label: 'Price: Low to High' },
   { value: 'price-desc', label: 'Price: High to Low' },
   { value: 'newest', label: 'Newest First' },
@@ -85,146 +86,174 @@ function ExploreContent() {
   const activeFiltersCount = [city, type, minPrice, maxPrice].filter(Boolean).length;
 
   return (
-    <div className="bg-background min-h-screen pt-24 pb-12">
+    <div className="bg-background min-h-screen pt-20 pb-12">
       {/* Search & Header Section */}
-      <div className="max-w-7xl mx-auto px-4 mb-12">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
-          <div className="space-y-4">
-            <span className="text-primary font-black uppercase tracking-[0.3em] text-xs">Marketplace</span>
-            <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tighter">Explore <span className="text-primary italic">Signature</span> Properties</h1>
-            <p className="text-muted-foreground font-medium max-w-xl">
-              Discover the most prestigious real estate listings across Bangladesh, curated for those who demand excellence.
-            </p>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 mb-8">
+        <div className="space-y-4 mb-8">
+          <span className="text-primary font-black uppercase tracking-[0.3em] text-xs">Marketplace</span>
+          <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">Explore <span className="text-primary italic">Signature</span> Properties</h1>
+          <p className="text-muted-foreground font-medium text-sm md:text-base max-w-xl">
+            Discover the most prestigious real estate listings across Bangladesh.
+          </p>
         </div>
 
-        {/* Premium Search Bar */}
-        <div className="bg-card p-4 rounded-3xl border border-border shadow-2xl flex flex-col md:flex-row gap-4 items-center">
-          <div className="flex-1 relative w-full">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-            <Input
-              placeholder="Search by location, neighborhood, or keywords..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-16 bg-secondary border-border rounded-2xl pl-14 pr-6 text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary text-base w-full"
-            />
+        {/* Search & Filter Bar */}
+        <div className="bg-card p-3 rounded-2xl border border-border flex flex-col gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
+            {/* Search Input */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
+              <Input
+                placeholder="Search properties..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-12 bg-secondary border-border rounded-xl pl-11 pr-4 text-foreground text-sm w-full"
+              />
+            </div>
+
+            {/* Filter & Sort Buttons */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`h-12 px-4 rounded-xl border-border flex items-center gap-2 text-sm font-bold ${showFilters ? 'bg-primary text-secondary border-primary' : 'text-foreground'}`}
+              >
+                <Funnel size={16} />
+                <span className="hidden sm:inline">Filters</span>
+                {activeFiltersCount > 0 && (
+                  <span className="w-5 h-5 bg-secondary text-primary rounded-full flex items-center justify-center text-xs font-black">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
+
+              <Select value={sortBy} onValueChange={(val) => setSortBy(val || '')}>
+                <SelectTrigger className="h-12 px-4 rounded-xl border-border bg-card text-foreground text-sm font-bold w-40">
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-foreground focus:bg-primary/10 cursor-pointer">
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="flex gap-2 w-full md:w-auto">
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`h-16 px-6 rounded-2xl border-border flex items-center gap-3 font-bold transition-all ${showFilters ? 'bg-primary text-secondary border-primary' : 'text-foreground hover:bg-muted'}`}
-            >
-              <SlidersHorizontal size={20} />
-              <span>Filters</span>
-              {activeFiltersCount > 0 && (
-                <span className="bg-primary text-secondary w-6 h-6 rounded-full flex items-center justify-center text-xs">
-                  {activeFiltersCount}
+          {/* Active Filters Tags */}
+          {(city || type || minPrice || maxPrice) && (
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+              {city && (
+                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                  {city}
+                  <X size={12} className="cursor-pointer" onClick={() => setCity('')} />
                 </span>
               )}
-            </Button>
-
-            <Select value={sortBy} onValueChange={(val) => setSortBy(val || '')}>
-              <SelectTrigger className="h-16 px-6 rounded-2xl border-border bg-card text-foreground font-bold w-full md:w-56 focus:ring-primary/30">
-                <SelectValue placeholder="Sort By" />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="focus:bg-primary/10 text-foreground cursor-pointer">
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              {type && (
+                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                  {type}
+                  <X size={12} className="cursor-pointer" onClick={() => setType('')} />
+                </span>
+              )}
+              {minPrice && (
+                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                  ৳{Number(minPrice).toLocaleString()}+
+                  <X size={12} className="cursor-pointer" onClick={() => setMinPrice('')} />
+                </span>
+              )}
+              {maxPrice && (
+                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                  ৳{Number(maxPrice).toLocaleString()}
+                  <X size={12} className="cursor-pointer" onClick={() => setMaxPrice('')} />
+                </span>
+              )}
+              <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground text-xs font-bold hover:text-foreground h-auto py-1 px-2">
+                Clear All
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Filters Panel */}
       <AnimatePresence>
         {showFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="max-w-7xl mx-auto px-4 mb-12 overflow-hidden"
-          >
-            <div className="bg-card p-8 rounded-3xl border border-border grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="space-y-3">
-                <label className="text-muted-foreground font-black uppercase tracking-widest text-xs ml-1">City</label>
-                <Select value={city} onValueChange={(val: string | null) => setCity(val || '')}>
-                   <SelectTrigger className="h-14 bg-secondary border-border rounded-xl text-foreground">
-                     <SelectValue placeholder="All Cities" />
-                   </SelectTrigger>
-                   <SelectContent className="bg-card border-border">
-                     {cities.map((c) => (
-                       <SelectItem key={c} value={c} className="text-foreground focus:bg-primary/10">{c}</SelectItem>
-                     ))}
-                   </SelectContent>
-                 </Select>
-              </div>
+          <div className="max-w-7xl mx-auto px-4 mb-8">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="max-w-7xl mx-4 mb-8"
+            >
+              <div className="bg-card p-5 rounded-2xl border border-border grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <label className="text-muted-foreground font-bold uppercase tracking-widest text-xs ml-1">City</label>
+                  <Select value={city} onValueChange={(val: string | null) => setCity(val || '')}>
+                    <SelectTrigger className="h-12 bg-secondary border-border rounded-xl text-foreground text-sm">
+                      <SelectValue placeholder="All Cities" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      {cities.map((c) => (
+                        <SelectItem key={c} value={c === 'All Cities' ? '' : c} className="text-foreground focus:bg-primary/10">{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-3">
-                <label className="text-muted-foreground font-black uppercase tracking-widest text-xs ml-1">Property Type</label>
-                <Select value={type} onValueChange={(val: string | null) => setType(val || '')}>
-                   <SelectTrigger className="h-14 bg-secondary border-border rounded-xl text-foreground">
-                     <SelectValue placeholder="All Types" />
-                   </SelectTrigger>
-                   <SelectContent className="bg-card border-border">
-                     {propertyTypes.map((t) => (
-                       <SelectItem key={t} value={t} className="text-foreground focus:bg-primary/10">{t}</SelectItem>
-                     ))}
-                   </SelectContent>
-                 </Select>
-              </div>
+                <div className="space-y-2">
+                  <label className="text-muted-foreground font-bold uppercase tracking-widest text-xs ml-1">Type</label>
+                  <Select value={type} onValueChange={(val: string | null) => setType(val || '')}>
+                    <SelectTrigger className="h-12 bg-secondary border-border rounded-xl text-foreground text-sm">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      {propertyTypes.map((t) => (
+                        <SelectItem key={t} value={t === 'All Types' ? '' : t} className="text-foreground focus:bg-primary/10">{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-3">
-                <label className="text-muted-foreground font-black uppercase tracking-widest text-xs ml-1">Min Price (BDT)</label>
-                <Input
-                  placeholder="Min Price"
-                  type="number"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  className="h-14 bg-secondary border-border rounded-xl text-foreground px-4 font-bold"
-                />
-              </div>
+                <div className="space-y-2">
+                  <label className="text-muted-foreground font-bold uppercase tracking-widest text-xs ml-1">Min Price</label>
+                  <Input
+                    placeholder="Min (BDT)"
+                    type="number"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    className="h-12 bg-secondary border-border rounded-xl text-foreground px-4 font-bold text-sm"
+                  />
+                </div>
 
-              <div className="space-y-3">
-                <label className="text-muted-foreground font-black uppercase tracking-widest text-xs ml-1">Max Price (BDT)</label>
-                <Input
-                  placeholder="Max Price"
-                  type="number"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  className="h-14 bg-secondary border-border rounded-xl text-foreground px-4 font-bold"
-                />
+                <div className="space-y-2">
+                  <label className="text-muted-foreground font-bold uppercase tracking-widest text-xs ml-1">Max Price</label>
+                  <Input
+                    placeholder="Max (BDT)"
+                    type="number"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    className="h-12 bg-secondary border-border rounded-xl text-foreground px-4 font-bold text-sm"
+                  />
+                </div>
               </div>
-
-              <div className="md:col-span-4 flex justify-end pt-4 gap-4">
-                <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground hover:text-foreground font-bold">
-                  Clear All Filters
-                </Button>
-                <Button onClick={() => setShowFilters(false)} className="bg-primary text-secondary font-black px-8 rounded-xl">
-                  Apply Filters
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
       {/* Properties Grid */}
       <div className="max-w-7xl mx-auto px-4">
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <Skeleton key={i} className="h-[420px] rounded-2xl bg-card" />
+              <Skeleton key={i} className="h-80 rounded-2xl bg-card" />
             ))}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {properties.map((property, index) => (
                 <motion.div
                   key={property.id}
@@ -253,22 +282,22 @@ function ExploreContent() {
             )}
 
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-4 mt-20">
+              <div className="flex justify-center items-center gap-2 mt-12">
                 <Button
                   variant="outline"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(currentPage - 1)}
-                  className="h-14 px-6 rounded-2xl border-border text-foreground hover:bg-muted disabled:opacity-30"
+                  className="h-10 px-4 rounded-xl border-border text-foreground hover:bg-muted disabled:opacity-30 text-sm font-bold"
                 >
-                  Previous
+                  Prev
                 </Button>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <Button
                       key={page}
                       variant={currentPage === page ? 'default' : 'outline'}
                       onClick={() => setCurrentPage(page)}
-                      className={`w-14 h-14 rounded-2xl font-black transition-all ${currentPage === page ? 'bg-primary text-secondary scale-110 shadow-xl shadow-primary/20' : 'border-border text-foreground hover:bg-muted'}`}
+                      className={`w-10 h-10 rounded-xl font-bold text-sm ${currentPage === page ? 'bg-primary text-secondary' : 'border-border text-foreground hover:bg-muted'}`}
                     >
                       {page}
                     </Button>
@@ -278,7 +307,7 @@ function ExploreContent() {
                   variant="outline"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(currentPage + 1)}
-                  className="h-14 px-6 rounded-2xl border-border text-foreground hover:bg-muted disabled:opacity-30"
+                  className="h-10 px-4 rounded-xl border-border text-foreground hover:bg-muted disabled:opacity-30 text-sm font-bold"
                 >
                   Next
                 </Button>

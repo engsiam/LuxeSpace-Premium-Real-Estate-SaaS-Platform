@@ -29,14 +29,14 @@ export function PropertyCard({ property }: { property: Property }) {
       <Link href={`/properties/${property.id}`} className="block h-full">
         <Card className="overflow-hidden h-full border-border bg-card hover:border-primary/30 hover:shadow-2xl transition-all duration-500 group rounded-3xl">
           {/* Minimal Image */}
-          <div className="relative h-64 overflow-hidden">
+          <div className="relative h-56 w-full overflow-hidden">
             {property.images?.[0] ? (
               <Image
                 src={property.images[0]}
                 alt={property.title}
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               />
             ) : (
               <div className="w-full h-full bg-secondary flex items-center justify-center">

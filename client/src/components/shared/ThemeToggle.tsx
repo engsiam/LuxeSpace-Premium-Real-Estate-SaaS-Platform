@@ -2,8 +2,9 @@
 
 import { useThemeStore } from '@/stores/theme-store';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ThemeToggle() {
   const theme = useThemeStore((state) => state.theme);
@@ -15,10 +16,9 @@ export default function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return <div className="w-10 h-10" />;
+    return <div className="w-9 h-9" />;
   }
 
-  // Determine if currently in dark mode
   const isDark =
     theme === 'dark' ||
     (theme === 'system' &&
@@ -30,14 +30,50 @@ export default function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="rounded-full border border-border bg-card hover:bg-primary/10 w-10 h-10"
+      className="relative rounded-full border border-border bg-card/50 hover:bg-primary/10 w-9 h-9 overflow-hidden"
     >
-      {isDark ? (
-        <Sun size={18} className="text-primary" />
-      ) : (
-        <Moon size={18} className="text-primary" />
-      )}
       <span className="sr-only">Toggle theme</span>
+      
+      <AnimatePresence mode="wait" initial={false}>
+        {isDark ? (
+          <motion.div
+            key="sun"
+            initial={{ y: 20, opacity: 0, rotate: -90 }}
+            animate={{ y: 0, opacity: 1, rotate: 0 }}
+            exit={{ y: -20, opacity: 0, rotate: 90 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <Sun size={16} className="text-primary" />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="moon"
+            initial={{ y: 20, opacity: 0, rotate: -90 }}
+            animate={{ y: 0, opacity: 1, rotate: 0 }}
+            exit={{ y: -20, opacity: 0, rotate: 90 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <Moon size={16} className="text-primary" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Sparkle effect on toggle */}
+      <AnimatePresence>
+        {isDark && (
+          <motion.span
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [0, 1.5, 0], opacity: [0, 1, 0] }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          >
+            <Sparkles size={20} className="text-primary/50" />
+          </motion.span>
+        )}
+      </AnimatePresence>
     </Button>
   );
 }

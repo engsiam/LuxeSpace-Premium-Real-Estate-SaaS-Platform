@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { PropertyCardWrapper } from '@/components/property/PropertyCardWrapper';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import axiosInstance from '@/lib/axiosInstance';
 import { Property } from '@/types';
 import { Heading, Section, Grid } from '@/design-system/components';
+import { ArrowRight } from 'lucide-react';
 
 export default function FeaturedProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -15,7 +18,7 @@ export default function FeaturedProperties() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await axiosInstance.get('/properties/featured');
+        const response = await axiosInstance.get('/properties?limit=8');
         setProperties(response.data.data || []);
       } catch (error) {
         // Handled
@@ -33,7 +36,7 @@ export default function FeaturedProperties() {
         <Skeleton className="h-10 w-64 mb-8" />
         <Grid cols={4}>
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-80 rounded-2xl" />
+            <Skeleton key={i} className="h-72 rounded-2xl" />
           ))}
         </Grid>
       </Section>
@@ -44,7 +47,7 @@ export default function FeaturedProperties() {
 
   return (
     <Section>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -62,14 +65,17 @@ export default function FeaturedProperties() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
         >
-          <p className="text-muted-foreground max-w-md text-base leading-relaxed">
-            A curated selection of Bangladesh's most exclusive properties, verified for quality and prestige.
-          </p>
+          <Link href="/explore">
+            <Button className="bg-primary text-secondary font-bold px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-primary/90 transition-colors">
+              View All Properties
+              <ArrowRight size={18} />
+            </Button>
+          </Link>
         </motion.div>
       </div>
 
       <Grid cols={4}>
-        {properties.map((property, index) => (
+        {properties.slice(0, 8).map((property, index) => (
           <PropertyCardWrapper key={property.id} property={property} index={index} />
         ))}
       </Grid>
