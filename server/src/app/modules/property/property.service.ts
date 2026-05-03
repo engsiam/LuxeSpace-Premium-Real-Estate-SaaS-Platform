@@ -22,7 +22,19 @@ export interface IPropertyData {
 export const createProperty = async (data: IPropertyData, agentId: string) => {
   return prisma.property.create({
     data: {
-      ...data,
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      location: data.location,
+      city: data.city,
+      area: data.area,
+      bhk: data.bhk,
+      size: data.size,
+      type: data.type,
+      images: data.images || [],
+      amenities: data.amenities || [],
+      status: data.status || 'AVAILABLE',
+      isFeatured: data.isFeatured || false,
       agentId,
     },
     include: {

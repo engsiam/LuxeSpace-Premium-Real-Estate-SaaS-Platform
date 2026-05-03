@@ -16,9 +16,9 @@ export const createPropertySchema = z.object({
       try { return JSON.parse(val); } catch { return [val]; }
     }
     return val;
-  }, z.array(z.string()).default([])),
-  status: z.enum(['AVAILABLE', 'BOOKED', 'SOLD']).default('AVAILABLE'),
-  isFeatured: z.preprocess((val) => val === 'true', z.boolean().default(false)),
+  }, z.array(z.string())).optional(), // Changed from .default([]) to .optional() to prevent wiping data in partial updates
+  status: z.enum(['AVAILABLE', 'BOOKED', 'SOLD']).optional(),
+  isFeatured: z.preprocess((val) => val === 'true' || val === true, z.boolean()).optional(),
 });
 
 export const updatePropertySchema = createPropertySchema.partial();

@@ -5,7 +5,7 @@ export const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   phone: z.string().optional(),
-  role: z.enum(['USER', 'AGENT']).default('USER'),
+  role: z.enum(['USER', 'AGENT', 'ADMIN']).default('USER'),
 });
 
 export const loginSchema = z.object({
@@ -17,4 +17,9 @@ export const updateUserSchema = z.object({
   name: z.string().min(2).optional(),
   phone: z.string().optional(),
   avatar: z.string().url().optional(),
+});
+
+export const adminUpdateUserSchema = z.object({
+  role: z.enum(['USER', 'AGENT', 'ADMIN']).optional(),
+  isActive: z.boolean().optional(),
 });

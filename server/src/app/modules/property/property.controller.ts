@@ -8,20 +8,26 @@ import { AuthRequest } from '../../middlewares/auth.middleware';
 export const createProperty = catchAsync(async (req: AuthRequest, res) => {
   const data = { ...req.body };
   
-  // Convert string values to numbers
-  if (data.price) data.price = parseFloat(data.price);
-  if (data.bhk) data.bhk = parseInt(data.bhk);
-  if (data.size) data.size = parseInt(data.size);
-  
-  // Handle images from file upload
+  // Handle images from file upload (Cloudinary)
   if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-    data.images = (req.files as any[]).map((file: any) => file.path || file.secure_url);
+    data.images = (req.files as any[])
+      .map((file: any) => file.path || file.secure_url)
+      .filter((url: string) => !!url);
   }
   
-  // Ensure images is at least an empty array
-  if (!data.images) {
+  // Ensure required arrays are at least empty for Prisma/MongoDB
+  if (!data.images || !Array.isArray(data.images)) {
     data.images = [];
   }
+
+  if (!data.amenities || !Array.isArray(data.amenities)) {
+    data.amenities = [];
+  }
+
+  // Ensure numeric values are actually numbers (in case validation transformation missed something)
+  if (data.price) data.price = Number(data.price);
+  if (data.bhk) data.bhk = Number(data.bhk);
+  if (data.size) data.size = Number(data.size);
 
   const result = await propertyService.createProperty(data, req.user!.id);
   sendResponse(res, {
@@ -56,12 +62,59 @@ export const getPropertyById = catchAsync(async (req, res) => {
 });
 
 export const updateProperty = catchAsync(async (req: AuthRequest, res) => {
+  const { id } = req.params;
+  const data = { ...req.body };
+
+  // Handle JSON stringified arrays from FormData
+  if (data.amenities) {
+    if (typeof data.amenities === 'string') {
+      try {
+        const parsed = JSON.parse(data.amenities);
+        data.amenities = Array.isArray(parsed) ? parsed : [data.amenities];
+      } catch (e) {
+        data.amenities = [data.amenities];
+      }
+    } else if (!Array.isArray(data.amenities)) {
+      data.amenities = [];
+    }
+  }
+
+  // Handle existing images merging with new ones
+  let finalImages: string[] = [];
+  if (data.existingImages) {
+    if (typeof data.existingImages === 'string') {
+      try { finalImages = JSON.parse(data.existingImages); } catch (e) {}
+    } else if (Array.isArray(data.existingImages)) {
+      finalImages = data.existingImages;
+    }
+  }
+
+  if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+    const newImageUrls = (req.files as any[])
+      .map((file: any) => file.path || file.secure_url)
+      .filter((url: string) => !!url);
+    finalImages = [...finalImages, ...newImageUrls];
+  }
+
+  if (finalImages.length > 0) {
+    data.images = finalImages;
+  }
+  
+  // Remove helper fields that aren't in the database schema
+  delete data.existingImages;
+
+  // Numeric conversion with safety
+  if (data.price !== undefined) data.price = Number(data.price);
+  if (data.bhk !== undefined) data.bhk = Number(data.bhk);
+  if (data.size !== undefined) data.size = Number(data.size);
+
   const result = await propertyService.updateProperty(
-    req.params.id,
-    req.body,
+    id,
+    data,
     req.user!.id,
     req.user!.role
   );
+
   sendResponse(res, {
     statusCode: 200,
     success: true,

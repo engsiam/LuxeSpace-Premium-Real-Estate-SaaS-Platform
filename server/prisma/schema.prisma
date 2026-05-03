@@ -1,16 +1,16 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 enum Role {
-  ADMIN
-  AGENT
   USER
+  AGENT
+  ADMIN
 }
 
 enum PropertyStatus {
@@ -26,6 +26,12 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum TransactionStatus {
+  INITIATED
+  COMPLETED
+  FAILED
+}
+
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String
@@ -39,6 +45,7 @@ model User {
   bookings      Booking[]
   reviews       Review[]
   blogs         Blog[]
+  transactions  Transaction[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -72,13 +79,34 @@ model Booking {
   user            User          @relation(fields: [userId], references: [id])
   propertyId      String        @db.ObjectId
   property        Property      @relation(fields: [propertyId], references: [id])
-  bKashTrxId      String?
-  bKashPaymentID  String?
   amount          Float
   status          BookingStatus @default(PENDING)
+  paymentStatus   String        @default("UNPAID")
+  paymentMethod   String?
+  paymentDate     DateTime?
+  transactionId   String?
   visitDate       DateTime?
+  transactions    Transaction[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  bKashTrxId      String?
+  bKashPaymentID  String?
+}
+
+model Transaction {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId     String            @db.ObjectId
+  booking       Booking           @relation(fields: [bookingId], references: [id])
+  userId        String            @db.ObjectId
+  user          User              @relation(fields: [userId], references: [id])
+  amount        Float
+  method        String
+  status        TransactionStatus @default(INITIATED)
+  trxId         String?           @unique
+  paymentId     String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 }
 
 model Review {
@@ -87,7 +115,7 @@ model Review {
   user        User      @relation(fields: [userId], references: [id])
   propertyId  String    @db.ObjectId
   property    Property  @relation(fields: [propertyId], references: [id])
-  rating      Int       // 1-5
+  rating      Int
   comment     String
   createdAt   DateTime  @default(now())
 }
@@ -98,21 +126,32 @@ model Blog {
   slug        String    @unique
   content     String
   coverImage  String
-  category    String
-  tags        String[]
+  isPublished Boolean   @default(true)
   authorId    String    @db.ObjectId
   author      User      @relation(fields: [authorId], references: [id])
-  isPublished Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
 
 model Contact {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   email     String
   subject   String
   message   String
-  isRead    Boolean   @default(false)
-  createdAt DateTime  @default(now())
+  isRead    Boolean  @default(false)
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Settings {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  siteName      String   @default("LuxeSpace")
+  logoUrl       String?
+  faviconUrl    String?
+  supportEmail  String?
+  bkashTrxId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

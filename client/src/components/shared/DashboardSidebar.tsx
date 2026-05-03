@@ -16,7 +16,8 @@ import {
   PlusCircle,
   Heart,
   UserCircle,
-  ChevronRight
+  ChevronRight,
+  Wallet
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
@@ -37,6 +38,7 @@ export default function DashboardSidebar({ role }: { role: string }) {
     { href: '/dashboard/admin/users', label: 'Elite Network', icon: <Users size={20} /> },
     { href: '/dashboard/admin/bookings', label: 'Transactions', icon: <Calendar size={20} /> },
     { href: '/dashboard/admin/blogs', label: 'Journal Manager', icon: <FileText size={20} /> },
+    { href: '/dashboard/admin/transactions', label: 'Financial Audit', icon: <Wallet size={20} /> },
     { href: '/dashboard/admin/messages', label: 'Inquiries', icon: <MessageSquare size={20} /> },
     { href: '/dashboard/admin/settings', label: 'Global Config', icon: <Settings size={20} /> },
   ];
@@ -51,6 +53,7 @@ export default function DashboardSidebar({ role }: { role: string }) {
   const userItems: SidebarItem[] = [
     { href: '/dashboard/user', label: 'Overview', icon: <LayoutDashboard size={20} /> },
     { href: '/dashboard/user/my-bookings', label: 'My Sanctuary', icon: <Calendar size={20} /> },
+    { href: '/dashboard/user/transactions', label: 'Transactions', icon: <Wallet size={20} /> },
     { href: '/dashboard/user/wishlist', label: 'Collection', icon: <Heart size={20} /> },
     { href: '/dashboard/user/profile', label: 'Identity', icon: <UserCircle size={20} /> },
   ];
@@ -137,7 +140,7 @@ export default function DashboardSidebar({ role }: { role: string }) {
           <div className="p-2 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform">
             <LogOut size={20} />
           </div>
-          <span className="text-sm tracking-tight uppercase">Term Session</span>
+          <span className="text-sm tracking-tight uppercase">Log Out</span>
         </button>
       
         <div className="mt-8 flex items-center justify-center gap-2 grayscale opacity-40">

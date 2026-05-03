@@ -2,7 +2,7 @@ import { Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import * as userService from './user.service';
-import { registerSchema, loginSchema, updateUserSchema } from './user.validation';
+import { registerSchema, loginSchema, updateUserSchema, adminUpdateUserSchema } from './user.validation';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 
 export const register = catchAsync(async (req, res) => {
@@ -65,6 +65,18 @@ export const updateMe = catchAsync(async (req: AuthRequest, res) => {
     statusCode: 200,
     success: true,
     message: 'Profile updated',
+    data: user,
+  });
+});
+
+export const updateUser = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const validated = adminUpdateUserSchema.parse(req.body);
+  const user = await userService.updateUser(id, validated);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User updated successfully',
     data: user,
   });
 });

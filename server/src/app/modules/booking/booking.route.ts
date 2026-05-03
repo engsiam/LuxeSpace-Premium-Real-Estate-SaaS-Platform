@@ -4,10 +4,10 @@ import * as bookingController from './booking.controller';
 
 const router = Router();
 
-router.post('/init', authGuard('USER'), bookingController.initiateBooking);
-router.post('/execute', authGuard('USER'), bookingController.executeBooking);
-router.post('/callback', bookingController.bkashCallback);
+router.post('/init', authGuard('USER', 'ADMIN', 'AGENT'), bookingController.initiateBooking);
+router.post('/execute', authGuard('USER', 'ADMIN', 'AGENT'), bookingController.executeBooking);
 router.get('/', authGuard(), bookingController.getMyBookings);
+router.get('/transactions', authGuard(), bookingController.getTransactionHistory);
 router.get('/all', authGuard('ADMIN'), bookingController.getAllBookings);
 
 export default router;

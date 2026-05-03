@@ -14,29 +14,18 @@ export const initiateBooking = catchAsync(async (req: AuthRequest, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Booking initiated',
+    message: 'Booking initiated. Redirecting to payment...',
     data: result,
   });
 });
 
 export const executeBooking = catchAsync(async (req, res) => {
-  const { paymentID } = req.body;
-  const result = await bookingService.executeBooking(paymentID);
+  const { paymentID, method, invoice } = req.body;
+  const result = await bookingService.executeBooking(paymentID, method, invoice);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Payment executed',
-    data: result,
-  });
-});
-
-export const bkashCallback = catchAsync(async (req, res) => {
-  const { paymentID } = req.body;
-  const result = await bookingService.executeBooking(paymentID);
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Payment executed',
+    message: result.success ? 'Payment verified successfully' : 'Payment verification failed',
     data: result,
   });
 });
@@ -57,6 +46,17 @@ export const getAllBookings = catchAsync(async (req, res) => {
     statusCode: 200,
     success: true,
     message: 'All bookings retrieved',
+    data: result,
+  });
+});
+
+export const getTransactionHistory = catchAsync(async (req: AuthRequest, res) => {
+  const userId = req.user!.role === 'ADMIN' ? undefined : req.user!.id;
+  const result = await bookingService.getTransactionHistory(userId);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Transaction history retrieved',
     data: result,
   });
 });

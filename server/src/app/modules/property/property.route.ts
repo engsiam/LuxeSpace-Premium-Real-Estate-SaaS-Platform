@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authGuard } from '../../middlewares/auth.middleware';
 import * as propertyController from './property.controller';
-import { createPropertySchema } from './property.validation';
+import { createPropertySchema, updatePropertySchema } from './property.validation';
 import { validateRequest } from '../../middlewares/validate.middleware';
 
 const router = Router();
@@ -25,6 +25,8 @@ router.get('/:id', propertyController.getPropertyById);
 router.patch(
   '/:id',
   authGuard('AGENT', 'ADMIN'),
+  upload.array('images', 5),
+  validateRequest(updatePropertySchema),
   propertyController.updateProperty
 );
 

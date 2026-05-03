@@ -1,9 +1,6 @@
 import prisma from '../../../prisma/client';
 import ApiError from '../../utils/ApiError';
-import env from '../../../config';
-import axios from 'axios';
-
-import * as bkashService from './bkash.service';
+import { paymentService } from '../payment/payment.service';
 
 export const initiateBooking = async (
   userId: string,
@@ -22,6 +19,19 @@ export const initiateBooking = async (
     throw new ApiError(400, 'Property is not available for booking');
   }
 
+  // Check if user already has a pending or paid booking for this property
+  const existingBooking = await prisma.booking.findFirst({
+    where: {
+      userId,
+      propertyId,
+      status: { in: ['PENDING', 'PAID'] },
+    },
+  });
+
+  if (existingBooking && existingBooking.status === 'PAID') {
+    throw new ApiError(400, 'You have already reserved this residence');
+  }
+
   const booking = await prisma.booking.create({
     data: {
       userId,
@@ -29,59 +39,29 @@ export const initiateBooking = async (
       amount: property.price,
       visitDate: visitDate ? new Date(visitDate) : undefined,
       status: 'PENDING',
+      paymentStatus: 'UNPAID',
     },
   });
 
-  // Create bKash payment
-  const paymentData = await bkashService.createPayment(
-    property.price,
+  // Initiate payment via centralized payment service
+  const paymentData = await paymentService.initiatePayment(
     booking.id,
-    userId
+    userId,
+    property.price,
+    'bkash' // Defaulting to bKash for now as per requirement
   );
 
   return {
     booking,
-    bkashURL: paymentData.bkashURL,
+    paymentURL: paymentData.paymentURL,
+    // Backwards compatibility for frontend if needed
+    bkashURL: paymentData.paymentURL,
   };
 };
 
-export const executeBooking = async (paymentID: string) => {
-  const paymentData = await bkashService.executePayment(paymentID);
-
-  const { transactionStatus, trxID, paymentID: pID } = paymentData;
-
-  const booking = await prisma.booking.findFirst({
-    where: { id: paymentData.merchantInvoiceNumber },
-  });
-
-  if (!booking) {
-    throw new ApiError(404, 'Booking not found');
-  }
-
-  if (transactionStatus === 'Completed') {
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: {
-        status: 'PAID',
-        bKashTrxId: trxID,
-        bKashPaymentID: pID,
-      },
-    });
-
-    await prisma.property.update({
-      where: { id: booking.propertyId },
-      data: { status: 'BOOKED' },
-    });
-  } else {
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { status: 'FAILED' },
-    });
-  }
-
-  return booking;
+export const executeBooking = async (paymentID: string, method: string = 'bkash', invoice: string) => {
+  return paymentService.verifyAndExecutePayment(paymentID, method as any, invoice);
 };
-
 
 export const getMyBookings = async (userId: string) => {
   return prisma.booking.findMany({
@@ -111,5 +91,21 @@ export const getAllBookings = async () => {
       },
     },
     orderBy: { createdAt: 'desc' },
+  });
+};
+
+export const getTransactionHistory = async (userId?: string) => {
+  const where = userId ? { userId } : {};
+  return prisma.transaction.findMany({
+    where,
+    include: {
+      user: { select: { name: true, email: true } },
+      booking: { 
+        include: { 
+          property: { select: { title: true } } 
+        } 
+      }
+    },
+    orderBy: { createdAt: 'desc' }
   });
 };
