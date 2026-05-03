@@ -2,7 +2,7 @@ import { Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import * as userService from './user.service';
-import { registerSchema, loginSchema, updateUserSchema, adminUpdateUserSchema } from './user.validation';
+import { registerSchema, loginSchema, updateUserSchema, adminUpdateUserSchema, googleAuthSchema } from './user.validation';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 
 export const register = catchAsync(async (req, res) => {
@@ -23,6 +23,17 @@ export const login = catchAsync(async (req, res) => {
     statusCode: 200,
     success: true,
     message: 'Login successful',
+    data: result,
+  });
+});
+
+export const googleAuth = catchAsync(async (req, res) => {
+  const validated = googleAuthSchema.parse(req.body);
+  const result = await userService.googleAuth(validated);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Google authentication successful',
     data: result,
   });
 });

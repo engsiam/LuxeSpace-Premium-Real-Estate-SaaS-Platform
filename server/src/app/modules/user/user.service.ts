@@ -95,6 +95,47 @@ export const loginUser = async (email: string, password: string) => {
   return { user: userWithoutPassword, accessToken, refreshToken };
 };
 
+export const googleAuth = async (data: { email: string; name: string; avatar?: string; role?: string }) => {
+  let user = await prisma.user.findUnique({
+    where: { email: data.email },
+  });
+
+  if (!user) {
+    const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(randomPassword, 12);
+
+    user = await prisma.user.create({
+      data: {
+        email: data.email,
+        name: data.name,
+        password: hashedPassword,
+        avatar: data.avatar,
+        role: (data.role as Role) || 'USER',
+      },
+    });
+  }
+
+  if (!user.isActive) {
+    throw new ApiError(403, 'Account is deactivated');
+  }
+
+  const { password: _, ...userWithoutPassword } = user;
+
+  const accessToken = jwt.sign(
+    { id: user.id, role: user.role },
+    env.JWT_SECRET as Secret,
+    { expiresIn: env.JWT_EXPIRES_IN } as SignOptions
+  );
+
+  const refreshToken = jwt.sign(
+    { id: user.id },
+    env.JWT_REFRESH_SECRET as Secret,
+    { expiresIn: '30d' } as SignOptions
+  );
+
+  return { user: userWithoutPassword, accessToken, refreshToken };
+};
+
 export const refreshToken = async (token: string) => {
   try {
     const decoded = jwt.verify(token, env.JWT_REFRESH_SECRET as Secret) as { id: string };

@@ -21,6 +21,7 @@ import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Eye, EyeOff, Building2, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
+import { FcGoogle } from 'react-icons/fc';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -192,7 +193,7 @@ export default function LoginPage() {
                 Secure Login
               </p>
 
-              <h2 className="text-5xl font-black tracking-[-0.04em] text-white">
+              <h2 className="text-3xl font-black tracking-[-0.04em] text-white">
                 Access Your Account
               </h2>
 
@@ -202,6 +203,22 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-12">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+                className="h-16 w-full rounded-2xl border border-white/10 bg-white/[0.03] text-base font-bold text-white hover:bg-white/10 transition-all mb-8"
+              >
+                <FcGoogle className="mr-3 h-6 w-6" />
+                Continue with Google
+              </Button>
+
+              <div className="mb-8 flex items-center">
+                <div className="flex-grow border-t border-white/10"></div>
+                <span className="mx-4 text-[11px] font-black uppercase tracking-[0.25em] text-white/40">Or continue with email</span>
+                <div className="flex-grow border-t border-white/10"></div>
+              </div>
+
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}

@@ -23,3 +23,10 @@ export const adminUpdateUserSchema = z.object({
   role: z.enum(['USER', 'AGENT', 'ADMIN']).optional(),
   isActive: z.boolean().optional(),
 });
+
+export const googleAuthSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  name: z.string().min(2, 'Name is required'),
+  avatar: z.string().url().optional(),
+  role: z.enum(['USER', 'AGENT', 'ADMIN']).optional().default('USER'),
+});

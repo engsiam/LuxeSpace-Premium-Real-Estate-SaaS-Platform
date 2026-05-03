@@ -9,6 +9,7 @@ const router = Router();
 // Auth routes
 router.post('/register', validateRequest(registerSchema), userController.register);
 router.post('/login', validateRequest(loginSchema), userController.login);
+router.post('/google', userController.googleAuth);
 router.post('/refresh-token', userController.refreshToken);
 
 // User routes
@@ -21,5 +22,6 @@ router.delete('/:id', authGuard('ADMIN'), userController.deleteUser);
 // Also export for auth routes
 router.post('/auth/register', validateRequest(registerSchema), userController.register);
 router.post('/auth/login', validateRequest(loginSchema), userController.login);
+router.post('/auth/google', userController.googleAuth);
 
 export default router;

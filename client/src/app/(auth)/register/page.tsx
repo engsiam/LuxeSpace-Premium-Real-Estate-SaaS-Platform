@@ -28,6 +28,8 @@ import axiosInstance from '@/lib/axiosInstance';
 import { motion } from 'framer-motion';
 import { Globe, User as UserIcon, Mail, Lock, ShieldCheck, Briefcase, Sparkles, ChevronRight, Eye, EyeOff, Check, Star } from 'lucide-react';
 import Image from 'next/image';
+import { FcGoogle } from 'react-icons/fc';
+import { signIn } from 'next-auth/react';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -59,6 +61,16 @@ export default function RegisterPage() {
       role: 'USER',
     },
   });
+
+  const handleGoogleAuth = async () => {
+    try {
+      // By default, NextAuth's Google provider handles the user creation and role assignment
+      // in the backend callbacks (e.g., setting default role to 'USER').
+      await signIn('google', { callbackUrl: '/dashboard' });
+    } catch (error) {
+      toast.error('Failed to authenticate with Google');
+    }
+  };
 
   const onSubmit = async (data: RegisterFormValues) => {
     if (!agreedToTerms) {
@@ -155,11 +167,11 @@ export default function RegisterPage() {
         <div className="flex items-center justify-center bg-[#020817] px-8 py-16 lg:px-16" style={{ flex: 1 }}>
           <div className="w-full max-w-[480px]">
 
-            <div className="space-y-3">
+            <div className="space-y-3 mb-4">
               <p className="text-[11px] font-black uppercase tracking-[0.35em] text-primary">
                 Membership Application
               </p>
-              <h2 className="text-5xl font-black tracking-[-0.04em] text-white">
+              <h2 className="text-3xl font-black tracking-[-0.04em] text-white">
                 Create Account
               </h2>
               <p className="text-base leading-relaxed text-white/50">
@@ -168,6 +180,22 @@ export default function RegisterPage() {
             </div>
 
             <div className="mt-10">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGoogleAuth}
+                className="h-16 w-full rounded-2xl border border-white/10 bg-white/[0.03] text-base font-bold text-white hover:bg-white/10 transition-all mb-8"
+              >
+                <FcGoogle className="mr-3 h-6 w-6" />
+                Continue with Google
+              </Button>
+
+              <div className="mb-8 flex items-center">
+                <div className="flex-grow border-t border-white/10"></div>
+                <span className="mx-4 text-[11px] font-black uppercase tracking-[0.25em] text-white/40">Or register with email</span>
+                <div className="flex-grow border-t border-white/10"></div>
+              </div>
+
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
