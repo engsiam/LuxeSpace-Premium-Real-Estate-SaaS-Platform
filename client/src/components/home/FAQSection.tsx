@@ -58,7 +58,7 @@ export default function FAQSection() {
             >
               <AccordionItem 
                 value={`item-${index}`}
-                className="bg-card border border-border rounded-2xl px-6 overflow-hidden hover:border-primary]/20 transition-all duration-300 shadow-2xl"
+                className="bg-card border border-border rounded-2xl px-6 overflow-hidden hover:border-primary/20 transition-all duration-300 shadow-2xl"
               >
                 <AccordionTrigger className="text-left font-medium text-lg text-foreground hover:text-primary transition-colors py-6 hover:no-underline">
                   <div className="flex items-center gap-4">

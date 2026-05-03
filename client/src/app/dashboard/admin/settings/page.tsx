@@ -45,11 +45,11 @@ export default function AdminSettings() {
           <div className="space-y-6">
             <div className="grid gap-2">
               <Label htmlFor="siteName" className="text-muted-foreground">Site Name</Label>
-              <Input id="siteName" defaultValue="LuxeSpace" className="bg-background border-border text-white focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+              <Input id="siteName" defaultValue="LuxeSpace" className="bg-background border-border text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="supportEmail" className="text-muted-foreground">Support Email</Label>
-              <Input id="supportEmail" defaultValue="support@luxespace.com" className="bg-background border-border text-white focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+              <Input id="supportEmail" defaultValue="support@luxespace.com" className="bg-background border-border text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
             </div>
           </div>
         </div>
@@ -66,11 +66,11 @@ export default function AdminSettings() {
           <div className="space-y-6">
             <div className="grid gap-2">
               <Label htmlFor="merchantId" className="text-muted-foreground">Merchant ID</Label>
-              <Input id="merchantId" defaultValue="LX-99221" className="bg-background border-border text-white focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+              <Input id="merchantId" defaultValue="LX-99221" className="bg-background border-border text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="apiKey" className="text-muted-foreground">API Key</Label>
-              <Input id="apiKey" type="password" defaultValue="••••••••••••••••" className="bg-background border-border text-white focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+              <Input id="apiKey" type="password" defaultValue="••••••••••••••••" className="bg-background border-border text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
             </div>
           </div>
         </div>

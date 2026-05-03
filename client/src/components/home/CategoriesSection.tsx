@@ -40,7 +40,7 @@ export default function CategoriesSection() {
             transition={{ delay: index * 0.1 }}
           >
             <Link href={`/explore?type=${encodeURIComponent(cat.type)}`}>
-              <div className="p-8 bg-card border border-border rounded-2xl text-center hover:border-primary]/30 hover:shadow-2xl transition-all duration-500 group h-full">
+              <div className="p-8 bg-card border border-border rounded-2xl text-center hover:border-primary/30 hover:shadow-2xl transition-all duration-500 group h-full">
                 <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 text-primary text-4xl mx-auto">
                   {cat.name.charAt(0)}
                 </div>

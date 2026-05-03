@@ -64,7 +64,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto space-y-6"
           >
-            <span className="inline-block py-2 px-4 rounded-full bg-primary/10 border border-primary]/30 text-primary text-xs font-black uppercase tracking-[0.3em]">
+            <span className="inline-block py-2 px-4 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-black uppercase tracking-[0.3em]">
               The LuxeSpace Story
             </span>
             <h1 className="text-4xl md:text-7xl font-black text-white leading-tight tracking-tighter">
@@ -197,7 +197,7 @@ export default function AboutPage() {
                 <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-[#C9A74D]/30 text-secondary-foreground font-black absolute left-0 md:left-1/2 md:-translate-x-1/2">
                   {index + 1}
                 </div>
-                <div className="flex-1 bg-card p-8 rounded-2xl border border-border hover:border-primary]/30 transition-colors ml-14 md:ml-0 md:w-1/2">
+                <div className="flex-1 bg-card p-8 rounded-2xl border border-border hover:border-primary/30 transition-colors ml-14 md:ml-0 md:w-1/2">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-black text-white">{milestone.title}</h3>
                     <span className="text-primary font-black text-xl">{milestone.year}</span>

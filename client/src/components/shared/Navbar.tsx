@@ -132,7 +132,7 @@ export default function Navbar() {
                 <Link
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-6 rounded-3xl bg-background/30 border border-border/50 group hover:bg-primary hover:border-primary] transition-all duration-300"
+                  className="flex items-center justify-between p-6 rounded-3xl bg-background/30 border border-border/50 group hover:bg-primary hover:border-primary transition-all duration-300"
                 >
                   <span className="text-2xl font-black tracking-tight group-hover:text-secondary-foreground">{link.label}</span>
                   <ChevronRight className="text-primary group-hover:text-secondary-foreground group-hover:translate-x-2 transition-all" />

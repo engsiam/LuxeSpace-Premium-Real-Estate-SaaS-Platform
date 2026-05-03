@@ -22,7 +22,7 @@ export function BlogCard({ blog, index = 0 }: BlogCardProps) {
       className="h-full"
     >
       <Link href={`/blog/${blog.slug}`} className="block h-full">
-        <div className="overflow-hidden h-full bg-card border border-border rounded-2xl hover:border-primary]/30 hover:shadow-2xl transition-all duration-500 group">
+        <div className="overflow-hidden h-full bg-card border border-border rounded-2xl hover:border-primary/30 hover:shadow-2xl transition-all duration-500 group">
           {/* Image - Fixed 16:9 Ratio */}
           <div className="relative aspect-video overflow-hidden">
             <Image 
@@ -41,12 +41,12 @@ export function BlogCard({ blog, index = 0 }: BlogCardProps) {
             </div>
 
             {/* Title - 2 Lines Max */}
-            <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2">
+            <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
               {blog.title}
             </h3>
 
             {/* Excerpt */}
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
               {blog.excerpt}
             </p>
 

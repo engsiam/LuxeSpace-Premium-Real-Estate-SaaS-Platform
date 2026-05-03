@@ -83,7 +83,7 @@ export default function AdminMessages() {
         ) : (
           <div className="space-y-4">
             {messages.map((message) => (
-              <div key={message.id} className="bg-background border border-border rounded-xl p-6 hover:border-primary]/30 transition-all">
+              <div key={message.id} className="bg-background border border-border rounded-xl p-6 hover:border-primary/30 transition-all">
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="font-semibold text-white text-lg">{message.subject}</h3>
@@ -96,7 +96,7 @@ export default function AdminMessages() {
                       {message.isRead ? 'Read' : 'Unread'}
                     </Badge>
                     {!message.isRead && (
-                      <Button size="sm" variant="outline" onClick={() => handleMarkRead(message.id)} className="border-primary]/20 text-primary hover:bg-primary hover:text-secondary-foreground">
+                      <Button size="sm" variant="outline" onClick={() => handleMarkRead(message.id)} className="border-primary/20 text-primary hover:bg-primary hover:text-secondary-foreground">
                         Mark Read
                       </Button>
                     )}

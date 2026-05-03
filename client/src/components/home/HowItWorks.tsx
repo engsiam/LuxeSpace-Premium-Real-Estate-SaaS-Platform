@@ -38,7 +38,7 @@ export default function HowItWorks() {
             transition={{ delay: index * 0.1 }}
             className="h-full"
           >
-            <div className="p-8 bg-card border border-border rounded-2xl h-full hover:border-primary]/30 transition-all duration-500 group">
+            <div className="p-8 bg-card border border-border rounded-2xl h-full hover:border-primary/30 transition-all duration-500 group">
               <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mb-6 text-secondary-foreground text-2xl font-bold">
                 {item.step}
               </div>

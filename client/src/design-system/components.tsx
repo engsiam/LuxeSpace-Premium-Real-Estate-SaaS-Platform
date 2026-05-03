@@ -3,6 +3,7 @@
 
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { MapPin, BedDouble, Maximize2 } from 'lucide-react';
 
 // ==================== CONTAINER ===================
 interface ContainerProps {
@@ -93,9 +94,9 @@ interface GridProps {
 export function Grid({ children, className, cols = 3 }: GridProps) {
   const gridCols = {
     1: 'grid-cols-1',
-    2: 'grid-cols-1 md:grid-cols-2',
-    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-    4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+    2: 'grid-cols-1 sm:grid-cols-2',
+    3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
   } as const;
 
   return (
@@ -132,9 +133,9 @@ export function PropertyCard({
 
   return (
     <Link href={`/properties/${id}`} className={cn('block', className)}>
-      <div className="overflow-hidden h-full bg-card border border-border rounded-2xl hover:border-primary]/30 hover:shadow-2xl transition-all duration-500 group">
+      <div className="overflow-hidden h-full bg-card border border-border rounded-2xl hover:border-primary/30 hover:shadow-2xl transition-all duration-500 group flex flex-col">
         {/* Image - Fixed 16:9 Ratio */}
-        <div className="relative aspect-video overflow-hidden">
+        <div className="relative aspect-video overflow-hidden shrink-0">
           {images?.[0] ? (
             <img 
               src={images[0]} 
@@ -156,32 +157,34 @@ export function PropertyCard({
         </div>
 
         {/* Content - Same Padding Everywhere */}
-        <div className="p-6 space-y-4">
-          {/* Location */}
-          <div className="flex items-center gap-2 text-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span className="text-xs font-medium uppercase tracking-[0.3em]">{city}</span>
+        <div className="p-6 flex flex-col flex-grow">
+          <div className="space-y-4 flex-grow">
+            {/* Location */}
+            <div className="flex items-center gap-2 text-primary">
+              <MapPin size={14} />
+              <span className="text-xs font-medium uppercase tracking-[0.3em]">{city}</span>
+            </div>
+
+            {/* Title - 2 Lines Max */}
+            <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+              {title}
+            </h3>
+
+            {/* Features */}
+            <div className="flex items-center gap-6 pt-2 border-t border-border/50">
+              <div className="flex items-center gap-2">
+                <BedDouble size={16} className="text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">{bhk} BHK</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Maximize2 size={16} className="text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">{size} sqft</span>
+              </div>
+            </div>
           </div>
 
-          {/* Title - 2 Lines Max */}
-          <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2">
-            {title}
-          </h3>
-
-          {/* Features */}
-          <div className="flex items-center gap-6 pt-2 border-t border-border/50">
-            <div className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><path d="M3 21V9a4 4 0 0 1 4-4h14"/></svg>
-              <span className="text-sm font-medium text-foreground">{bhk} BHK</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><path d="M3 21V9a4 4 0 0 1 4-4h14"/></svg>
-              <span className="text-sm font-medium text-foreground">{size} sqft</span>
-            </div>
-          </div>
-
-          {/* Price */}
-          <div className="pt-2 border-t border-border/50">
+          {/* Price - Pushed to bottom */}
+          <div className="pt-4 mt-4 border-t border-border/50">
             <p className="text-2xl font-bold text-foreground tracking-tight">
               {formatPrice(price)}
             </p>

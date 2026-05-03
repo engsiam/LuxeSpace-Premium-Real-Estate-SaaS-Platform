@@ -25,7 +25,7 @@ export default function CTASection() {
             viewport={{ once: true }}
             className="max-w-3xl mx-auto space-y-8"
           >
-            <div className="inline-flex items-center gap-3 py-2 px-6 rounded-full bg-primary/10 border border-primary]/20 backdrop-blur-xl">
+            <div className="inline-flex items-center gap-3 py-2 px-6 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-xl">
               <Sparkles size={16} className="text-primary animate-pulse" />
               <span className="text-primary text-xs font-bold uppercase tracking-[0.4em]">Ready for Excellence?</span>
             </div>

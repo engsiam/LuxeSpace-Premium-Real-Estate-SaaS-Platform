@@ -81,6 +81,8 @@
 /* Smooth theme transition - top to bottom effect */
 html, body {
   transition: background-color 0.5s ease, color 0.5s ease;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 *, *::before, *::after {

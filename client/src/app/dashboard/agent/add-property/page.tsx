@@ -139,7 +139,7 @@ export default function AddProperty() {
                 <FormItem>
                   <FormLabel className="text-muted-foreground">Property Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Modern Penthouse in Gulshan" {...field} className="bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+                    <Input placeholder="e.g. Modern Penthouse in Gulshan" {...field} className="bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -155,7 +155,7 @@ export default function AddProperty() {
                   <FormControl>
                     <Textarea 
                       placeholder="Describe the property, amenities, etc." 
-                      className="min-h-[120px] bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]"
+                      className="min-h-[120px] bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]"
                       {...field} 
                     />
                   </FormControl>
@@ -172,7 +172,7 @@ export default function AddProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">Price (BDT)</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} value={field.value as any} className="bg-background border-border text-white focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+                      <Input type="number" {...field} value={field.value as any} className="bg-background border-border text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -185,7 +185,7 @@ export default function AddProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">City</FormLabel>
                     <FormControl>
-                      <Input placeholder="Dhaka" {...field} className="bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+                      <Input placeholder="Dhaka" {...field} className="bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,7 +198,7 @@ export default function AddProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">Location</FormLabel>
                     <FormControl>
-                      <Input placeholder="Gulshan 2" {...field} className="bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+                      <Input placeholder="Gulshan 2" {...field} className="bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -214,7 +214,7 @@ export default function AddProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">Area (Thana/Block)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Road 12" {...field} className="bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+                      <Input placeholder="Road 12" {...field} className="bg-background border-border text-white placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -227,7 +227,7 @@ export default function AddProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">BHK</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} value={field.value as any} className="bg-background border-border text-white focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+                      <Input type="number" {...field} value={field.value as any} className="bg-background border-border text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -240,7 +240,7 @@ export default function AddProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">Size (sqft)</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} value={field.value as any} className="bg-background border-border text-white focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
+                      <Input type="number" {...field} value={field.value as any} className="bg-background border-border text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D]" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

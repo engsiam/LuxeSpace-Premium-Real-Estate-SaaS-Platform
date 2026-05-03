@@ -136,7 +136,7 @@ export default function AdminDashboard() {
                 <h2 className="text-2xl font-black tracking-tight text-white">Financial Growth</h2>
                 <p className="text-sm text-muted-foreground font-medium">Monthly revenue and booking trends</p>
               </div>
-              <Button variant="outline" className="rounded-xl border-primary]/20 text-primary font-bold hover:bg-primary hover:text-secondary-foreground">
+              <Button variant="outline" className="rounded-xl border-primary/20 text-primary font-bold hover:bg-primary hover:text-secondary-foreground">
                 <ArrowUpRight size={18} className="mr-2" />
                 View Detailed Report
               </Button>

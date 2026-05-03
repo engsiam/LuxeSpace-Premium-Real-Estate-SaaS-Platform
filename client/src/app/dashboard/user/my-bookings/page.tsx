@@ -63,7 +63,7 @@ export default function UserBookings() {
 
         <div className="space-y-4">
           {bookings.map((booking) => (
-            <div key={booking.id} className="bg-background border border-border rounded-xl p-6 hover:border-primary]/30 transition-all">
+            <div key={booking.id} className="bg-background border border-border rounded-xl p-6 hover:border-primary/30 transition-all">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="font-semibold text-white text-lg">{booking.property?.title}</h3>

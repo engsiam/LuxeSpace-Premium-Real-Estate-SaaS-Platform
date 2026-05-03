@@ -62,7 +62,7 @@ export default function HeroSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
         <div className="max-w-2xl">
           {/* Badge */}
-          <div className="inline-flex items-center gap-3 mb-8 px-5 py-2.5 rounded-full bg-primary/10 border border-primary]/30 backdrop-blur-xl">
+          <div className="inline-flex items-center gap-3 mb-8 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-xl">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="text-primary text-xs font-bold uppercase tracking-[0.3em]">
               Elite Property Network
@@ -86,7 +86,7 @@ export default function HeroSection() {
               <input 
                 type="text"
                 placeholder="Where would you like to live?"
-                className="w-full h-14 pl-14 pr-6 rounded-xl bg-card/60 border border-border text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary] focus-visible:ring-1 focus-visible:ring-[#C9A74D] text-base backdrop-blur-xl transition-all duration-300"
+                className="w-full h-14 pl-14 pr-6 rounded-xl bg-card/60 border border-border text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D] text-base backdrop-blur-xl transition-all duration-300"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

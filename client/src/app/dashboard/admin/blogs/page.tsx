@@ -82,7 +82,7 @@ export default function AdminBlogs() {
         ) : (
           <div className="space-y-4">
             {blogs.map((blog) => (
-              <div key={blog.id} className="bg-background border border-border rounded-xl p-6 hover:border-primary]/30 transition-all">
+              <div key={blog.id} className="bg-background border border-border rounded-xl p-6 hover:border-primary/30 transition-all">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-semibold text-white text-lg">{blog.title}</h3>

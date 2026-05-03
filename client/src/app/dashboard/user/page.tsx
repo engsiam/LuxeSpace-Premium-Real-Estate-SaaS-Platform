@@ -85,7 +85,7 @@ export default function UserDashboard() {
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">My <span className="text-primary italic">Dashboard</span></h1>
         </div>
 
-        <Button variant="outline" className="rounded-xl border-primary]/20 text-primary font-bold hover:bg-primary hover:text-secondary-foreground">
+        <Button variant="outline" className="rounded-xl border-primary/20 text-primary font-bold hover:bg-primary hover:text-secondary-foreground">
           <ArrowUpRight size={18} className="mr-2" />
           View Profile
         </Button>
