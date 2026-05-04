@@ -1,26 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
   <rect width="1200" height="630" fill="#0B0F1A"/>
-  <rect width="1200" height="630" fill="url(#gradient)"/>
   
+  <!-- Background gradient -->
   <defs>
-    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0B0F1A" stop-opacity="0.9"/>
-      <stop offset="50%" stop-color="#0B0F1A" stop-opacity="0.7"/>
-      <stop offset="100%" stop-color="#C9A74D" stop-opacity="0.3"/>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F1A"/>
+      <stop offset="100%" stop-color="#1a2332"/>
     </linearGradient>
   </defs>
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
   
-  <!-- Globe Icon -->
-  <circle cx="600" cy="315" r="120" fill="#0B0F1A" stroke="#C9A74D" stroke-width="4"/>
-  <ellipse cx="600" cy="315" rx="50" ry="120" stroke="#C9A74D" stroke-width="3" fill="none"/>
-  <line x1="480" y1="315" x2="720" y2="315" stroke="#C9A74D" stroke-width="3"/>
-  <circle cx="600" cy="315" r="20" fill="#C9A74D"/>
+  <!-- Decorative top left -->
+  <rect x="60" y="50" width="80" height="3" fill="#C9A74D"/>
+  <rect x="60" y="60" width="50" height="3" fill="#C9A74D" opacity="0.5"/>
   
-  <!-- Brand Text -->
-  <text x="600" y="500" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="72" font-weight="bold" letter-spacing="8">LUXESPACE</text>
-  <text x="600" y="550" text-anchor="middle" fill="#C9A74D" font-family="Arial, sans-serif" font-size="28" font-weight="300" letter-spacing="12">ELITE PROPERTY NETWORK</text>
+  <!-- Decorative bottom right -->
+  <rect x="1060" y="577" width="80" height="3" fill="#C9A74D"/>
+  <rect x="1090" y="567" width="50" height="3" fill="#C9A74D" opacity="0.5"/>
   
-  <!-- Decorative Elements -->
-  <rect x="100" y="100" width="60" height="4" fill="#C9A74D"/>
-  <rect x="1040" y="526" width="60" height="4" fill="#C9A74D"/>
+  <!-- Center Globe Icon -->
+  <circle cx="600" cy="280" r="100" fill="#0B0F1A" stroke="#C9A74D" stroke-width="4"/>
+  <ellipse cx="600" cy="280" rx="40" ry="100" stroke="#C9A74D" stroke-width="2.5" fill="none"/>
+  <line x1="500" y1="280" x2="700" y2="280" stroke="#C9A74D" stroke-width="2.5"/>
+  <circle cx="600" cy="280" r="15" fill="#C9A74D"/>
+  
+  <!-- Main Headline - Clear and Bold -->
+  <text x="600" y="430" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="52" font-weight="bold" letter-spacing="2">
+    Discover Your Dream Home
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="470" text-anchor="middle" fill="#C9A74D" font-family="Arial, sans-serif" font-size="24" font-weight="300" letter-spacing="6">
+    LUXE SPACE
+  </text>
+  
+  <!-- Tagline -->
+  <text x="600" y="510" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="20" font-weight="400" opacity="0.9">
+    Bangladesh's Premier Luxury Real Estate Platform
+  </text>
+  
+  <!-- Call to Action - Button-like element -->
+  <rect x="450" y="540" width="300" height="50" rx="25" fill="#C9A74D"/>
+  <text x="600" y="572" text-anchor="middle" fill="#0B0F1A" font-family="Arial, sans-serif" font-size="18" font-weight="bold" letter-spacing="2">
+    EXPLORE PROPERTIES
+  </text>
+  
+  <!-- Stats / Social Proof -->
+  <text x="600" y="610" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="14" opacity="0.7">
+    250+ Premium Properties • 45+ Elite Agents • 98% Satisfaction
+  </text>
 </svg>

@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { authGuard } from '../../middlewares/auth.middleware';
 import * as aiController from './ai.controller';
 import { rateLimiter } from '../../middlewares/rateLimiter';
 import { validateRequest } from '../../middlewares/validate.middleware';
@@ -8,16 +7,13 @@ import { z } from 'zod';
 const router = Router();
 
 const chatSchema = z.object({
-  body: z.object({
-    prompt: z.string({
-      required_error: 'Prompt is required',
-    }).min(1, 'Prompt cannot be empty'),
-  }),
+  prompt: z.string({
+    required_error: 'Prompt is required',
+  }).min(1, 'Prompt cannot be empty'),
 });
 
 router.post(
   '/chat',
-  authGuard(),
   rateLimiter(10, 60000), // 10 requests per minute
   validateRequest(chatSchema),
   aiController.chatWithAI

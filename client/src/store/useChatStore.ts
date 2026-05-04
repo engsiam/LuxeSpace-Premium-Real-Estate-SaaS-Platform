@@ -58,6 +58,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sendMessage: async (content) => {
     if (!content.trim() || get().isLoading) return;
 
+    const isPropertyQuery = ['browse', 'show properties', 'latest', 'apartments', 'villas', 'penthouses', 'spaces', 'properties', 'houses', 'flats', 'browse spaces'].some(k => content.toLowerCase().includes(k));
+
     // Add user message
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -69,18 +71,42 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set((state) => ({ 
       messages: [...state.messages, userMsg],
       isLoading: true,
-      inputValue: '' // Clear input on send
+      inputValue: ''
     }));
 
     try {
-      const response = await axiosInstance.post('/ai/chat', { prompt: content });
+      let aiText: string;
       
-      // Backend wraps reply as: { success, message, data: { response: "..." } }
-      const aiText: string =
-        response.data?.data?.response ||
-        response.data?.data ||
-        response.data?.message ||
-        'No response received.';
+      if (isPropertyQuery) {
+        try {
+          const propResponse = await axiosInstance.get('/properties?limit=5');
+          // Handle both wrapped and unwrapped responses
+          let properties: any[] = [];
+          if (propResponse.data?.data?.properties) {
+            properties = propResponse.data.data.properties;
+          } else if (propResponse.data?.data) {
+            properties = Array.isArray(propResponse.data.data) ? propResponse.data.data : [];
+          } else if (Array.isArray(propResponse.data)) {
+            properties = propResponse.data;
+          }
+          
+          if (properties.length > 0) {
+            const propertyCards = properties.map((p: any) => 
+              `[PROP]{"id":"${p._id || p.id}","title":"${p.title}","price":"৳${Number(p.price || 0).toLocaleString()}","location":"${p.location || p.city}","image":"${p.images?.[0] || ''}"}[/PROP]`
+            ).join('\n');
+            
+            aiText = `Here are our latest properties:\n\n${propertyCards}\n\n[LINK]http://localhost:3000/explore[/LINK]\n\n📞 Contact: 01742080475`;
+          } else {
+            aiText = 'No properties available at the moment. Browse our explore page for more options.';
+          }
+        } catch (err: any) {
+          console.error('Property fetch error:', err);
+          aiText = 'Sorry, unable to load properties. Please try again or browse our explore page.';
+        }
+      } else {
+        const response = await axiosInstance.post('/ai/chat', { prompt: content });
+        aiText = response.data?.data?.response || response.data?.data || response.data?.message || 'No response received.';
+      }
 
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),

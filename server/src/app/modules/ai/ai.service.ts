@@ -1,8 +1,23 @@
 import prisma from '../../../prisma/client';
 import env from '../../../config';
 
+const API_BASE = process.env.SERVER_URL || 'http://localhost:5000';
+
 export const chatWithAI = async (prompt: string) => {
-  const properties = await prisma.property.findMany({
+  // Fetch recent properties from API
+  let propertyList: any[] = [];
+  try {
+    const propRes = await fetch(`${API_BASE}/api/v1/properties/ai-recent`);
+    const propData = await propRes.json() as { success: boolean; data?: any[] };
+    if (propData.success && propData.data) {
+      propertyList = propData.data;
+    }
+  } catch (e) {
+    console.error('Failed to fetch properties:', e);
+  }
+
+  // Also get all properties for context
+  const allProperties = await prisma.property.findMany({
     where: { status: 'AVAILABLE' },
     take: 20,
     select: {
@@ -17,10 +32,30 @@ export const chatWithAI = async (prompt: string) => {
     },
   });
 
-  const context = JSON.stringify(properties);
+  const context = JSON.stringify(allProperties);
+
+  const contactInfo = `
+**For Premium Property Services, Contact:**
+Md. Shohrab Hossain
+📞 Phone: 01742080475
+💬 WhatsApp: https://wa.me/8801742080475
+📧 Email: shohrab@luxespace.com
+🌐 Website: https://luxspace-beta.vercel.app
+`;
+
+  // Check if user is asking about properties - return direct formatted response
+  const propertyKeywords = ['browse', 'show properties', 'latest', 'apartments', 'villas', 'penthouses', 'spaces', 'properties', 'houses', 'flats'];
+  const isPropertyQuery = propertyKeywords.some(kw => prompt.toLowerCase().includes(kw));
+  
+  if (isPropertyQuery && propertyList.length > 0) {
+    const propertyResponse = propertyList
+      .map(p => `[PROP]{"id":"${p.id}","title":"${p.title}","price":"${p.price}","location":"${p.location}","image":"${p.image || ''}"}[/PROP]`)
+      .join('\n');
+    
+    return `Here are our latest available properties:\n\n${propertyResponse}\n\n[LINK]http://localhost:3000/explore[/LINK]\n\n**For more details or to schedule a viewing, contact:**\n📞 01742080475\n💬 https://wa.me/8801742080475`;
+  }
 
   try {
-    // Groq API Integration (OpenAI compatible)
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -39,6 +74,19 @@ export const chatWithAI = async (prompt: string) => {
 - We specialize in luxury apartments, penthouses, villas, and commercial spaces
 - Primary markets: Dhaka, Chittagong, Sylhet, and other major cities
 - All properties are verified for quality and prestige
+
+**Contact Info (ALWAYS share when user asks about contact, pricing, or premium services):**
+${contactInfo}
+
+**Recent Properties (5 latest - use these EXACTLY to show users):**
+${JSON.stringify(propertyList.map(p => ({
+  id: p.id,
+  title: p.title,
+  price: p.price,
+  location: p.location,
+  type: p.type,
+  image: p.image,
+})))}
 
 **How LuxeSpace Works:**
 1. Browse properties on the /explore page
@@ -65,22 +113,29 @@ export const chatWithAI = async (prompt: string) => {
 **Current Available Properties from Database:**
 ${context}
 
-**Your Behavior Rules:**
-- Be warm, professional, and concise — like a luxury hotel concierge
-- Always try to match user needs to available properties in the database above
-- If no matching property exists, acknowledge it and suggest alternatives or recommend they check /explore
-- Never make up prices or property details not in the database
-- Help with: property search, pricing questions, booking guidance, agent contact, investment advice
-- Respond in the same language the user writes in (English or Bangla)
-- Keep responses under 200 words unless more detail is specifically requested
-- Use bullet points for lists of properties or features`,
+**Your Behavior Rules - VERY IMPORTANT:**
+- Be warm, professional, and concise — like a luxury hotel concierge for Bangladesh's top real estate
+- ALWAYS mention contact info (01742080475 / Md. Shohrab Hossain / WhatsApp) when user asks about pricing, premium services, or contact details
+- When user asks about properties (browse, show, latest, apartments, villas, penthouses, spaces) - you MUST use the 5 properties from "Recent Properties" list
+
+- FOR EACH PROPERTY - output EXACTLY this format:
+[PROP]{"id":"ID","title":"TITLE","price":"PRICE","location":"LOCATION","image":"URL"}[/PROP]
+
+Example: [PROP]{"id":"123","title":"Modern Apartment in Gulshan","price":"৳50,00,000","location":"Gulshan, Dhaka","image":"https://..."}[/PROP]
+
+- IMPORTANT: The price in the recent properties list ALREADY includes the ৳ symbol - use it exactly as shown
+- DO NOT make up any property - only use the 5 properties from the list
+- After showing properties, ALWAYS add: [LINK]http://localhost:3000/explore[/LINK]
+- NEVER show more than 5 properties
+- Never show fake/placeholder data
+- Short intro (1-2 sentences), then show properties, then contact info`,
           },
           {
             role: 'user',
             content: prompt,
           },
         ],
-        max_tokens: 600,
+        max_tokens: 1000,
         temperature: 0.65,
       }),
     });
@@ -100,7 +155,9 @@ ${context}
     return data.choices?.[0]?.message?.content || 'No response generated';
   } catch (error: any) {
     console.error('Chat AI Error:', error.message);
-    // Fallback: Return a professional fallback based on property data
-    return `Welcome to LuxeSpace. We currently have ${properties.length} elite residences available in prime locations. How can I help you find your dream home today?`;
+    if (error.message.includes('API key')) {
+      return "AI service configuration issue. Please contact support.";
+    }
+    return `Welcome to LuxeSpace. We currently have ${allProperties.length} elite residences available in prime locations. For immediate assistance, contact Md. Shohrab Hossain at 01742080475. How can I help you find your dream home today?`;
   }
 };

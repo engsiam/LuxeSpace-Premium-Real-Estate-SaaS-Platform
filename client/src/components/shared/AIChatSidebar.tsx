@@ -2,19 +2,120 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Sparkles, Loader2, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { X, Send, Sparkles, Loader2, Copy, ThumbsUp, ThumbsDown, ArrowRight, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useChatStore } from '@/store/useChatStore';
+import Image from 'next/image';
+import Link from 'next/link';
 
-const formatContent = (content: string) =>
-  content.split('\n').map((line, i) => (
-    <p
-      key={i}
-      className="mb-1.5 last:mb-0 text-[13px] leading-relaxed"
-      dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
-    />
-  ));
+interface PropertyCard {
+  id: string;
+  title: string;
+  price: string;
+  location: string;
+  image: string | null;
+}
+
+const parseProperties = (content: string): { text: string; properties: PropertyCard[]; exploreLink: string | null } => {
+  // Support both [PROPERTY] and [PROP] tags
+  const propertyRegex = /\[PROP\]\s*(\{[^}]+\})\s*\[\/PROP\]/g;
+  const properties: PropertyCard[] = [];
+  let match;
+  
+  while ((match = propertyRegex.exec(content)) !== null) {
+    try {
+      const prop = JSON.parse(match[1]);
+      properties.push(prop);
+    } catch (e) {
+      // Invalid JSON, skip
+    }
+  }
+  
+  // Check for explore link
+  const linkMatch = content.match(/\[LINK\](.*?)\[\/LINK\]/);
+  const exploreLink = linkMatch ? linkMatch[1] : null;
+  
+  const text = content
+    .replace(/\[PROP\]\s*\{[^}]+\}\s*\[\/PROP\]/g, '')
+    .replace(/\[PROPERTY\]\s*\{[^}]+\}\s*\[\/PROPERTY\]/g, '')
+    .replace(/\[LINK\].*?\[\/LINK\]/g, '')
+    .trim();
+  
+  return { text, properties, exploreLink };
+};
+
+const formatContent = (content: string) => {
+  const { text, properties, exploreLink } = parseProperties(content);
+  
+  return (
+    <div>
+      {text.split('\n').map((line, i) => (
+        line.trim() && (
+          <p
+            key={i}
+            className="mb-1.5 last:mb-0 text-[13px] leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/http:\/\/localhost:3000/g, '') }}
+          />
+        )
+      ))}
+      
+      {properties.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {properties.map((prop, i) => (
+            <Link
+              key={prop.id || i}
+              href={`/properties/${prop.id}`}
+              target="_blank"
+              className="block group"
+            >
+              <div className="flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/10 hover:border-primary/50 transition-all">
+                {prop.image ? (
+                  <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 relative">
+                    <Image 
+                      src={prop.image} 
+                      alt={prop.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+                    <Building2 className="w-6 h-6 text-primary" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">{prop.title}</p>
+                  <p className="text-primary text-xs font-bold">{prop.price}</p>
+                  <p className="text-white/50 text-xs truncate">{prop.location}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-primary transition-colors" />
+              </div>
+            </Link>
+          ))}
+          
+          {exploreLink ? (
+            <Link 
+              href={exploreLink}
+              target="_blank"
+              className="flex items-center justify-center gap-2 mt-3 py-2 px-4 rounded-full bg-primary/20 border border-primary/30 text-primary text-sm font-medium hover:bg-primary/30 transition-colors"
+            >
+              View More Properties <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : (
+            <Link 
+              href="/explore" 
+              target="_blank"
+              className="flex items-center justify-center gap-2 mt-3 py-2 px-4 rounded-full bg-primary/20 border border-primary/30 text-primary text-sm font-medium hover:bg-primary/30 transition-colors"
+            >
+              View More Properties <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const initialOptions = [
   { label: 'Find luxury apartments', emoji: '🏢' },
@@ -22,6 +123,17 @@ const initialOptions = [
   { label: 'Explore penthouses', emoji: '🏙️' },
   { label: 'Schedule a property tour', emoji: '📅' },
   { label: 'Contact an agent', emoji: '👤' },
+];
+
+const quickActions = [
+  { label: 'How to book?', emoji: '📖' },
+  { label: 'Pricing info', emoji: '💵' },
+  { label: 'Browse spaces', emoji: '🏠' },
+  { label: 'Elite Rewards', emoji: '⭐' },
+  { label: 'Contact', emoji: '📞' },
+  { label: 'Latest properties', emoji: '🆕' },
+  { label: 'Investment', emoji: '📈' },
+  { label: 'Agent support', emoji: '🤝' },
 ];
 
 export default function AIChatSidebar() {
@@ -143,7 +255,7 @@ export default function AIChatSidebar() {
               style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12, background: chatAreaBg }}
             >
               {/* Empty state */}
-              {messages.length === 0 && (
+              {messages.length <= 1 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, borderTopLeftRadius: 4, padding: 16, color: textPrimary, fontSize: 13, lineHeight: 1.6 }}>
                     I'd be happy to help! Here are some things I can assist with:
@@ -216,21 +328,32 @@ export default function AIChatSidebar() {
 
             {/* Bottom */}
             <div style={{ padding: 16, background: bottomBg, borderTop: `1px solid ${bottomBorder}`, flexShrink: 0 }}>
-              {/* Quick chips */}
-              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 10 }} className="no-scrollbar">
-                {['How to book?', 'Pricing info', 'Browse spaces', 'Elite Rewards'].map((t) => (
+              {/* Quick chips - horizontal scroll with visible scrollbar */}
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  gap: 8, 
+                  overflowX: 'auto', 
+                  paddingBottom: 10, 
+                  marginBottom: 10,
+                  scrollbarWidth: 'auto',
+                }} 
+                className="scrollbar-draggable"
+              >
+                {quickActions.map((action) => (
                   <button
-                    key={t}
-                    onClick={() => sendMessage(t)}
+                    key={action.label}
+                    onClick={() => sendMessage(action.label)}
                     style={{
-                      whiteSpace: 'nowrap', padding: '6px 12px', background: chipBg, color: chipText,
-                      fontSize: 11, fontWeight: 600, borderRadius: 20, border: `1px solid ${chipBorder}`,
-                      cursor: 'pointer', transition: 'all 0.15s',
+                      whiteSpace: 'nowrap', padding: '8px 14px', background: '#3D3B9E', color: 'white',
+                      fontSize: 12, fontWeight: 600, borderRadius: 20, border: 'none',
+                      cursor: 'pointer', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 6,
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#3D3B9E'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = '#3D3B9E'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = chipBg; e.currentTarget.style.color = chipText; e.currentTarget.style.borderColor = chipBorder; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#2D2B8E'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#3D3B9E'; }}
                   >
-                    {t}
+                    <span>{action.emoji}</span>
+                    <span>{action.label}</span>
                   </button>
                 ))}
               </div>
