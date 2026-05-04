@@ -1,16 +1,54 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/design-system/components';
 import Link from 'next/link';
-import { Search, Play, Pause } from 'lucide-react';
+import { Search, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import axiosInstance from '@/lib/axiosInstance';
+
+const HERO_VIDEOS = [
+  'https://www.pexels.com/download/video/34030196/',
+  'https://www.pexels.com/download/video/13761471/',
+  'https://www.pexels.com/download/video/14016414/',
+  'https://www.pexels.com/download/video/37368568/'
+
+];
 
 export default function HeroSection() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const response = await axiosInstance.get('/properties/featured');
+        const properties = response.data.data || [];
+        const videos = properties
+          .flatMap((p: any) => p.videos || [])
+          .slice(0, 6);
+        if (videos.length > 0) {
+          // Use real videos if available
+        }
+      } catch (error) {
+        // Use default videos
+      }
+    };
+    fetchVideos();
+  }, []);
+
+  useEffect(() => {
+    if (!isVideoPlaying || HERO_VIDEOS.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentVideoIndex((prev) => (prev + 1) % HERO_VIDEOS.length);
+    }, 14000);
+    
+    return () => clearInterval(interval);
+  }, [isVideoPlaying]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,33 +68,60 @@ export default function HeroSection() {
     }
   };
 
+  const goToPrevVideo = () => {
+    setCurrentVideoIndex((prev) => (prev - 1 + HERO_VIDEOS.length) % HERO_VIDEOS.length);
+  };
+
+  const goToNextVideo = () => {
+    setCurrentVideoIndex((prev) => (prev + 1) % HERO_VIDEOS.length);
+  };
+
   return (
     <section className="relative min-[90vh] flex items-center overflow-hidden py-20">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
+          key={currentVideoIndex}
           ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
-          poster="https://images.pexels.com/photos/34281368/pexels-photo-34281368.jpeg"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-opacity duration-1000"
+          onEnded={() => setCurrentVideoIndex((prev) => (prev + 1) % HERO_VIDEOS.length)}
         >
-          <source src="https://www.pexels.com/download/video/14016414/" type="video/mp4" />
+          <source src={HERO_VIDEOS[currentVideoIndex]} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-background/70" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-background/60" />
       </div>
 
-      {/* Video Control */}
-      <button
-        onClick={toggleVideo}
-        className="absolute bottom-8 right-8 z-20 w-12 h-12 rounded-full bg-card/80 border border-border flex items-center justify-center text-primary hover:bg-primary hover:text-secondary-foreground transition-all duration-300 backdrop-blur-xl"
-        aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
-      >
-        {isVideoPlaying ? <Pause size={18} /> : <Play size={18} />}
-      </button>
+      {/* Video Controls */}
+      <div className="absolute bottom-8 right-8 z-20 flex items-center gap-2">
+        {HERO_VIDEOS.length > 1 && (
+          <>
+            <button
+              onClick={goToPrevVideo}
+              className="w-10 h-10 rounded-full bg-card/80 border border-border flex items-center justify-center text-primary hover:bg-primary hover:text-secondary-foreground transition-all duration-300 backdrop-blur-xl"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              onClick={toggleVideo}
+              className="w-12 h-12 rounded-full bg-card/80 border border-border flex items-center justify-center text-primary hover:bg-primary hover:text-secondary-foreground transition-all duration-300 backdrop-blur-xl"
+              aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
+            >
+              {isVideoPlaying ? <Pause size={18} /> : <Play size={18} />}
+            </button>
+            <button
+              onClick={goToNextVideo}
+              className="w-10 h-10 rounded-full bg-card/80 border border-border flex items-center justify-center text-primary hover:bg-primary hover:text-secondary-foreground transition-all duration-300 backdrop-blur-xl"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </>
+        )}
+      </div>
 
       {/* Content - Left Aligned, Max-Width */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
