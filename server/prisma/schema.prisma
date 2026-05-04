@@ -150,8 +150,13 @@ model Settings {
   siteName      String   @default("LuxeSpace")
   logoUrl       String?
   faviconUrl    String?
-  supportEmail  String?
-  bkashTrxId    String?
+  supportEmail String?
+  bkashTrxId   String?
+  heroVideos   String[]  // Hero section background videos
+  heroTitle    String?   // Hero section title
+  heroSubtitle String?   // Hero section subtitle
+  sliderInterval Int    @default(8)     // Slider auto-slide interval in seconds
+  sliderAutoPlay Boolean @default(true) // Auto-play videos
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

@@ -7,48 +7,64 @@ import { Search, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axiosInstance';
 
-const HERO_VIDEOS = [
-  'https://www.pexels.com/download/video/34030196/',
-  'https://www.pexels.com/download/video/13761471/',
-  'https://www.pexels.com/download/video/14016414/',
-  'https://www.pexels.com/download/video/37368568/'
-
-];
+// const DEFAULT_VIDEOS = [
+//   'https://videos.pexels.com/video-files/5382779/5382779-uhd_2560_1440_25fps.mp4',
+//   'https://videos.pexels.com/video-files/4763637/4763637-uhd_2560_1440_25fps.mp4',
+//   'https://videos.pexels.com/video-files/5875141/5875141-uhd_2560_1440_25fps.mp4',
+// ];
 
 export default function HeroSection() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [heroVideos, setHeroVideos] = useState<string[]>([]);
+  const [heroTitle, setHeroTitle] = useState('Find Your Dream Property');
+  const [heroSubtitle, setHeroSubtitle] = useState();
+  const [sliderInterval, setSliderInterval] = useState(8);
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
+  const [videoKey, setVideoKey] = useState(0);
 
   useEffect(() => {
-    const fetchVideos = async () => {
+    const fetchSettings = async () => {
       try {
-        const response = await axiosInstance.get('/properties/featured');
-        const properties = response.data.data || [];
-        const videos = properties
-          .flatMap((p: any) => p.videos || [])
-          .slice(0, 6);
-        if (videos.length > 0) {
-          // Use real videos if available
+        const response = await axiosInstance.get('/settings');
+        const settings = response.data.data;
+        if (settings) {
+          if (settings.heroVideos && settings.heroVideos.length > 0) {
+            const validVideos = settings.heroVideos.filter((v: string) => v && v.trim() !== '');
+            if (validVideos.length > 0) {
+              setHeroVideos(validVideos);
+              setCurrentVideoIndex(0);
+              setVideoKey(k => k + 1);
+            }
+          }
+          if (settings.heroTitle) {
+            setHeroTitle(settings.heroTitle);
+          }
+          if (settings.heroSubtitle) {
+            setHeroSubtitle(settings.heroSubtitle);
+          }
+          if (settings.sliderInterval) {
+            setSliderInterval(settings.sliderInterval);
+          }
         }
       } catch (error) {
-        // Use default videos
+        console.error('Failed to fetch settings:', error);
       }
     };
-    fetchVideos();
+    fetchSettings();
   }, []);
 
   useEffect(() => {
-    if (!isVideoPlaying || HERO_VIDEOS.length <= 1) return;
-    
+    if (heroVideos.length <= 1) return;
+
     const interval = setInterval(() => {
-      setCurrentVideoIndex((prev) => (prev + 1) % HERO_VIDEOS.length);
-    }, 14000);
-    
+      setCurrentVideoIndex((prev) => (prev + 1) % heroVideos.length);
+    }, sliderInterval * 1000);
+
     return () => clearInterval(interval);
-  }, [isVideoPlaying]);
+  }, [heroVideos.length, sliderInterval]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,125 +85,344 @@ export default function HeroSection() {
   };
 
   const goToPrevVideo = () => {
-    setCurrentVideoIndex((prev) => (prev - 1 + HERO_VIDEOS.length) % HERO_VIDEOS.length);
+    setCurrentVideoIndex((prev) => (prev - 1 + heroVideos.length) % heroVideos.length);
   };
 
   const goToNextVideo = () => {
-    setCurrentVideoIndex((prev) => (prev + 1) % HERO_VIDEOS.length);
+    setCurrentVideoIndex((prev) => (prev + 1) % heroVideos.length);
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => { });
+    }
   };
 
   return (
-    <section className="relative min-[90vh] flex items-center overflow-hidden py-20">
-      {/* Video Background */}
+    <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-background">
+
+      {/* VIDEO BACKGROUND */}
       <div className="absolute inset-0 z-0">
+
         <video
-          key={currentVideoIndex}
+          key={`video-${currentVideoIndex}-${videoKey}`}
           ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
-          className="w-full h-full object-cover transition-opacity duration-1000"
-          onEnded={() => setCurrentVideoIndex((prev) => (prev + 1) % HERO_VIDEOS.length)}
+          className="h-full w-full object-cover"
+          onEnded={() =>
+            setCurrentVideoIndex(
+              (prev) => (prev + 1) % heroVideos.length
+            )
+          }
         >
-          <source src={HERO_VIDEOS[currentVideoIndex]} type="video/mp4" />
+          <source
+            src={heroVideos[currentVideoIndex]}
+            type="video/mp4"
+          />
         </video>
-        <div className="absolute inset-0 bg-background/70" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-background/60" />
+
+        {/* LIGHT MODE OVERLAY */}
+        <div className="absolute inset-0 bg-white/10 dark:hidden" />
+
+        <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-white/5 to-white/20 dark:hidden" />
+
+        {/* DARK MODE OVERLAY */}
+        <div className="absolute inset-0 hidden dark:block bg-black/55" />
+
+        <div className="absolute inset-0 hidden dark:block bg-gradient-to-r from-black/80 via-black/30 to-black/70" />
       </div>
 
-      {/* Video Controls */}
-      <div className="absolute bottom-8 right-8 z-20 flex items-center gap-2">
-        {HERO_VIDEOS.length > 1 && (
-          <>
-            <button
-              onClick={goToPrevVideo}
-              className="w-10 h-10 rounded-full bg-card/80 border border-border flex items-center justify-center text-primary hover:bg-primary hover:text-secondary-foreground transition-all duration-300 backdrop-blur-xl"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              onClick={toggleVideo}
-              className="w-12 h-12 rounded-full bg-card/80 border border-border flex items-center justify-center text-primary hover:bg-primary hover:text-secondary-foreground transition-all duration-300 backdrop-blur-xl"
-              aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
-            >
-              {isVideoPlaying ? <Pause size={18} /> : <Play size={18} />}
-            </button>
-            <button
-              onClick={goToNextVideo}
-              className="w-10 h-10 rounded-full bg-card/80 border border-border flex items-center justify-center text-primary hover:bg-primary hover:text-secondary-foreground transition-all duration-300 backdrop-blur-xl"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </>
-        )}
-      </div>
+      {/* VIDEO CONTROLS */}
+      {heroVideos.length > 1 && (
+        <div className="absolute bottom-8 right-8 z-30 flex items-center gap-3">
 
-      {/* Content - Left Aligned, Max-Width */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
-        <div className="max-w-2xl">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-3 mb-8 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-xl">
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-primary text-xs font-bold uppercase tracking-[0.3em]">
+          <button
+            onClick={goToPrevVideo}
+            className="
+          flex
+          h-11
+          w-11
+          items-center
+          justify-center
+          rounded-full
+          border
+          border-border
+          bg-background/70
+          text-foreground
+          backdrop-blur-xl
+          transition-all
+          duration-300
+          hover:border-primary
+          hover:bg-primary
+          hover:text-primary-foreground
+        "
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <button
+            onClick={toggleVideo}
+            aria-label={
+              isVideoPlaying
+                ? 'Pause video'
+                : 'Play video'
+            }
+            className="
+          flex
+          h-12
+          w-12
+          items-center
+          justify-center
+          rounded-full
+          border
+          border-border
+          bg-background/70
+          text-foreground
+          backdrop-blur-xl
+          transition-all
+          duration-300
+          hover:border-primary
+          hover:bg-primary
+          hover:text-primary-foreground
+        "
+          >
+            {isVideoPlaying ? (
+              <Pause size={18} />
+            ) : (
+              <Play size={18} />
+            )}
+          </button>
+
+          <button
+            onClick={goToNextVideo}
+            className="
+          flex
+          h-11
+          w-11
+          items-center
+          justify-center
+          rounded-full
+          border
+          border-border
+          bg-background/70
+          text-foreground
+          backdrop-blur-xl
+          transition-all
+          duration-300
+          hover:border-primary
+          hover:bg-primary
+          hover:text-primary-foreground
+        "
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
+
+      {/* HERO CONTENT */}
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 lg:px-0">
+
+        <div className="max-w-3xl">
+
+          {/* BADGE */}
+          <div
+            className="
+          mb-8
+          inline-flex
+          items-center
+          gap-3
+          rounded-full
+          border
+          border-primary/30
+          bg-primary/10
+          px-5
+          py-2.5
+          backdrop-blur-xl
+        "
+          >
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+
+            <span
+              className="
+            text-[11px]
+            font-black
+            uppercase
+            tracking-[0.35em]
+            text-primary
+          "
+            >
               Elite Property Network
             </span>
           </div>
 
-          {/* Heading */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight tracking-tight">
-            Find Your <span className="text-primary italic">Dream</span> Property
+          {/* TITLE */}
+          <h1
+            className="
+          max-w-4xl
+          text-5xl
+          font-black
+          leading-[0.95]
+          tracking-[-0.04em]
+          text-foreground
+          md:text-6xl
+          lg:text-7xl
+        "
+          >
+            Find Your{' '}
+
+            <span className="italic text-primary">
+              Dream
+            </span>
+
+            <br />
+
+            Property
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-lg text-white mb-10 leading-relaxed max-w-xl">
-            Connecting distinguished individuals with Bangladesh's most extraordinary architectural masterpieces. Experience luxury living redefined.
+          {/* SUBTITLE */}
+          <p
+            className="
+          mt-8
+          max-w-2xl
+          text-base
+          leading-relaxed
+          text-foreground/80
+          md:text-xl
+        "
+          >
+            Discover Bangladesh&apos;s most exclusive luxury
+            residences crafted for modern lifestyles.
           </p>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-10">
-            <div className="flex-1 relative group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary h-5 w-5 group-focus-within:text-foreground transition-colors" />
+          {/* SEARCH */}
+          <form
+            onSubmit={handleSearch}
+            className="mt-10 flex flex-col gap-4 sm:flex-row"
+          >
+
+            <div className="relative flex-1">
+
+              <Search
+                className="
+              absolute
+              left-5
+              top-1/2
+              h-5
+              w-5
+              -translate-y-1/2
+              text-primary
+            "
+              />
+
               <input
                 type="text"
                 placeholder="Where would you like to live?"
-                className="w-full h-14 pl-14 pr-6 rounded-xl bg-card/60 border border-border text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-[#C9A74D] text-base backdrop-blur-xl transition-all duration-300"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) =>
+                  setSearchTerm(e.target.value)
+                }
+                className="
+              h-16
+              w-full
+              rounded-2xl
+              border
+              border-border
+              bg-background/80
+              pl-14
+              pr-6
+              text-foreground
+              placeholder:text-muted-foreground
+              backdrop-blur-xl
+              outline-none
+              transition-all
+              duration-300
+              focus:border-primary
+              focus:ring-2
+              focus:ring-primary/20
+            "
               />
             </div>
-            <Button size="lg" className="h-14 px-8">
+
+            <Button
+              size="lg"
+              className="
+            h-16
+            rounded-2xl
+            px-10
+            text-base
+            font-bold
+          "
+            >
               Search Properties
             </Button>
           </form>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          {/* ACTION BUTTONS */}
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+
             <Link href="/explore">
-              <Button variant="outline" size="lg" className="h-14 px-8">
+              <Button
+                variant="outline"
+                size="lg"
+                className="
+              h-14
+              rounded-2xl
+              border-border
+              bg-background/40
+              px-8
+              backdrop-blur-xl
+            "
+              >
                 Browse All Properties
               </Button>
             </Link>
+
             <Link href="/how-it-works">
-              <Button variant="ghost" size="lg" className="h-14 px-8 text-primary hover:text-foreground">
+              <Button
+                variant="ghost"
+                size="lg"
+                className="
+              h-14
+              px-2
+              text-primary
+              hover:text-foreground
+            "
+              >
                 Learn More →
               </Button>
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="flex gap-8 mt-16 pt-8 border-t border-border/50">
+          {/* STATS */}
+          <div className="mt-16 inline-flex items-center gap-10 rounded-3xl border border-white/20 bg-white/10 px-8 py-6 backdrop-blur-2xl dark:border-white/10 dark:bg-black/20 max-w-3xl">
             <div>
-              <div className="text-3xl font-bold text-primary">250+</div>
-              <div className="text-sm text-muted-foreground mt-1">Premium Properties</div>
+              <div className="text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+                250+
+              </div>
+
+              <div className="mt-1 text-sm font-medium text-black/70 dark:text-white/60">
+                Premium Properties
+              </div>
             </div>
+
             <div>
-              <div className="text-3xl font-bold text-primary">45+</div>
-              <div className="text-sm text-muted-foreground mt-1">Elite Agents</div>
+              <div className="text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+                45+
+              </div>
+
+              <div className="mt-1 text-sm font-medium text-black/70 dark:text-white/60">
+                Elite Agents
+              </div>
             </div>
+
             <div>
-              <div className="text-3xl font-bold text-primary">98%</div>
-              <div className="text-sm text-muted-foreground mt-1">Satisfaction</div>
+              <div className="text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+                98%
+              </div>
+
+              <div className="mt-1 text-sm font-medium text-black/70 dark:text-white/60">
+                Satisfaction
+              </div>
             </div>
           </div>
         </div>

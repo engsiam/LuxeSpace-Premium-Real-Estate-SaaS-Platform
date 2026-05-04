@@ -5,7 +5,13 @@ export const getSettings = async () => {
 
   if (!settings) {
     settings = await prisma.settings.create({
-      data: {},
+      data: {
+        heroVideos: [],
+        heroTitle: 'Find Your Dream Property',
+        heroSubtitle: 'Connecting distinguished individuals with Bangladesh\'s most extraordinary architectural masterpieces.',
+        sliderInterval: 8,
+        sliderAutoPlay: true,
+      },
     });
   }
 
@@ -18,6 +24,11 @@ export const updateSettings = async (data: {
   faviconUrl?: string;
   supportEmail?: string;
   bkashTrxId?: string;
+  heroVideos?: string[];
+  heroTitle?: string;
+  heroSubtitle?: string;
+  sliderInterval?: number;
+  sliderAutoPlay?: boolean;
 }) => {
   let settings = await prisma.settings.findFirst();
 
