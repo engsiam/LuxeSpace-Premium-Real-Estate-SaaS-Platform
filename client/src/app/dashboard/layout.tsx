@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -16,6 +17,7 @@ export default function DashboardLayout({
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -23,27 +25,28 @@ export default function DashboardLayout({
     }
   }, [status, router]);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen bg-background">
-        <div className="w-80 border-r border-border p-10 space-y-8 bg-card/50">
-          <Skeleton className="h-14 w-full rounded-2xl" />
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-full rounded-xl" />
-            <Skeleton className="h-10 w-full rounded-xl" />
-            <Skeleton className="h-10 w-full rounded-xl" />
-            <Skeleton className="h-10 w-full rounded-xl" />
-          </div>
+        <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-lg" />
         </div>
-        <div className="flex-1 p-12 space-y-10">
-          <Skeleton className="h-12 w-64 rounded-2xl" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <Skeleton className="h-40 w-full rounded-[2.5rem]" />
-            <Skeleton className="h-40 w-full rounded-[2.5rem]" />
-            <Skeleton className="h-40 w-full rounded-[2.5rem]" />
-            <Skeleton className="h-40 w-full rounded-[2.5rem]" />
+        <div className="flex-1 p-4 lg:p-6 space-y-6">
+          <Skeleton className="h-8 w-32 rounded-lg" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
           </div>
-          <Skeleton className="h-[500px] w-full rounded-[3rem]" />
+          <Skeleton className="h-64 w-full rounded-2xl" />
         </div>
       </div>
     );
@@ -51,7 +54,6 @@ export default function DashboardLayout({
 
   const role = session?.user?.role || 'USER';
 
-  // Role-based route protection
   if (pathname.includes('/dashboard/admin') && role !== 'ADMIN') {
     router.push('/dashboard');
     return null;
@@ -63,9 +65,46 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-background overflow-hidden">
-      <DashboardSidebar role={role} />
-      <main className="flex-1 overflow-y-auto custom-scrollbar relative" data-lenis-prevent>
-        {/* Decorative background glow */}
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? 'block' : 'hidden'} lg:block fixed lg:relative z-50`}>
+        <DashboardSidebar role={role} onClose={() => setSidebarOpen(false)} />
+      </div>
+
+      {/* Mobile Toggle Buttons */}
+      <div className="lg:hidden fixed top-3 left-3 z-50">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="p-2 rounded-lg bg-card border border-border shadow-lg"
+        >
+          <Menu size={22} className="text-primary" />
+        </button>
+      </div>
+
+      {sidebarOpen && (
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(false)}
+          className="lg:hidden fixed top-3 left-[260px] z-50 p-2 rounded-full bg-card border border-border shadow-lg"
+        >
+          <X size={22} className="text-primary" />
+        </button>
+      )}
+
+      <main className="flex-1 overflow-y-auto custom-scrollbar relative w-full" data-lenis-prevent>
         <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
         
         <DashboardHeader />
