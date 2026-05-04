@@ -282,3 +282,12 @@ button,
 a {
   -webkit-tap-highlight-color: transparent;
 }
+
+.mysvg {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.accordion-arrow {
+  display: none !important;
+}
