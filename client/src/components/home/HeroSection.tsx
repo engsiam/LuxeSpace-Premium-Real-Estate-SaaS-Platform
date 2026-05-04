@@ -268,15 +268,18 @@ export default function HeroSection() {
           lg:text-7xl
         "
           >
-            Find Your{' '}
-
-            <span className="italic text-primary">
-              Dream
-            </span>
-
-            <br />
-
-            Property
+            {heroTitle ? (
+              heroTitle.split('Dream').map((part, index, arr) => (
+                <span key={index}>
+                  {part}
+                  {index < arr.length - 1 && <span className="italic text-primary">Dream</span>}
+                </span>
+              ))
+            ) : (
+              <>
+                Find Your <span className="italic text-primary">Dream</span> Property
+              </>
+            )}
           </h1>
 
           {/* SUBTITLE */}
@@ -290,8 +293,7 @@ export default function HeroSection() {
           md:text-xl
         "
           >
-            Discover Bangladesh&apos;s most exclusive luxury
-            residences crafted for modern lifestyles.
+            {heroSubtitle || "Discover Bangladesh's most exclusive luxury residences crafted for modern lifestyles."}
           </p>
 
           {/* SEARCH */}
