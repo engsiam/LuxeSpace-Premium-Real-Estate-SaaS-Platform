@@ -81,12 +81,12 @@ export default function LoginPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: 'easeOut' }}
-      className="relative w-full max-w-7xl mx-auto overflow-hidden rounded-[40px] border border-white/10 bg-[#020817]/90 backdrop-blur-2xl shadow-[0_30px_120px_rgba(0,0,0,0.45)] border rounded-3xl mt-20"
+      className="relative w-full max-w-7xl mx-auto overflow-hidden rounded-[40px] border border-white/10 bg-[#020817]/90 backdrop-blur-2xl shadow-[0_30px_120px_rgba(0,0,0,0.45)] border rounded-3xl mt-4 md:mt-10 lg:mt-20"
     >
-      <div style={{ display: 'flex', minHeight: '850px' }}>
+      <div className="flex flex-col lg:flex-row min-h-[600px] lg:min-h-[850px]">
 
         {/* LEFT SIDE - Image Panel */}
-        <div className="relative overflow-hidden" style={{ width: '58%', flexShrink: 0 }}>
+        <div className="relative overflow-hidden w-full lg:w-[58%] min-h-[300px] lg:min-h-auto order-1">
 
           {/* IMAGE */}
           <Image
@@ -105,10 +105,10 @@ export default function LoginPage() {
           <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[140px]" />
 
           {/* CONTENT */}
-          <div className="relative z-10 flex h-full flex-col justify-between p-16">
+          <div className="relative z-10 flex h-full flex-col justify-between p-6 md:p-10 lg:p-16">
 
             {/* TOP */}
-            <div className="space-y-10">
+            <div className="space-y-6 lg:space-y-10">
 
               <Link href="/" className="inline-flex items-center gap-3">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
@@ -134,7 +134,7 @@ export default function LoginPage() {
                   </span>
                 </div>
 
-                <h1 className="text-7xl font-black leading-[0.95] tracking-[-0.05em] text-white">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-[-0.05em] text-white">
                   Welcome
                   <br />
                   <span className="italic text-white/70">
@@ -151,7 +151,7 @@ export default function LoginPage() {
             {/* BOTTOM CARDS */}
             <div className="space-y-6">
 
-              <div className="grid grid-cols-2 gap-5 max-w-[500px]">
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 max-w-[500px]">
 
                 <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
                   <Building2 className="mb-4 h-7 w-7 text-yellow-400" />
@@ -184,7 +184,7 @@ export default function LoginPage() {
         </div>
 
         {/* RIGHT SIDE - Form Panel */}
-        <div className="flex items-center justify-center bg-[#020817] px-8 py-16 lg:px-16" style={{ flex: 1 }}>
+        <div className="flex items-center justify-center bg-[#020817] px-6 py-10 sm:px-8 sm:py-12 lg:px-16 lg:py-16 w-full lg:flex-1 order-2">
 
           <div className="w-full max-w-[480px]">
 
@@ -328,7 +328,7 @@ export default function LoginPage() {
                 Quick Access
               </p>
 
-              <div className="flex gap-4">
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
                 {[
                   { id: 'admin', label: 'Admin', icon: ShieldCheck },
                   { id: 'agent', label: 'Agent', icon: UserIcon },
@@ -345,15 +345,15 @@ export default function LoginPage() {
           border
           border-white/10
           bg-white/[0.03]
-          p-5
+          p-3 sm:p-5
           transition-all
           hover:border-primary/40
           hover:bg-primary/10
         "
                   >
-                    <demo.icon className="mx-auto mb-3 h-5 w-5 text-white/40 transition group-hover:text-primary" />
+                    <demo.icon className="mx-auto mb-2 sm:mb-3 h-5 w-5 text-white/40 transition group-hover:text-primary" />
 
-                    <p className="text-center text-[11px] font-black uppercase tracking-[0.25em] text-white/60 group-hover:text-white">
+                    <p className="text-center text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-white/60 group-hover:text-white">
                       {demo.label}
                     </p>
                   </button>

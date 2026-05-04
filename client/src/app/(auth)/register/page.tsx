@@ -99,12 +99,12 @@ export default function RegisterPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: 'easeOut' }}
-      className="w-full max-w-7xl mx-auto overflow-hidden rounded-[40px] border border-white/10 bg-[#020817]/90 backdrop-blur-2xl shadow-[0_30px_120px_rgba(0,0,0,0.45)] border rounded-3xl mt-20"
+      className="w-full max-w-7xl mx-auto overflow-hidden rounded-[40px] border border-white/10 bg-[#020817]/90 backdrop-blur-2xl shadow-[0_30px_120px_rgba(0,0,0,0.45)] border rounded-3xl mt-4 md:mt-10 lg:mt-20"
     >
-      <div style={{ display: 'flex', minHeight: '850px' }}>
+      <div className="flex flex-col lg:flex-row min-h-[600px] lg:min-h-[850px]">
 
         {/* Left Side - Image Panel */}
-        <div className="relative overflow-hidden flex flex-col justify-between p-10 lg:p-16" style={{ width: '58%', flexShrink: 0 }}>
+        <div className="relative overflow-hidden flex flex-col justify-between p-6 sm:p-8 lg:p-16 w-full lg:w-[58%] min-h-[300px] lg:min-h-auto order-1">
           {/* Background Image & Overlay */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -133,7 +133,7 @@ export default function RegisterPage() {
                 <Star className="w-4 h-4 text-yellow-400" />
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Exclusive Membership</span>
               </div>
-              <h1 className="text-5xl lg:text-6xl font-black dark:text-white text-black leading-[1.1] tracking-tighter flex">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black dark:text-white text-black leading-[1.1] tracking-tighter flex">
                 Join The Network
 
               </h1>
@@ -164,7 +164,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Right Side - Form Panel */}
-        <div className="flex items-center justify-center bg-[#020817] px-8 py-16 lg:px-16" style={{ flex: 1 }}>
+        <div className="flex items-center justify-center bg-[#020817] px-6 py-10 sm:px-8 sm:py-12 lg:px-16 lg:py-16 w-full lg:flex-1 order-2">
           <div className="w-full max-w-[480px]">
 
             <div className="space-y-3 mb-4">
