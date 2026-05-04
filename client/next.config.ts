@@ -26,9 +26,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui'],
   },
