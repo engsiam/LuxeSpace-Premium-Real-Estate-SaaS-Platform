@@ -112,11 +112,11 @@ function ExploreContent() {
             </div>
 
             {/* Filter & Sort Buttons */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-1 md:flex-none">
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className={`h-12 px-4 rounded-xl border-border flex items-center gap-2 text-sm font-bold ${showFilters ? 'bg-primary text-secondary border-primary' : 'text-foreground'}`}
+                className={`h-12 flex-1 md:flex-none px-4 rounded-xl border-border flex items-center justify-center gap-2 text-sm font-bold ${showFilters ? 'bg-primary text-secondary border-primary' : 'text-foreground'}`}
               >
                 <Funnel size={16} />
                 <span className="hidden sm:inline">Filters</span>
@@ -128,12 +128,12 @@ function ExploreContent() {
               </Button>
 
               <Select value={sortBy} onValueChange={(val) => setSortBy(val || '')}>
-                <SelectTrigger className="h-12 px-4 rounded-xl border-border bg-card text-foreground text-sm font-bold w-40">
+                <SelectTrigger className="h-12 px-4 rounded-xl border-border bg-card text-foreground text-sm font-bold w-full md:w-44">
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
                   {sortOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value} className="text-foreground focus:bg-primary/10 cursor-pointer">
+                    <SelectItem key={option.value} value={option.value} className="text-foreground focus:bg-primary/10 cursor-pointer h-12">
                       {option.label}
                     </SelectItem>
                   ))}
