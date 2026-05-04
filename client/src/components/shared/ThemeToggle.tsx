@@ -10,20 +10,17 @@ export default function ThemeToggle() {
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    const dark =
+      theme === 'dark' ||
+      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    setIsDark(dark);
+  }, [theme]);
 
-  if (!mounted) {
-    return <div className="w-9 h-9" />;
-  }
-
-  const isDark =
-    theme === 'dark' ||
-    (theme === 'system' &&
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const isDarkFinal = mounted ? isDark : false;
 
   return (
     <Button
@@ -35,7 +32,7 @@ export default function ThemeToggle() {
       <span className="sr-only">Toggle theme</span>
       
       <AnimatePresence mode="wait" initial={false}>
-        {isDark ? (
+        {isDarkFinal ? (
           <motion.div
             key="sun"
             initial={{ y: 20, opacity: 0, rotate: -90 }}
@@ -62,7 +59,7 @@ export default function ThemeToggle() {
       
       {/* Sparkle effect on toggle */}
       <AnimatePresence>
-        {isDark && (
+        {isDarkFinal && (
           <motion.span
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: [0, 1.5, 0], opacity: [0, 1, 0] }}

@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounce } from '@/hooks/useDebounce';
 import axiosInstance from '@/lib/axiosInstance';
 import { Property } from '@/types';
-import { Search, SlidersHorizontal, X, Funnel } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Funnel, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const cities = ['All Cities', 'Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi'];
@@ -36,6 +36,8 @@ function ExploreContent() {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('searchTerm') || '');
   const [city, setCity] = useState(searchParams.get('city') || '');
@@ -73,6 +75,31 @@ function ExploreContent() {
     fetchProperties();
   }, [debouncedSearch, city, type, minPrice, maxPrice, sortBy, currentPage]);
 
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!debouncedSearch.trim() || debouncedSearch.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const response = await axiosInstance.get(`/properties?searchTerm=${encodeURIComponent(debouncedSearch)}&limit=5&fields=title,city`);
+        const props: Array<{title: string; city: string}> = response.data.data || [];
+        const titles = props.map(p => p.title);
+        const cities = props.map(p => p.city);
+        const uniqueSuggestions = [...new Set([...titles, ...cities])].slice(0, 6);
+        setSuggestions(uniqueSuggestions as string[]);
+      } catch {
+        setSuggestions([]);
+      }
+    };
+    fetchSuggestions();
+  }, [debouncedSearch]);
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setSearchTerm(suggestion);
+    setShowSuggestions(false);
+  };
+
   const clearFilters = () => {
     setSearchTerm('');
     setCity('');
@@ -98,17 +125,33 @@ function ExploreContent() {
         </div>
 
         {/* Search & Filter Bar */}
-        <div className="bg-card p-3 rounded-2xl border border-border flex flex-col gap-3">
+        <div className="bg-card p-3 rounded-2xl border border-border flex flex-col gap-3 relative">
           <div className="flex flex-col md:flex-row gap-3">
             {/* Search Input */}
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
               <Input
-                placeholder="Search properties..."
+                placeholder="Search by location, property name..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-12 bg-secondary border-border rounded-xl pl-11 pr-4 text-foreground text-sm w-full"
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                className="h-12 bg-secondary border-border rounded-xl pl-11 pr-10 text-foreground text-sm w-full"
               />
+              {searchTerm && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSuggestions([]);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X size={16} />
+                </button>
+              )}
             </div>
 
             {/* Filter & Sort Buttons */}
@@ -142,31 +185,48 @@ function ExploreContent() {
             </div>
           </div>
 
+          {/* Live Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-primary/10 transition-colors"
+                >
+                  <MapPin size={16} className="text-primary shrink-0" />
+                  <span className="text-foreground text-sm font-medium truncate">{suggestion}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Active Filters Tags */}
           {(city || type || minPrice || maxPrice) && (
             <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
               {city && (
-                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold cursor-pointer" onClick={() => setCity('')}>
                   {city}
-                  <X size={12} className="cursor-pointer" onClick={() => setCity('')} />
+                  <X size={12} />
                 </span>
               )}
               {type && (
-                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold cursor-pointer" onClick={() => setType('')}>
                   {type}
-                  <X size={12} className="cursor-pointer" onClick={() => setType('')} />
+                  <X size={12} />
                 </span>
               )}
               {minPrice && (
-                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold cursor-pointer" onClick={() => setMinPrice('')}>
                   ৳{Number(minPrice).toLocaleString()}+
-                  <X size={12} className="cursor-pointer" onClick={() => setMinPrice('')} />
+                  <X size={12} />
                 </span>
               )}
               {maxPrice && (
-                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                <span className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold cursor-pointer" onClick={() => setMaxPrice('')}>
                   ৳{Number(maxPrice).toLocaleString()}
-                  <X size={12} className="cursor-pointer" onClick={() => setMaxPrice('')} />
+                  <X size={12} />
                 </span>
               )}
               <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground text-xs font-bold hover:text-foreground h-auto py-1 px-2">

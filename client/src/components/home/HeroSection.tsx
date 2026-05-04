@@ -3,27 +3,25 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/design-system/components';
 import Link from 'next/link';
-import { Search, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Play, Pause, ChevronLeft, ChevronRight, MapPin, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axiosInstance';
-
-// const DEFAULT_VIDEOS = [
-//   'https://videos.pexels.com/video-files/5382779/5382779-uhd_2560_1440_25fps.mp4',
-//   'https://videos.pexels.com/video-files/4763637/4763637-uhd_2560_1440_25fps.mp4',
-//   'https://videos.pexels.com/video-files/5875141/5875141-uhd_2560_1440_25fps.mp4',
-// ];
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function HeroSection() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [heroVideos, setHeroVideos] = useState<string[]>([]);
   const [heroTitle, setHeroTitle] = useState('Find Your Dream Property');
-  const [heroSubtitle, setHeroSubtitle] = useState();
+  const [heroSubtitle, setHeroSubtitle] = useState<string | undefined>();
   const [sliderInterval, setSliderInterval] = useState(8);
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
   const [videoKey, setVideoKey] = useState(0);
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -66,11 +64,38 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, [heroVideos.length, sliderInterval]);
 
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!debouncedSearchTerm.trim() || debouncedSearchTerm.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const response = await axiosInstance.get(`/properties?searchTerm=${encodeURIComponent(debouncedSearchTerm)}&limit=5&fields=title,city`);
+        const properties: Array<{title: string; city: string}> = response.data.data || [];
+        const titles = properties.map(p => p.title);
+        const cities = properties.map(p => p.city);
+        const uniqueSuggestions = [...new Set([...titles, ...cities])].slice(0, 6);
+        setSuggestions(uniqueSuggestions as string[]);
+      } catch {
+        setSuggestions([]);
+      }
+    };
+    fetchSuggestions();
+  }, [debouncedSearchTerm]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
+      setShowSuggestions(false);
       router.push(`/explore?searchTerm=${encodeURIComponent(searchTerm)}`);
     }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setSearchTerm(suggestion);
+    setShowSuggestions(false);
+    router.push(`/explore?searchTerm=${encodeURIComponent(suggestion)}`);
   };
 
   const toggleVideo = () => {
@@ -220,34 +245,40 @@ export default function HeroSection() {
       )}
 
       {/* HERO CONTENT */}
-      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 lg:px-0">
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-0 pt-16 sm:pt-0">
 
         <div className="max-w-3xl">
 
           {/* BADGE */}
           <div
             className="
-          mb-8
+          mb-6
+          sm:mb-8
           inline-flex
           items-center
-          gap-3
+          gap-2
+          sm:gap-3
           rounded-full
           border
           border-primary/30
           bg-primary/10
-          px-5
-          py-2.5
+          px-4
+          sm:px-5
+          py-2
+          sm:py-2.5
           backdrop-blur-xl
         "
           >
-            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <div className="h-1.5 sm:h-2 w-1.5 sm:w-2 rounded-full bg-primary animate-pulse" />
 
             <span
               className="
-            text-[11px]
+            text-[10px]
+            sm:text-[11px]
             font-black
             uppercase
-            tracking-[0.35em]
+            tracking-[0.3em]
+            sm:tracking-[0.35em]
             text-primary
           "
             >
@@ -259,13 +290,15 @@ export default function HeroSection() {
           <h1
             className="
           max-w-4xl
-          text-5xl
+          text-3xl
+          sm:text-4xl
+          md:text-5xl
+          lg:text-6xl
+          xl:text-7xl
           font-black
           leading-[0.95]
-          tracking-[-0.04em]
+          tracking-[-0.02em]
           text-foreground
-          md:text-6xl
-          lg:text-7xl
         "
           >
             {heroTitle ? (
@@ -282,15 +315,18 @@ export default function HeroSection() {
             )}
           </h1>
 
-          {/* SUBTITLE */}
+{/* SUBTITLE */}
           <p
             className="
-          mt-8
+          mt-4
+          sm:mt-6
+          lg:mt-8
           max-w-2xl
-          text-base
+          text-sm
+          sm:text-base
+          md:text-lg
           leading-relaxed
           text-foreground/80
-          md:text-xl
         "
           >
             {heroSubtitle || "Discover Bangladesh's most exclusive luxury residences crafted for modern lifestyles."}
@@ -298,8 +334,8 @@ export default function HeroSection() {
 
           {/* SEARCH */}
           <form
-            onSubmit={handleSearch}
-            className="mt-10 flex flex-col gap-4 sm:flex-row"
+            onSubmit={(e) => handleSearch(e)}
+            className="mt-6 sm:mt-8 lg:mt-10 relative flex flex-col gap-3 sm:flex-row"
           >
 
             <div className="relative flex-1">
@@ -307,32 +343,49 @@ export default function HeroSection() {
               <Search
                 className="
               absolute
-              left-5
+              left-4
+              sm:left-5
               top-1/2
-              h-5
-              w-5
+              h-4
+              sm:h-5
+              w-4
+              sm:w-5
               -translate-y-1/2
               text-primary
+              z-10
             "
               />
 
               <input
                 type="text"
-                placeholder="Where would you like to live?"
+                placeholder="Search location or property..."
                 value={searchTerm}
-                onChange={(e) =>
-                  setSearchTerm(e.target.value)
-                }
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  if (e.target.value.length >= 2) {
+                    setShowSuggestions(true);
+                  } else {
+                    setShowSuggestions(false);
+                  }
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 className="
-              h-16
+              h-12
+              sm:h-14
+              md:h-16
               w-full
-              rounded-2xl
+              rounded-xl
+              sm:rounded-2xl
               border
               border-border
               bg-background/80
-              pl-14
-              pr-6
-              text-foreground
+              pl-12
+              sm:pl-14
+              pr-10
+              sm:pr-6
+              text-sm
+              sm:text-base
               placeholder:text-muted-foreground
               backdrop-blur-xl
               outline-none
@@ -343,48 +396,94 @@ export default function HeroSection() {
               focus:ring-primary/20
             "
               />
+
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSuggestions([]);
+                    setShowSuggestions(false);
+                  }}
+                  className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X size={16} />
+                </button>
+              )}
+
+              {/* LIVE SUGGESTIONS */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-primary/10 transition-colors"
+                    >
+                      <MapPin size={16} className="text-primary shrink-0" />
+                      <span className="text-foreground text-sm font-medium truncate">{suggestion}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Button
+              type="submit"
               size="lg"
               className="
-            h-16
-            rounded-2xl
-            px-10
-            text-base
+            h-12
+            sm:h-14
+            md:h-16
+            rounded-xl
+            sm:rounded-2xl
+            px-6
+            sm:px-8
+            md:px-10
+            text-sm
+            sm:text-base
             font-bold
           "
             >
-              Search Properties
+              Search
             </Button>
           </form>
 
           {/* ACTION BUTTONS */}
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+          <div className="mt-5 sm:mt-6 lg:mt-8 flex flex-col gap-3 sm:flex-row">
 
             <Link href="/explore">
               <Button
                 variant="outline"
                 size="lg"
                 className="
-              h-14
-              rounded-2xl
+              h-11
+              sm:h-12
+              md:h-14
+              rounded-xl
+              sm:rounded-2xl
               border-border
               bg-background/40
-              px-8
+              px-6
+              sm:px-8
               backdrop-blur-xl
+              text-sm
+              sm:text-base
             "
               >
                 Browse All Properties
               </Button>
             </Link>
 
-            <Link href="/how-it-works">
+            <Link href="/about">
               <Button
                 variant="ghost"
                 size="lg"
                 className="
-              h-14
+              h-11
+              sm:h-12
+              md:h-14
               px-2
               text-primary
               hover:text-foreground
@@ -396,37 +495,37 @@ export default function HeroSection() {
           </div>
 
           {/* STATS */}
-          <div className="mt-16 inline-flex items-center gap-10 rounded-3xl border border-white/20 bg-white/10 px-8 py-6 backdrop-blur-2xl dark:border-white/10 dark:bg-black/20 max-w-3xl">
+          <div className="mt-10 sm:mt-12 lg:mt-16 inline-flex flex-wrap items-center gap-6 sm:gap-10 rounded-2xl sm:rounded-3xl border border-white/20 bg-white/10 px-6 sm:px-8 py-4 sm:py-6 backdrop-blur-2xl dark:border-white/10 dark:bg-black/20 max-w-3xl">
             <div>
-              <div className="text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+              <div className="text-2xl sm:text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
                 250+
               </div>
 
-              <div className="mt-1 text-sm font-medium text-black/70 dark:text-white/60">
+              <div className="mt-1 text-xs sm:text-sm font-medium text-black/70 dark:text-white/60">
                 Premium Properties
               </div>
             </div>
 
             <div>
-              <div className="text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+              <div className="text-2xl sm:text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
                 45+
               </div>
 
-              <div className="mt-1 text-sm font-medium text-black/70 dark:text-white/60">
+              <div className="mt-1 text-xs sm:text-sm font-medium text-black/70 dark:text-white/60">
                 Elite Agents
               </div>
             </div>
 
             <div>
-              <div className="text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+              <div className="text-2xl sm:text-3xl font-black text-primary drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
                 98%
               </div>
 
-              <div className="mt-1 text-sm font-medium text-black/70 dark:text-white/60">
+              <div className="mt-1 text-xs sm:text-sm font-medium text-black/70 dark:text-white/60">
                 Satisfaction
               </div>
             </div>
-          </div>
+</div>
         </div>
       </div>
     </section>

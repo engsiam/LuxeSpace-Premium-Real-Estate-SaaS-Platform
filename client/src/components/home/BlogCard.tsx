@@ -29,6 +29,7 @@ export function BlogCard({ blog, index = 0 }: BlogCardProps) {
               src={blog.coverImage || 'https://images.unsplash.com/photo-1585829491330-bf6a3f5f79f?q=80&w=800&auto=format&fit=crop'}
               alt={blog.title}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover transition-transform duration-1000 group-hover:scale-105"
             />
           </div>

@@ -35,6 +35,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   if (request.method !== 'GET') return;
+  if (!url.protocol.startsWith('http')) return;
 
   if (url.origin === location.origin) {
     event.respondWith(cacheFirst(request));
