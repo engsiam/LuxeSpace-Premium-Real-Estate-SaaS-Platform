@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, User, LogOut, LayoutDashboard, Globe, X, ChevronRight, Sparkles, Settings, Home, Bot } from 'lucide-react';
+import { Menu, User, LogOut, LayoutDashboard, Globe, X, ChevronRight, Sparkles, Settings, Home, Bot, Building } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useChatStore } from '@/store/useChatStore';
+import { useUserStore } from '@/store/useUserStore';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -53,6 +54,8 @@ export default function Navbar() {
   };
 
   const { toggleChat } = useChatStore();
+  const { user: storedUser } = useUserStore();
+  const avatarUrl = storedUser?.avatar || session?.user?.avatar || session?.user?.image || '';
 
   return (
     <nav 
@@ -121,7 +124,7 @@ export default function Navbar() {
                 <DropdownMenuTrigger className="outline-none">
                   <div className="flex items-center gap-3 px-3 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all group cursor-pointer">
                     <Avatar className="w-10 h-10 border-2 border-primary/20">
-                      <AvatarImage src={session?.user?.avatar || session?.user?.image || ''} />
+                      <AvatarImage src={avatarUrl} />
                       <AvatarFallback className="bg-primary text-secondary-foreground font-black">
                         {session?.user?.name?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
@@ -152,6 +155,18 @@ export default function Navbar() {
                     <User size={18} />
                     <span className="font-bold text-sm">My Profile</span>
                   </DropdownMenuItem>
+                  {userRole === 'USER' && (
+                    <DropdownMenuItem onClick={() => router.push('/dashboard/user/bookings')}>
+                      <Building size={18} />
+                      <span className="font-bold text-sm">My Bookings</span>
+                    </DropdownMenuItem>
+                  )}
+                  {userRole === 'AGENT' && (
+                    <DropdownMenuItem onClick={() => router.push('/dashboard/agent/my-properties')}>
+                      <Building size={18} />
+                      <span className="font-bold text-sm">My Properties</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator className="bg-border/50 my-2" />
                   <DropdownMenuItem 
                     onClick={() => signOut()}

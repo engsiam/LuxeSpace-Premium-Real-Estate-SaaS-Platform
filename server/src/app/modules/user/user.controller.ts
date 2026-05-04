@@ -4,6 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import * as userService from './user.service';
 import { registerSchema, loginSchema, updateUserSchema, adminUpdateUserSchema, googleAuthSchema } from './user.validation';
 import { AuthRequest } from '../../middlewares/auth.middleware';
+import { uploadImageToCloudinary } from '../../middlewares/upload.middleware';
 
 export const register = catchAsync(async (req, res) => {
   const validated = registerSchema.parse(req.body);
@@ -36,7 +37,8 @@ export const uploadAvatar = catchAsync(async (req: AuthRequest, res) => {
       data: null,
     });
   }
-  const fileUrl = req.file.path;
+  
+  const fileUrl = await uploadImageToCloudinary(req.file.buffer, { folder: 'luxespace/avatars' });
   const result = await userService.updateUser(req.user!.id, { avatar: fileUrl });
   
   sendResponse(res, {

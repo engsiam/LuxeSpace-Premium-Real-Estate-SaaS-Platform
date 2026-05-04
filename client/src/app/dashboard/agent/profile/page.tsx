@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axiosInstance';
 import { toast } from 'sonner';
-import { User as UserIcon, Mail, Phone, ShieldCheck, CheckCircle2, Sparkles } from 'lucide-react';
+import { User as UserIcon, Mail, Phone, ShieldCheck, CheckCircle2, Sparkles, Camera, Loader2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
+import { useUserStore } from '@/store/useUserStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -29,8 +31,12 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function AgentProfile() {
   const router = useRouter();
+  const { updateAvatar: updateUserStoreAvatar } = useUserStore();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [avatar, setAvatar] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -49,6 +55,9 @@ export default function AgentProfile() {
           name: user.name,
           phone: user.phone || '',
         });
+        if (user.avatar) {
+          setAvatar(user.avatar);
+        }
       } catch (error) {
         toast.error('Failed to fetch profile');
       } finally {
@@ -67,6 +76,33 @@ export default function AgentProfile() {
       toast.error(error.response?.data?.message || 'Failed to update profile');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploadingImage(true);
+    try {
+      const response = await axiosInstance.post('/users/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      if (response.data.success) {
+        const newAvatarUrl = response.data.data.avatar;
+        setAvatar(newAvatarUrl);
+        updateUserStoreAvatar(newAvatarUrl);
+        router.refresh();
+        toast.success('Profile picture updated!');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -96,12 +132,40 @@ export default function AgentProfile() {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 max-w-6xl">
-        {/* Left - Profile Preview */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] p-8 text-center relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
-            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-primary/20 group-hover:scale-110 transition-transform duration-500">
-              <Sparkles size={48} className="text-primary" />
+            
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handleImageUpload} 
+            />
+            
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-primary/20 group-hover:scale-110 transition-transform duration-500 overflow-hidden relative cursor-pointer"
+            >
+              {uploadingImage ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                  <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <Camera className="w-6 h-6 text-white" />
+                </div>
+              )}
+
+              {avatar ? (
+                <Avatar className="w-full h-full">
+                  <AvatarImage src={avatar} alt={form.getValues().name} className="object-cover" />
+                  <AvatarFallback className="bg-primary/10 text-primary font-black text-2xl">{form.getValues().name?.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              ) : (
+                <Sparkles size={48} className="text-primary" />
+              )}
             </div>
             <h2 className="text-2xl font-black text-white">{form.getValues().name}</h2>
             <p className="text-sm text-muted-foreground font-medium mb-6 italic">Certified Elite Agent</p>
@@ -123,7 +187,6 @@ export default function AgentProfile() {
           </div>
         </div>
 
-        {/* Right - Edit Form */}
         <div className="lg:col-span-2">
           <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden">
             <div className="p-8 border-b border-border bg-background/20 flex items-center gap-4">

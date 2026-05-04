@@ -39,3 +39,25 @@ export const uploadVideoToCloudinary = async (buffer: Buffer, options?: { folder
     readable.pipe(uploadStream);
   });
 };
+
+export const uploadImageToCloudinary = async (buffer: Buffer, options?: { folder?: string }): Promise<string> => {
+  return new Promise<string>((resolve, reject) => {
+    const uploadStream = (cloudinary as any).uploader.upload_stream(
+      {
+        folder: options?.folder || 'luxespace',
+        transformation: [
+          { width: 500, height: 500, crop: 'fill' },
+        ],
+      },
+      (error: Error, result: { secure_url: string }) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    
+    const readable = new Readable();
+    readable.push(buffer);
+    readable.push(null);
+    readable.pipe(uploadStream);
+  });
+};

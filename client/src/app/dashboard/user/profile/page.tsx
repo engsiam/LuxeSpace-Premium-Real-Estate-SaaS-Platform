@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { useSession } from 'next-auth/react';
+import { useUserStore } from '@/store/useUserStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -34,6 +35,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export default function UserProfile() {
   const router = useRouter();
   const { update } = useSession();
+  const { updateAvatar: updateUserStoreAvatar } = useUserStore();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [avatar, setAvatar] = useState('');
@@ -96,6 +98,7 @@ export default function UserProfile() {
       if (response.data.success) {
         const newAvatarUrl = response.data.data.avatar;
         setAvatar(newAvatarUrl);
+        updateUserStoreAvatar(newAvatarUrl);
         await update({ avatar: newAvatarUrl });
         router.refresh();
         toast.success('Profile picture updated!');
