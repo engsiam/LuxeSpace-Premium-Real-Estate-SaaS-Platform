@@ -1,0 +1,51 @@
+{
+  "name": "LuxeSpace - Elite Property Network",
+  "short_name": "LuxeSpace",
+  "description": "Discover exclusive luxury properties and premium estates in Bangladesh",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#D4AF37",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["business", "lifestyle", "shopping"],
+  "shortcuts": [
+    {
+      "name": "Explore Properties",
+      "short_name": "Explore",
+      "url": "/explore",
+      "description": "Browse luxury property listings"
+    },
+    {
+      "name": "My Dashboard",
+      "short_name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View your dashboard"
+    },
+    {
+      "name": "Contact Us",
+      "short_name": "Contact",
+      "url": "/contact",
+      "description": "Get in touch with us"
+    }
+  ]
+}

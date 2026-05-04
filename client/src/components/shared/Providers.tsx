@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import ThemeInitializer from '@/components/shared/ThemeInitializer';
 import AIChatSidebar from '@/components/shared/AIChatSidebar';
 import { UserStoreProvider } from '@/components/providers/UserStoreProvider';
+import PWAProvider from '@/components/shared/PWAProvider';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -14,10 +15,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <TooltipProvider>
         <LenisProvider>
           <ThemeInitializer />
-          <UserStoreProvider>
-            {children}
-            <AIChatSidebar />
-          </UserStoreProvider>
+          <PWAProvider>
+            <UserStoreProvider>
+              {children}
+              <AIChatSidebar />
+            </UserStoreProvider>
+          </PWAProvider>
         </LenisProvider>
         <Toaster richColors position="top-right" />
       </TooltipProvider>

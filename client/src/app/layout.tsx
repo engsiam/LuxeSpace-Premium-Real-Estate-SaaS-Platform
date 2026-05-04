@@ -1,9 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/shared/Providers";
 
 const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"] });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#D4AF37",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://luxespace.com'),
@@ -58,8 +65,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    apple: "/icon-192.svg",
   },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -69,6 +77,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#D4AF37" />
+        <link rel="apple-touch-icon" href="/icon-192.svg" />
+      </head>
         <body className={`${plusJakarta.className} antialised`}>
         <Providers>{children}</Providers>
       </body>

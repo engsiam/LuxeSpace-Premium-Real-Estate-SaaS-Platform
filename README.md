@@ -43,7 +43,7 @@ A full-stack premium real estate platform for Bangladesh, connecting property bu
 - **Agent Dashboard** - Add/edit properties, analytics
 - **Admin Dashboard** - User management, property moderation, blogs, messages
 - **Contact Form** - Stores to database
-- **AI Chat** - Property recommendations
+- **AI Agent** - AI-powered property recommendations and chat assistant
 
 ### 🛡️ Security Features
 - JWT authentication (access + refresh tokens)
@@ -59,6 +59,8 @@ A full-stack premium real estate platform for Bangladesh, connecting property bu
 - Lenis smooth scrolling
 - Skeleton loaders
 - Toast notifications
+- **PWA** - Installable, offline support, push notifications
+- **AI Chat Sidebar** - Floating chat assistant for property recommendations
 
 ---
 
@@ -79,6 +81,8 @@ A full-stack premium real estate platform for Bangladesh, connecting property bu
 | Zustand + React Query | State management |
 | Recharts | Charts |
 | Axios | HTTP client |
+| PWA | Installable web app |
+| OpenAI/Gemini | AI Agent |
 
 ### Backend (`/server`)
 
@@ -123,10 +127,14 @@ luxespace/                    # Root directory
 │   │   │   ├── auth.config.ts
 │   │   │   └── utils.ts
 │   │   │
-│   │   ├── store/           # Zustand stores
+│   ├── store/           # Zustand stores
 │   │   ├── hooks/          # Custom hooks
 │   │   ├── types/          # TypeScript types
+│   │   │                   #
 │   │   └── public/         # Static assets
+│   │       ├── manifest.json    # PWA manifest
+│   │       ├── sw.js          # Service worker
+│   │       └── icon-192.svg  # PWA icon
 │   │
 │   ├── .env.example
 │   ├── package.json
@@ -379,6 +387,8 @@ Client runs on: `http://localhost:3000`
 - [x] Role-based protection
 - [x] shadcn/ui components
 - [x] Smooth scroll (Lenis)
+- [x] PWA support (installable, offline mode)
+- [x] AI Agent (chat assistant)
 
 ---
 
