@@ -102,8 +102,12 @@ export interface Contact {
   email: string;
   subject: string;
   message: string;
+  reply?: string;
+  repliedAt?: string;
   isRead: boolean;
+  status?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface ApiResponse<T> {

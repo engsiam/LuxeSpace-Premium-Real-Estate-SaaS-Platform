@@ -139,6 +139,8 @@ model Contact {
   email     String
   subject   String
   message   String
+  reply     String?
+  repliedAt DateTime?
   isRead    Boolean  @default(false)
   status    String   @default("PENDING")
   createdAt DateTime @default(now())

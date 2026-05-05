@@ -24,6 +24,16 @@ export const getContacts = catchAsync(async (req: AuthRequest, res) => {
   });
 });
 
+export const getContactById = catchAsync(async (req: AuthRequest, res) => {
+  const result = await contactService.getContactById(req.params.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Message retrieved',
+    data: result,
+  });
+});
+
 export const markAsRead = catchAsync(async (req, res) => {
   const result = await contactService.markAsRead(req.params.id);
   sendResponse(res, {
@@ -31,5 +41,29 @@ export const markAsRead = catchAsync(async (req, res) => {
     success: true,
     message: 'Message marked as read',
     data: result,
+  });
+});
+
+export const replyToContact = catchAsync(async (req: AuthRequest, res) => {
+  const { reply } = req.body;
+  if (!reply) {
+    throw new Error('Reply message is required');
+  }
+  const result = await contactService.replyToContact(req.params.id, reply);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Reply sent successfully',
+    data: result,
+  });
+});
+
+export const deleteContact = catchAsync(async (req: AuthRequest, res) => {
+  await contactService.deleteContact(req.params.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Message deleted',
+    data: null,
   });
 });
