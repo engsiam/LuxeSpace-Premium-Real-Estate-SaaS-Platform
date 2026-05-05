@@ -291,3 +291,90 @@ a {
 .accordion-arrow {
   display: none !important;
 }
+
+/* =========================
+   BLOG CONTENT STYLES
+   ========================= */
+.prose-content {
+  font-size: 1.125rem;
+  line-height: 1.875;
+  color: var(--muted-foreground);
+}
+
+.prose-content p {
+  margin-bottom: 1.5rem;
+}
+
+.prose-content h1,
+.prose-content h2,
+.prose-content h3,
+.prose-content h4 {
+  color: var(--foreground);
+  font-weight: 700;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.prose-content h1 { font-size: 2rem; }
+.prose-content h2 { font-size: 1.75rem; }
+.prose-content h3 { font-size: 1.5rem; }
+.prose-content h4 { font-size: 1.25rem; }
+
+.prose-content ul,
+.prose-content ol {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose-content li {
+  margin-bottom: 0.5rem;
+}
+
+.prose-content blockquote {
+  border-left: 4px solid var(--primary);
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+.prose-content a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose-content a:hover {
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+.prose-content img {
+  border-radius: 1rem;
+  margin: 2rem 0;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+}
+
+.prose-content code {
+  background: var(--card);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--primary);
+}
+
+.prose-content pre {
+  background: var(--card);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.prose-content hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 3rem 0;
+}
