@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://luxespace.com/sitemap.xml
+
+# Disallow admin and private routes
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /*?*
+
+# Allow important public pages
+Allow: /$
+Allow: /explore
+Allow: /blog
+Allow: /about
+Allow: /contact
+Allow: /login
+Allow: /register
+Allow: /properties/
+Allow: /cookies
+Allow: /privacy
+Allow: /terms
