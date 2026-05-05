@@ -1,14 +1,32 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const createTransporter = () => {
+  const host = process.env.SMTP_HOST?.trim() || 'smtp.gmail.com';
+  const port = parseInt(process.env.SMTP_PORT?.trim() || '587');
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS?.trim();
+  const from = process.env.SMTP_FROM?.trim() || 'LuxeSpace <concierge@luxespace.com>';
+
+  if (!user || !pass) {
+    console.warn('⚠️ SMTP credentials not configured. Emails will be disabled.');
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user,
+      pass,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+};
+
+const transporter = createTransporter();
 
 export const sendEmail = async ({
   to,
@@ -21,19 +39,25 @@ export const sendEmail = async ({
   html?: string;
   text?: string;
 }) => {
-  const from = process.env.SMTP_FROM || 'LuxeSpace <concierge@luxespace.com>';
+  if (!transporter) {
+    console.log('📧 Email skipped (no SMTP config):', { to, subject });
+    return false;
+  }
+
+  const from = process.env.SMTP_FROM?.trim() || 'LuxeSpace <concierge@luxespace.com>';
   
   try {
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from,
       to,
       subject,
       html,
       text,
     });
+    console.log('✅ Email sent:', info.messageId);
     return true;
   } catch (error) {
-    console.error('Email sending failed:', error);
+    console.error('❌ Email sending failed:', error);
     return false;
   }
 };
@@ -76,7 +100,7 @@ export const sendContactConfirmation = async (email: string, name: string) => {
     </html>
   `;
   
-  return sendEmail({ to: email, subject, html });
+  sendEmail({ to: email, subject, html }).catch(console.error);
 };
 
 export const sendReplyEmail = async (email: string, name: string, reply: string, subject: string) => {
@@ -118,5 +142,5 @@ export const sendReplyEmail = async (email: string, name: string, reply: string,
     </html>
   `;
   
-  return sendEmail({ to: email, subject: `Re: ${subject}`, html });
+  sendEmail({ to: email, subject: `Re: ${subject}`, html }).catch(console.error);
 };

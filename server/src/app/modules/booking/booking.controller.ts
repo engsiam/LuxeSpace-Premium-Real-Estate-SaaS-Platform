@@ -31,32 +31,41 @@ export const executeBooking = catchAsync(async (req, res) => {
 });
 
 export const getMyBookings = catchAsync(async (req: AuthRequest, res) => {
-  const result = await bookingService.getMyBookings(req.user!.id);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const result = await bookingService.getMyBookings(req.user!.id, page, limit);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Bookings retrieved',
-    data: result,
+    data: result.bookings,
+    meta: result.pagination,
   });
 });
 
 export const getAllBookings = catchAsync(async (req, res) => {
-  const result = await bookingService.getAllBookings();
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const result = await bookingService.getAllBookings(page, limit);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'All bookings retrieved',
-    data: result,
+    data: result.bookings,
+    meta: result.pagination,
   });
 });
 
 export const getTransactionHistory = catchAsync(async (req: AuthRequest, res) => {
   const userId = req.user!.role === 'ADMIN' ? undefined : req.user!.id;
-  const result = await bookingService.getTransactionHistory(userId);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const result = await bookingService.getTransactionHistory(userId, page, limit);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Transaction history retrieved',
-    data: result,
+    data: result.transactions,
+    meta: result.pagination,
   });
 });

@@ -48,6 +48,11 @@ model User {
   transactions  Transaction[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  // Indexes
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt(sort: Desc)])
 }
 
 model Property {
@@ -71,6 +76,15 @@ model Property {
   reviews       Review[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+
+  // Indexes for faster queries
+  @@index([status])
+  @@index([isFeatured])
+  @@index([type])
+  @@index([city])
+  @@index([price(sort: Asc)])
+  @@index([createdAt(sort: Desc)])
+  @@index([agentId])
 }
 
 model Booking {
@@ -92,6 +106,13 @@ model Booking {
 
   bKashTrxId      String?
   bKashPaymentID  String?
+
+  // Indexes
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([userId])
+  @@index([propertyId])
+  @@index([createdAt(sort: Desc)])
 }
 
 model Transaction {
@@ -107,6 +128,12 @@ model Transaction {
   paymentId     String?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+
+  // Indexes
+  @@index([status])
+  @@index([userId])
+  @@index([bookingId])
+  @@index([createdAt(sort: Desc)])
 }
 
 model Review {
@@ -118,6 +145,11 @@ model Review {
   rating      Int
   comment     String
   createdAt   DateTime  @default(now())
+
+  // Indexes
+  @@index([propertyId])
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
 }
 
 model Blog {
@@ -131,6 +163,11 @@ model Blog {
   author      User      @relation(fields: [authorId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  // Indexes
+  @@index([isPublished])
+  @@index([createdAt(sort: Desc)])
+  @@index([authorId])
 }
 
 model Contact {
@@ -145,6 +182,12 @@ model Contact {
   status    String   @default("PENDING")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Indexes for faster queries
+  @@index([createdAt(sort: Desc)])
+  @@index([isRead])
+  @@index([status])
+  @@index([email])
 }
 
 model Settings {

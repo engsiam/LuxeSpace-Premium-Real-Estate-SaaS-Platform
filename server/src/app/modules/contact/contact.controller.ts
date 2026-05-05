@@ -15,12 +15,16 @@ export const submitContact = catchAsync(async (req, res) => {
 });
 
 export const getContacts = catchAsync(async (req: AuthRequest, res) => {
-  const result = await contactService.getContacts();
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  
+  const result = await contactService.getContacts(page, limit);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Messages retrieved',
-    data: result,
+    data: result.contacts,
+    meta: result.pagination,
   });
 });
 

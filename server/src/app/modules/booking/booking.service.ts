@@ -63,49 +63,85 @@ export const executeBooking = async (paymentID: string, method: string = 'bkash'
   return paymentService.verifyAndExecutePayment(paymentID, method as any, invoice);
 };
 
-export const getMyBookings = async (userId: string) => {
-  return prisma.booking.findMany({
-    where: { userId },
-    include: {
-      property: {
-        select: {
-          id: true,
-          title: true,
-          location: true,
-          images: true,
+export const getMyBookings = async (userId: string, page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  
+  const [bookings, total] = await Promise.all([
+    prisma.booking.findMany({
+      where: { userId },
+      include: {
+        property: {
+          select: {
+            id: true,
+            title: true,
+            location: true,
+            images: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.booking.count({ where: { userId } }),
+  ]);
+
+  return {
+    bookings,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
 };
 
-export const getAllBookings = async () => {
-  return prisma.booking.findMany({
-    include: {
-      user: {
-        select: { id: true, name: true, email: true },
+export const getAllBookings = async (page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  
+  const [bookings, total] = await Promise.all([
+    prisma.booking.findMany({
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+        property: {
+          select: { id: true, title: true, location: true },
+        },
       },
-      property: {
-        select: { id: true, title: true, location: true },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.booking.count(),
+  ]);
+
+  return {
+    bookings,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
 };
 
-export const getTransactionHistory = async (userId?: string) => {
+export const getTransactionHistory = async (userId?: string, page = 1, limit = 20) => {
   const where = userId ? { userId } : {};
-  return prisma.transaction.findMany({
-    where,
-    include: {
-      user: { select: { name: true, email: true } },
-      booking: { 
-        include: { 
-          property: { select: { title: true } } 
-        } 
-      }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
+  const skip = (page - 1) * limit;
+  
+  const [transactions, total] = await Promise.all([
+    prisma.transaction.findMany({
+      where,
+      include: {
+        user: { select: { name: true, email: true } },
+        booking: { 
+          include: { 
+            property: { select: { title: true } } 
+          } 
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.transaction.count({ where }),
+  ]);
+
+  return {
+    transactions,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
 };

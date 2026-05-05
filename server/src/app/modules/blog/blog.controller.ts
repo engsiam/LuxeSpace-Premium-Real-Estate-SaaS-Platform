@@ -20,7 +20,8 @@ export const getBlogs = catchAsync(async (req, res) => {
     statusCode: 200,
     success: true,
     message: 'Blogs retrieved',
-    data: result,
+    data: result.data,
+    meta: result.pagination,
   });
 });
 

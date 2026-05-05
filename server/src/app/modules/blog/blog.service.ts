@@ -30,25 +30,42 @@ export const createBlog = async (data: any, authorId: string) => {
   });
 };
 
-export const getBlogs = async (filters: any) => {
-  const { limit } = filters;
+export const getBlogs = async (filters: { page?: string; limit?: string; category?: string }) => {
+  const { page = '1', limit = '10', category } = filters;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const take = parseInt(limit);
   
-  const blogs = await prisma.blog.findMany({
-    where: { isPublished: true },
-    include: {
-      author: {
-        select: { id: true, name: true, avatar: true },
+  const where: any = { isPublished: true };
+  if (category) {
+    where.category = category;
+  }
+  
+  const [blogs, total] = await Promise.all([
+    prisma.blog.findMany({
+      where,
+      include: {
+        author: {
+          select: { id: true, name: true, avatar: true },
+        },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-    take: limit ? parseInt(limit) : undefined,
-  });
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take,
+    }),
+    prisma.blog.count({ where }),
+  ]);
 
   if (blogs.length === 0) {
-    return limit ? PLACEHOLDER_BLOGS.slice(0, parseInt(limit)) : PLACEHOLDER_BLOGS;
+    return {
+      data: take > 0 ? PLACEHOLDER_BLOGS.slice(0, take) : PLACEHOLDER_BLOGS,
+      pagination: { page: parseInt(page), limit: take, total: PLACEHOLDER_BLOGS.length, totalPages: 1 },
+    };
   }
 
-  return blogs;
+  return {
+    data: blogs,
+    pagination: { page: parseInt(page), limit: take, total, totalPages: Math.ceil(total / take) },
+  };
 };
 
 export const getBlogBySlug = async (slug: string) => {

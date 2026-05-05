@@ -72,12 +72,15 @@ export const refreshToken = catchAsync(async (req, res) => {
 });
 
 export const getUsers = catchAsync(async (req, res) => {
-  const users = await userService.getUsers();
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const result = await userService.getUsers(page, limit);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Users retrieved',
-    data: users,
+    data: result.users,
+    meta: result.pagination,
   });
 });
 

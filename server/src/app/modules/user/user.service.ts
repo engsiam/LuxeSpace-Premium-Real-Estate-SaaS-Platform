@@ -159,17 +159,30 @@ export const refreshToken = async (token: string) => {
   }
 };
 
-export const getUsers = async () => {
-  return prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-    },
-  });
+export const getUsers = async (page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.user.count(),
+  ]);
+
+  return {
+    users,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
 };
 
 export const getUserById = async (id: string) => {

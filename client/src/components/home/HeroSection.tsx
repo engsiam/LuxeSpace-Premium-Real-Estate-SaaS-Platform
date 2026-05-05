@@ -8,25 +8,42 @@ import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axiosInstance';
 import { useDebounce } from '@/hooks/useDebounce';
 
-export default function HeroSection() {
+interface HeroData {
+  videos: string[];
+  title: string;
+  subtitle?: string;
+  interval: number;
+}
+
+interface HeroSectionProps {
+  initialData?: HeroData;
+}
+
+export default function HeroSection({ initialData }: HeroSectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [heroVideos, setHeroVideos] = useState<string[]>([]);
-  const [heroTitle, setHeroTitle] = useState('Find Your Dream Property');
-  const [heroSubtitle, setHeroSubtitle] = useState<string | undefined>();
-  const [sliderInterval, setSliderInterval] = useState(8);
+  const [heroVideos, setHeroVideos] = useState<string[]>(initialData?.videos || []);
+  const [heroTitle, setHeroTitle] = useState(initialData?.title || 'Find Your Dream Property');
+  const [heroSubtitle, setHeroSubtitle] = useState<string | undefined>(initialData?.subtitle);
+  const [sliderInterval, setSliderInterval] = useState(initialData?.interval || 8);
+  const [isLoading, setIsLoading] = useState(!initialData);
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
   const [videoKey, setVideoKey] = useState(0);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
+    if (initialData) {
+      setIsLoading(false);
+      return;
+    }
+    
     const fetchSettings = async () => {
       try {
-        const response = await axiosInstance.get('/settings');
+        const response = await axiosInstance.get('/settings', { timeout: 5000 });
         const settings = response.data.data;
         if (settings) {
           if (settings.heroVideos && settings.heroVideos.length > 0) {
@@ -49,10 +66,12 @@ export default function HeroSection() {
         }
       } catch (error) {
         console.error('Failed to fetch settings:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchSettings();
-  }, []);
+  }, [initialData]);
 
   useEffect(() => {
     if (heroVideos.length <= 1) return;
@@ -125,6 +144,8 @@ export default function HeroSection() {
 
       {/* VIDEO BACKGROUND */}
       <div className="absolute inset-0 z-0">
+        {/* Placeholder gradient while video loads */}
+        <div className={`absolute inset-0 bg-gradient-to-br from-primary/30 via-primary/20 to-background transition-opacity duration-500 ${isLoading ? 'opacity-100' : 'opacity-0'}`} />
 
         <video
           key={`video-${currentVideoIndex}-${videoKey}`}
@@ -133,7 +154,12 @@ export default function HeroSection() {
           muted
           loop
           playsInline
-          className="h-full w-full object-cover"
+          preload="none"
+          className="h-full w-full object-cover opacity-0 transition-opacity duration-500"
+          onCanPlay={(e) => {
+            (e.target as HTMLVideoElement).classList.remove('opacity-0');
+            (e.target as HTMLVideoElement).play().catch(() => {});
+          }}
           onEnded={() =>
             setCurrentVideoIndex(
               (prev) => (prev + 1) % heroVideos.length

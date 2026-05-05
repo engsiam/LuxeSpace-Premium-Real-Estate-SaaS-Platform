@@ -18,15 +18,32 @@ export const submitContact = async (data: {
     },
   });
 
-  await sendContactConfirmation(data.email, data.name);
+  sendContactConfirmation(data.email, data.name);
 
   return result;
 };
 
-export const getContacts = async () => {
-  return prisma.contact.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+export const getContacts = async (page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  
+  const [contacts, total] = await Promise.all([
+    prisma.contact.findMany({
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.contact.count(),
+  ]);
+
+  return {
+    contacts,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
 export const getContactById = async (id: string) => {
@@ -74,7 +91,7 @@ export const replyToContact = async (id: string, reply: string) => {
     },
   });
 
-  await sendReplyEmail(contact.email, contact.name, reply, contact.subject);
+  sendReplyEmail(contact.email, contact.name, reply, contact.subject);
 
   return result;
 };
