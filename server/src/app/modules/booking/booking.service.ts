@@ -7,9 +7,14 @@ export const initiateBooking = async (
   propertyId: string,
   visitDate?: string
 ) => {
+  console.log('=== bookingService.initiateBooking ===');
+  console.log('userId:', userId, 'propertyId:', propertyId);
+  
   const property = await prisma.property.findUnique({
     where: { id: propertyId },
   });
+  
+  console.log('property found:', property ? 'yes' : 'no');
 
   if (!property) {
     throw new ApiError(404, 'Property not found');

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import HeroSection from '@/components/home/HeroSection';
 import FeaturedProperties from '@/components/home/FeaturedProperties';
 import HowItWorks from '@/components/home/HowItWorks';
@@ -14,7 +16,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1
 async function getSettings() {
   try {
     const res = await fetch(`${API_URL}/settings`, { 
-      next: { revalidate: 300 },
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) return null;

@@ -5,18 +5,28 @@ import * as bookingService from './booking.service';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 
 export const initiateBooking = catchAsync(async (req: AuthRequest, res) => {
+  console.log('=== initiateBooking called ===');
+  console.log('body:', req.body);
+  console.log('user:', req.user);
+  
   const { propertyId, visitDate } = req.body;
-  const result = await bookingService.initiateBooking(
-    req.user!.id,
-    propertyId,
-    visitDate
-  );
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Booking initiated. Redirecting to payment...',
-    data: result,
-  });
+  
+  try {
+    const result = await bookingService.initiateBooking(
+      req.user!.id,
+      propertyId,
+      visitDate
+    );
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Booking initiated. Redirecting to payment...',
+      data: result,
+    });
+  } catch (error) {
+    console.error('Error in initiateBooking:', error);
+    throw error;
+  }
 });
 
 export const executeBooking = catchAsync(async (req, res) => {

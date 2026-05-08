@@ -38,7 +38,15 @@ self.addEventListener('fetch', (event) => {
   if (!url.protocol.startsWith('http')) return;
 
   if (url.origin === location.origin) {
-    event.respondWith(cacheFirst(request));
+    const isPage = request.mode === 'navigate';
+    const isHtml = request.headers.get('accept')?.includes('text/html');
+    
+    if (isPage || isHtml) {
+      event.respondWith(networkFirst(request));
+      return;
+    }
+    
+    event.respondWith(networkFirst(request));
     return;
   }
 

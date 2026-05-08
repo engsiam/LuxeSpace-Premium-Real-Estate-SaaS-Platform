@@ -1,6 +1,7 @@
 import { mockBkashProvider } from './providers/mock-bkash.provider';
 import prisma from '../../../prisma/client';
 import ApiError from '../../utils/ApiError';
+import crypto from 'crypto';
 
 export type PaymentMethod = 'bkash' | 'stripe' | 'nagad';
 
@@ -14,16 +15,31 @@ export class PaymentService {
       throw new ApiError(404, 'Booking record not found');
     }
 
-    // Create a transaction record in INITIATED status
-    const transaction = await prisma.transaction.create({
-      data: {
+    // Check for existing INITIATED transaction for this booking
+    const existingTransaction = await prisma.transaction.findFirst({
+      where: {
         bookingId,
-        userId,
-        amount,
-        method,
         status: 'INITIATED',
       },
     });
+
+    let transaction;
+    if (existingTransaction) {
+      // Reuse existing transaction
+      transaction = existingTransaction;
+    } else {
+      // Create a new transaction record in INITIATED status
+      transaction = await prisma.transaction.create({
+        data: {
+          bookingId,
+          userId,
+          amount,
+          method,
+          status: 'INITIATED',
+          trxId: `TRX-${crypto.randomUUID()}`,
+        },
+      });
+    }
 
     // Use Strategy pattern logic here
     let paymentURL = '';

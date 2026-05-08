@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { BASE_URL } from '@/lib/config';
 
+axios.defaults.withCredentials = true;
+
 export interface User {
   id: string;
   name: string;
@@ -104,25 +106,30 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isHydrating: true });
 
     try {
-      const response = await axios.get(`${BASE_URL}/users/session`, {
-        withCredentials: true,
+      const response = await fetch(`${BASE_URL}/users/session`, {
+        credentials: 'include',
         headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate',
-          'Pragma': 'no-cache',
+          'Content-Type': 'application/json',
         },
       });
       
-      if (response.data.success && response.data.data?.isAuthenticated && response.data.data?.user) {
+      console.log('Response status:', response.status, response.statusText);
+      const data = await response.json();
+      console.log('Hydrate response:', JSON.stringify(data));
+      
+      if (data.success && data.data?.isAuthenticated && data.data?.user) {
+        console.log('Setting user:', data.data.user);
         set({
-          user: response.data.data.user,
+          user: data.data.user,
           isAuthenticated: true,
           isHydrating: false,
         });
       } else {
+        console.log('No valid session, setting not authenticated');
         set({ isHydrating: false, isAuthenticated: false });
       }
     } catch (error: any) {
-      console.error('Hydrate error:', error.response?.status, error.response?.data);
+      console.error('Hydrate error:', error.message);
       set({ isHydrating: false, isAuthenticated: false });
     }
   },

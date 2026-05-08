@@ -81,6 +81,78 @@ export const googleAuth = catchAsync(async (req, res) => {
   });
 });
 
+export const googleAuthCallback = catchAsync(async (req, res) => {
+  const { code, error } = req.query;
+  
+  if (error) {
+    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=${error}`);
+  }
+  
+  if (!code) {
+    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=no_code`);
+  }
+  
+  try {
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    const redirectUri = `${serverUrl}/api/v1/users/auth/google/callback`;
+    
+    if (!googleClientId || !googleClientSecret || googleClientId === 'your-google-client-id') {
+      return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=google_not_configured`);
+    }
+    
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: googleClientId,
+        client_secret: googleClientSecret,
+        code: code as string,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri,
+      }),
+    });
+    
+    const tokens = await tokenResponse.json() as { access_token?: string };
+    
+    if (!tokens.access_token) {
+      return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=token_exchange_failed`);
+    }
+    
+    const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    });
+    
+    const googleUser = await userResponse.json() as { email?: string; name?: string; picture?: string };
+    
+    const { accessToken, refreshToken, user } = await userService.googleAuth({
+      email: googleUser.email || '',
+      name: googleUser.name || '',
+      avatar: googleUser.picture || '',
+      role: 'USER',
+    });
+    
+    res.cookie('accessToken', accessToken, { 
+      ...cookieOptions, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: false,
+      sameSite: 'lax',
+    });
+    res.cookie('refreshToken', refreshToken, { 
+      ...cookieOptions, 
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: false,
+      sameSite: 'lax',
+    });
+    
+    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/dashboard`);
+  } catch (err) {
+    console.error('Google auth callback error:', err);
+    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=auth_failed`);
+  }
+});
+
 export const refreshToken = catchAsync(async (req, res) => {
   const refreshTokenFromCookie = req.cookies.refreshToken;
   const refreshTokenFromBody = req.body?.refreshToken;
@@ -101,6 +173,9 @@ export const refreshToken = catchAsync(async (req, res) => {
 export const getSession = catchAsync(async (req, res) => {
   const token = req.cookies.accessToken;
   
+  console.log('Session check - cookies:', req.cookies);
+  console.log('Session check - token:', token ? 'present' : 'missing');
+  
   if (!token) {
     return sendResponse(res, {
       statusCode: 200,
@@ -111,8 +186,12 @@ export const getSession = catchAsync(async (req, res) => {
   }
   
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string; role: string };
-    const user = await userService.getUserById(decoded.id);
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { id?: string; userId?: string; role?: string };
+    console.log('Session check - decoded:', decoded);
+    const userId = decoded.id || decoded.userId;
+    if (!userId) throw new Error('No user ID in token');
+    const user = await userService.getUserById(userId);
+    console.log('Session check - user found:', user?.email);
     
     sendResponse(res, {
       statusCode: 200,

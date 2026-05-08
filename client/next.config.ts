@@ -57,7 +57,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui'],
   },
-  transpilePackages: ['recharts', 'gsap', 'framer-motion'],
+  transpilePackages: ['react', 'react-dom', 'recharts', 'gsap', 'framer-motion'],
 };
 
 export default nextConfig;

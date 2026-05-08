@@ -19,20 +19,32 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { motion } from 'framer-motion';
-import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Eye, EyeOff, Building2, TrendingUp } from 'lucide-react';
+import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { GoogleButton } from '@/components/auth/GoogleButton';
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
 
-
-
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated, isHydrating, isLoading } = useAuthStore();
-  const [showPassword, setShowPassword] = useState(false);
+  const { login, user } = useAuthStore();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'agent'>('user');
+
+  const demoCredentials = {
+    admin: { email: 'admin@luxespace.com', password: 'Admin@123' },
+    agent: { email: 'agent1@luxespace.com', password: 'Agent@123' },
+    user: { email: 'user1@luxespace.com', password: 'User@123' },
+  };
+
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -42,42 +54,30 @@ export default function LoginPage() {
     },
   });
 
-  useEffect(() => {
-    if (!isHydrating && isAuthenticated) {
-      router.push('/dashboard');
-    }
-  }, [isAuthenticated, isHydrating, router]);
-
-  // Only show loading during hydration, not when authenticated
-  if (isHydrating) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
   const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
+    let email = '';
+    let password = '';
+    
     if (role === 'admin') {
-      form.setValue('email', 'admin@luxespace.com');
-      form.setValue('password', 'Admin@123');
+      email = 'admin@luxespace.com';
+      password = 'Admin@123';
     } else if (role === 'agent') {
-      form.setValue('email', 'agent1@luxespace.com');
-      form.setValue('password', 'Agent@123');
+      email = 'agent1@luxespace.com';
+      password = 'Agent@123';
     } else {
-      form.setValue('email', 'user1@luxespace.com');
-      form.setValue('password', 'User@123');
+      email = 'user1@luxespace.com';
+      password = 'User@123';
     }
-    toast.success(`${role.toUpperCase()} credentials loaded`);
+    
+    form.setValue('email', email);
+    form.setValue('password', password);
+    toast.success(`${role.toUpperCase()} credentials loaded - click SIGN IN to login`);
   };
 
-  const onSubmit = async (
-    data: z.infer<typeof loginSchema>
-  ) => {
-    const success = await login(
-      data.email,
-      data.password
-    );
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    setIsLoggingIn(true);
+    const success = await login(data.email, data.password);
+    setIsLoggingIn(false);
 
     if (success) {
       toast.success('Welcome back!');
@@ -96,7 +96,7 @@ export default function LoginPage() {
       <div className="flex flex-col lg:flex-row min-h-[600px] lg:min-h-[850px]">
         <div className="relative overflow-hidden w-full lg:w-[58%] min-h-[300px] lg:min-h-auto order-1">
           <Image
-            src="https://plus.unsplash.com/premium_photo-1689609950112-d66095626efb?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            src="/login.jpg"
             alt="Luxury Property"
             fill
             priority
@@ -157,9 +157,11 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-12">
+              <GoogleButton className="h-16 w-full rounded-2xl border border-white/10 bg-white/[0.03] text-base font-bold text-white hover:bg-white/10 transition-all mb-6 flex items-center justify-center" />
+
               <div className="mb-8 flex items-center">
                 <div className="flex-grow border-t border-white/10"></div>
-                <span className="mx-4 text-[11px] font-black uppercase tracking-[0.25em] text-white/40">Sign in with email</span>
+                <span className="mx-4 text-[11px] font-black uppercase tracking-[0.25em] text-white/40">Or sign in with email</span>
                 <div className="flex-grow border-t border-white/10"></div>
               </div>
 
@@ -194,10 +196,7 @@ export default function LoginPage() {
                         <FormControl>
                           <div className="relative">
                             <Lock className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
-                            <Input {...field} type={showPassword ? 'text' : 'password'} placeholder="••••••••" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-14 text-base text-white placeholder:text-white/20 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20" />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white">
-                              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                            </button>
+                            <Input {...field} type="password" placeholder="••••••••" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20" />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -205,22 +204,40 @@ export default function LoginPage() {
                     )}
                   />
 
-                  <Button type="submit" disabled={isAuthenticated} className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)] transition-all hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(255,215,0,0.35)]">
-                    {isAuthenticated ? 'REDIRECTING...' : <div className="flex items-center gap-2"><span>SIGN IN</span><ChevronRight className="h-5 w-5" /></div>}
+                  <Button type="submit" disabled={isLoggingIn} className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)] transition-all hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(255,215,0,0.35)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                    {isLoggingIn ? (
+                      <div className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /><span>SIGNING IN...</span></div>
+                    ) : (
+                      <div className="flex items-center gap-2"><span>SIGN IN</span><ChevronRight className="h-5 w-5" /></div>
+                    )}
                   </Button>
                 </form>
               </Form>
-            </div>
 
-            <div className="mt-10 border-t border-white/10 py-8">
-              <p className="mb-5 text-center text-[11px] font-black uppercase tracking-[0.3em] text-white/40 mt-5">Quick Access</p>
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                {[{ id: 'admin', label: 'Admin', icon: ShieldCheck }, { id: 'agent', label: 'Agent', icon: UserIcon }, { id: 'user', label: 'User', icon: Globe }].map((demo) => (
-                  <button key={demo.id} type="button" onClick={() => fillDemoCredentials(demo.id as any)} className="group flex-1 rounded-2xl border border-white/10 bg-white/[0.03] p-3 sm:p-5 transition-all hover:border-primary/40 hover:bg-primary/10">
-                    <demo.icon className="mx-auto mb-2 sm:mb-3 h-5 w-5 text-white/40 transition group-hover:text-primary" />
-                    <p className="text-center text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-white/60 group-hover:text-white">{demo.label}</p>
-                  </button>
-                ))}
+              <div className="mt-8 border-t border-white/10 pt-8">
+                <p className="mb-4 text-center text-[10px] font-black uppercase tracking-[0.25em] text-white/40">Or Quick Login</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: 'user', label: 'User', icon: Globe },
+                    { id: 'agent', label: 'Agent', icon: UserIcon },
+                    { id: 'admin', label: 'Admin', icon: ShieldCheck }
+                  ].map((role) => (
+                    <button
+                      key={role.id}
+                      type="button"
+                      disabled={isLoggingIn}
+                      onClick={() => fillDemoCredentials(role.id as any)}
+                      className="group flex flex-col items-center gap-2 p-4 rounded-2xl border border-white/10 bg-white/[0.03] transition-all hover:border-primary/40 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoggingIn ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                      ) : (
+                        <role.icon className="h-5 w-5 text-white/40 transition group-hover:text-primary" />
+                      )}
+                      <span className="text-[10px] font-black uppercase tracking-wider text-white/60 group-hover:text-white">{role.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

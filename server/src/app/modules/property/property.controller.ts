@@ -4,15 +4,30 @@ import sendResponse from '../../utils/sendResponse';
 import * as propertyService from './property.service';
 import { propertyFilterSchema } from './property.validation';
 import { AuthRequest } from '../../middlewares/auth.middleware';
+import { uploadImageToCloudinary } from '../../middlewares/upload.middleware';
 
 export const createProperty = catchAsync(async (req: AuthRequest, res) => {
+  console.log('=== DEBUG createProperty ===');
+  console.log('req.files:', req.files);
+  console.log('req.body keys:', Object.keys(req.body));
+  
   const data = { ...req.body };
   
   // Handle images from file upload (Cloudinary)
+  console.log('Checking req.files - type:', typeof req.files, 'isArray:', Array.isArray(req.files));
   if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-    data.images = (req.files as any[])
-      .map((file: any) => file.path || file.secure_url)
-      .filter((url: string) => !!url);
+    console.log('Files received:', req.files.length);
+    const imageUrls = await Promise.all(
+      (req.files as any[]).map(async (file: any) => {
+        try {
+          return await uploadImageToCloudinary(file.buffer, { folder: 'luxespace/properties' });
+        } catch (error) {
+          console.error('Failed to upload image to Cloudinary:', error);
+          return null;
+        }
+      })
+    );
+    data.images = imageUrls.filter((url: string | null): url is string => !!url);
   }
   
   // Ensure required arrays are at least empty for Prisma/MongoDB

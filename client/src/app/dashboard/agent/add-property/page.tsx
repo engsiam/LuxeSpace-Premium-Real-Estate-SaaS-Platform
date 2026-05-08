@@ -143,6 +143,7 @@ export default function AddProperty() {
 
       toast.success('Property added successfully!');
       router.push('/dashboard/agent/my-properties');
+      router.refresh();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to add property');
     } finally {

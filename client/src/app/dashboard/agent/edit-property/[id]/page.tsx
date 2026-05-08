@@ -182,6 +182,7 @@ export default function EditProperty() {
 
       toast.success('Property updated successfully!');
       router.push('/dashboard/agent/my-properties');
+      router.refresh();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update property');
     } finally {

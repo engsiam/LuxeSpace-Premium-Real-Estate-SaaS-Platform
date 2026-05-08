@@ -48,8 +48,8 @@ const headingStyles = {
 } as const;
 
 export function Heading({ level, children, className }: HeadingProps) {
-  const Tag = `h${level}` as keyof JSX.IntrinsicElements;
-  return <Tag className={cn(headingStyles[level], className)}>{children}</Tag>;
+  const Component = `h${level}` as any;
+  return <Component className={cn(headingStyles[level], className)}>{children}</Component>;
 }
 
 // ==================== BUTTON ===================

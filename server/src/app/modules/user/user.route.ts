@@ -25,6 +25,26 @@ router.delete('/:id', authGuard('ADMIN'), userController.deleteUser);
 // Also export for auth routes
 router.post('/auth/register', validateRequest(registerSchema), userController.register);
 router.post('/auth/login', validateRequest(loginSchema), userController.login);
+
+// Google OAuth - GET for redirect-based auth
+router.get('/auth/google', (req, res) => {
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+  const redirectUri = `${serverUrl}/api/v1/users/auth/google/callback`;
+  
+  if (!googleClientId || googleClientId === 'your-google-client-id') {
+    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=google_not_configured`);
+  }
+  
+  const scope = 'openid email profile';
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline`;
+  
+  res.redirect(authUrl);
+});
+
+// Google OAuth callback
+router.get('/auth/google/callback', userController.googleAuthCallback);
+
 router.post('/auth/google', userController.googleAuth);
 
 export default router;
