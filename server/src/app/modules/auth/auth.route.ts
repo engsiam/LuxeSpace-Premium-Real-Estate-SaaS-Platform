@@ -3,6 +3,7 @@ import { auth } from '../../../lib/auth';
 import { toNodeHandler } from 'better-auth/node';
 import prisma from '../../../prisma/client';
 import jwt from 'jsonwebtoken';
+import { getCrossDomainCookieOptions } from '../../utils/cookie';
 
 const router = Router();
 
@@ -63,15 +64,9 @@ router.get('/callback/google', async (req: Request, res: Response) => {
       { expiresIn: '7d' }
     );
     
-    res.cookie('accessToken', jwtToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
-    });
+    res.cookie('accessToken', jwtToken, getCrossDomainCookieOptions(60 * 60 * 24 * 7));
     
-    res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+    res.redirect(`${process.env.CLIENT_URL}/dashboard/user`);
   } catch (error) {
     console.error('Google callback error:', error);
     res.redirect(`${process.env.CLIENT_URL}/login?error=callback_failed`);

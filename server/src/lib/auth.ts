@@ -11,6 +11,8 @@ const getGoogleRedirectUri = (): string => {
   return `${serverUrl}/api/v1/auth/callback/google`;
 };
 
+const isProduction = env.NODE_ENV === 'production';
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'mongodb',
@@ -33,9 +35,16 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 5 * 60,
     },
+    cookieName: 'better-auth.session',
   },
-  advanced: {},
+  advanced: {
+    generateSessionToken: () => crypto.randomUUID(),
+  },
   trustedOrigins: getTrustedOrigins(),
+  cookies: {
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;

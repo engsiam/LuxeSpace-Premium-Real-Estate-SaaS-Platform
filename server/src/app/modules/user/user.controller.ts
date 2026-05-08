@@ -7,20 +7,14 @@ import { registerSchema, loginSchema, updateUserSchema, adminUpdateUserSchema, g
 import { AuthRequest } from '../../middlewares/auth.middleware';
 import { uploadImageToCloudinary } from '../../middlewares/upload.middleware';
 import env, { getClientUrl, getServerUrl } from '../../../config';
-
-const cookieOptions = {
-  httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  path: '/',
-};
+import { getCookieOptions, getCrossDomainCookieOptions, cookieOptions } from '../../utils/cookie';
 
 export const register = catchAsync(async (req, res) => {
   const validated = registerSchema.parse(req.body);
   const { accessToken, refreshToken, user } = await userService.registerUser(validated);
   
-  res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
-  res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 });
+  res.cookie('accessToken', accessToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 7 });
+  res.cookie('refreshToken', refreshToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 30 });
   
   sendResponse(res, {
     statusCode: 201,
@@ -34,8 +28,8 @@ export const login = catchAsync(async (req, res) => {
   const validated = loginSchema.parse(req.body);
   const { accessToken, refreshToken, user } = await userService.loginUser(validated.email, validated.password);
   
-  res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
-  res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 });
+  res.cookie('accessToken', accessToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 7 });
+  res.cookie('refreshToken', refreshToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 30 });
   
   sendResponse(res, {
     statusCode: 200,
@@ -70,8 +64,8 @@ export const googleAuth = catchAsync(async (req, res) => {
   const validated = googleAuthSchema.parse(req.body);
   const { accessToken, refreshToken, user } = await userService.googleAuth(validated);
   
-  res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
-  res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 });
+  res.cookie('accessToken', accessToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 7 });
+  res.cookie('refreshToken', refreshToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 30 });
   
   sendResponse(res, {
     statusCode: 200,
@@ -135,16 +129,10 @@ export const googleAuthCallback = catchAsync(async (req, res) => {
     });
     
     res.cookie('accessToken', accessToken, { 
-      ...cookieOptions, 
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: false,
-      sameSite: 'lax',
+      ...getCrossDomainCookieOptions(60 * 60 * 24 * 7),
     });
     res.cookie('refreshToken', refreshToken, { 
-      ...cookieOptions, 
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: false,
-      sameSite: 'lax',
+      ...getCrossDomainCookieOptions(60 * 60 * 24 * 30),
     });
     
     res.redirect(`${clientUrl}/dashboard/user`);
@@ -159,9 +147,9 @@ export const refreshToken = catchAsync(async (req, res) => {
   const refreshTokenFromBody = req.body?.refreshToken;
   const result = await userService.refreshToken(refreshTokenFromCookie || refreshTokenFromBody);
   
-  if (result.accessToken) {
-    res.cookie('accessToken', result.accessToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
-  }
+if (result.accessToken) {
+      res.cookie('accessToken', result.accessToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 7 });
+    }
   
   sendResponse(res, {
     statusCode: 200,
@@ -211,8 +199,9 @@ export const getSession = catchAsync(async (req, res) => {
 });
 
 export const logout = catchAsync(async (req, res) => {
-  res.clearCookie('accessToken', { ...cookieOptions });
-  res.clearCookie('refreshToken', { ...cookieOptions });
+  const clearOptions = getCookieOptions();
+  res.clearCookie('accessToken', clearOptions);
+  res.clearCookie('refreshToken', clearOptions);
   
   sendResponse(res, {
     statusCode: 200,
