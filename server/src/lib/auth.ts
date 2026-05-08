@@ -35,10 +35,6 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 5 * 60,
     },
-    cookieName: 'better-auth.session',
-  },
-  advanced: {
-    generateSessionToken: () => crypto.randomUUID(),
   },
   trustedOrigins: getTrustedOrigins(),
   cookies: {

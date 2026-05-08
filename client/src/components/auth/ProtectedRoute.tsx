@@ -1,8 +1,8 @@
 'use client';
 
-import { useSession } from '@/lib/auth-client';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -11,16 +11,23 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
-  const { data: session, isPending } = useSession();
+  const { isAuthenticated, isHydrating, hydrate } = useAuthStore();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!isPending && !session) {
-      router.push('/login');
-    }
-  }, [session, isPending, router]);
+    setMounted(true);
+  }, []);
 
-  if (isPending) {
+  useEffect(() => {
+    if (!mounted || isHydrating) return;
+    
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, isHydrating, router, mounted]);
+
+  if (!mounted || isHydrating) {
     return (
       fallback || (
         <div className="flex items-center justify-center min-h-screen">
@@ -30,7 +37,7 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
     );
   }
 
-  if (!session) {
+  if (!isAuthenticated) {
     return null;
   }
 

@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore, useUser, useIsAuthenticated, useIsHydrating } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,19 +14,37 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isAuthenticated, isHydrating } = useAuthStore();
+  const user = useUser();
+  const isAuthenticated = useIsAuthenticated();
+  const isHydrating = useIsHydrating();
+  const { hydrate } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
-    if (!isHydrating && !isAuthenticated) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || hydratedRef.current) return;
+    
+    hydratedRef.current = true;
+    hydrate();
+  }, [mounted, hydrate]);
+
+  useEffect(() => {
+    if (!mounted || isHydrating) return;
+    
+    if (!isAuthenticated) {
       router.replace('/login');
     }
-  }, [isAuthenticated, isHydrating, router]);
+  }, [isAuthenticated, isHydrating, router, mounted]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || isHydrating) return;
     
     const role = user.role || 'USER';
     
@@ -35,13 +53,13 @@ export default function DashboardLayout({
     } else if (pathname.includes('/dashboard/agent') && role !== 'AGENT' && role !== 'ADMIN') {
       router.replace('/dashboard');
     }
-  }, [user, pathname, router]);
+  }, [user, pathname, router, isHydrating]);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
 
-  if (isHydrating || !isAuthenticated) {
+  if (!mounted || isHydrating || !isAuthenticated) {
     return (
       <div className="flex min-h-screen bg-background">
         <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">

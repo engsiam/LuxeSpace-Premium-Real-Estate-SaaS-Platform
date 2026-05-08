@@ -11,7 +11,7 @@ import FAQSection from '@/components/home/FAQSection';
 import CTASection from '@/components/home/CTASection';
 import NewsletterSection from '@/components/home/NewsletterSection';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 async function getSettings() {
   try {

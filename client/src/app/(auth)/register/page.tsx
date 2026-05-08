@@ -49,10 +49,11 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const handleGoogleAuth = () => {
-    window.location.href = `${BASE_URL}/auth/google`;
+    const redirectUrl = `${BASE_URL}/auth/google?redirect_uri=${encodeURIComponent('/dashboard/user')}`;
+    window.location.href = redirectUrl;
   };
 
   const form = useForm<RegisterFormValues>({
@@ -81,7 +82,7 @@ export default function RegisterPage() {
     
     if (success) {
       toast.success('Account created successfully!');
-      router.push('/dashboard');
+      router.replace('/dashboard/user');
     } else {
       toast.error('Registration failed');
     }

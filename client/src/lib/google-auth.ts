@@ -1,11 +1,19 @@
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
-const REDIRECT_URI = typeof window !== 'undefined' 
-  ? `${window.location.origin}/api/auth/callback/google`
-  : 'http://localhost:3000/api/auth/callback/google';
+const getRedirectUri = () => {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/auth/callback/google`;
+  }
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    throw new Error('NEXT_PUBLIC_APP_URL is not defined');
+  }
+  return `${appUrl}/api/auth/callback/google`;
+};
 
 export function getGoogleAuthUrl() {
   const scope = 'openid email profile';
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
+  const redirectUri = getRedirectUri();
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
   return authUrl;
 }
 

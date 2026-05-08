@@ -42,7 +42,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/dashboard');
+      router.replace('/dashboard/user');
     }
   }, [user, router]);
 
@@ -77,14 +77,14 @@ export default function LoginPage() {
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     setIsLoggingIn(true);
     const success = await login(data.email, data.password);
-    setIsLoggingIn(false);
-
+    
     if (success) {
       toast.success('Welcome back!');
-      router.push('/dashboard');
+      router.replace('/dashboard/user');
     } else {
       toast.error('Invalid email or password');
     }
+    setIsLoggingIn(false);
   };
   return (
     <motion.div

@@ -27,12 +27,13 @@ interface AuthState {
   hydrate: () => Promise<void>;
   fetchCurrentUser: () => Promise<void>;
   clearError: () => void;
+  refetchSession: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: false,
-  isHydrating: false,  // Changed to false - only used for initial session check
+  isHydrating: false,
   error: null,
   isAuthenticated: false,
 
@@ -103,6 +104,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   hydrate: async () => {
+    if (get().isHydrating) return;
+    
     set({ isHydrating: true });
 
     try {
@@ -113,24 +116,38 @@ export const useAuthStore = create<AuthState>((set) => ({
         },
       });
       
-      console.log('Response status:', response.status, response.statusText);
       const data = await response.json();
-      console.log('Hydrate response:', JSON.stringify(data));
       
       if (data.success && data.data?.isAuthenticated && data.data?.user) {
-        console.log('Setting user:', data.data.user);
         set({
           user: data.data.user,
           isAuthenticated: true,
           isHydrating: false,
         });
       } else {
-        console.log('No valid session, setting not authenticated');
         set({ isHydrating: false, isAuthenticated: false });
       }
-    } catch (error: any) {
-      console.error('Hydrate error:', error.message);
+    } catch {
       set({ isHydrating: false, isAuthenticated: false });
+    }
+  },
+
+  refetchSession: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/users/session`, {
+        withCredentials: true,
+      });
+      
+      if (response.data.success && response.data.data?.isAuthenticated && response.data.data?.user) {
+        set({
+          user: response.data.data.user,
+          isAuthenticated: true,
+        });
+      } else {
+        set({ isAuthenticated: false, user: null });
+      }
+    } catch {
+      set({ isAuthenticated: false, user: null });
     }
   },
 
@@ -155,3 +172,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ error: null });
   },
 }));
+
+export const useUser = () => useAuthStore((state) => state.user);
+export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
+export const useIsHydrating = () => useAuthStore((state) => state.isHydrating);
+export const useIsLoading = () => useAuthStore((state) => state.isLoading);
+export const useAuthError = () => useAuthStore((state) => state.error);

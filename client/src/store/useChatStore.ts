@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import axiosInstance from '@/lib/axiosInstance';
+import { BASE_URL } from '@/lib/config';
 import { toast } from 'sonner';
+
+const getExploreUrl = () => {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    throw new Error('NEXT_PUBLIC_APP_URL is not defined');
+  }
+  return `${appUrl}/explore`;
+};
 
 interface Message {
   id: string;
@@ -95,7 +104,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
               `[PROP]{"id":"${p._id || p.id}","title":"${p.title}","price":"৳${Number(p.price || 0).toLocaleString()}","location":"${p.location || p.city}","image":"${p.images?.[0] || ''}"}[/PROP]`
             ).join('\n');
             
-            aiText = `Here are our latest properties:\n\n${propertyCards}\n\n[LINK]http://localhost:3000/explore[/LINK]\n\n📞 Contact: 01742080475`;
+            aiText = `Here are our latest properties:\n\n${propertyCards}\n\n[LINK]${getExploreUrl()}[/LINK]\n\n📞 Contact: 01742080475`;
           } else {
             aiText = 'No properties available at the moment. Browse our explore page for more options.';
           }

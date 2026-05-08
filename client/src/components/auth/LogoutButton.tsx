@@ -1,6 +1,6 @@
 'use client';
 
-import { signOut } from '@/lib/auth-client';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 
 interface LogoutButtonProps {
@@ -9,16 +9,12 @@ interface LogoutButtonProps {
 
 export function LogoutButton({ className = '' }: LogoutButtonProps) {
   const router = useRouter();
+  const { logout } = useAuthStore();
 
   const handleLogout = async () => {
-    await signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push('/login');
-          router.refresh();
-        },
-      },
-    });
+    await logout();
+    router.push('/login');
+    router.refresh();
   };
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { signIn } from '@/lib/auth-client';
+import { BASE_URL } from '@/lib/config';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -19,18 +19,15 @@ export function GoogleLoginButton({
 }: GoogleLoginButtonProps) {
   const [loading, setLoading] = useState(false);
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setLoading(true);
     try {
-      await signIn.social({
-        provider: 'google',
-        callbackURL: '/dashboard',
-      });
+      const redirectUrl = `${BASE_URL}/auth/google?redirect_uri=${encodeURIComponent('/dashboard/user')}`;
+      window.location.href = redirectUrl;
       onSuccess?.();
     } catch (error) {
       console.error('Google login failed:', error);
       onError?.(error as Error);
-    } finally {
       setLoading(false);
     }
   };

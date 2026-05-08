@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -9,21 +9,21 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
-  const [hydrateTimeout, setHydrateTimeout] = useState(false);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     setMounted(true);
-    hydrate();
-    
-    const timer = setTimeout(() => {
-      setHydrateTimeout(true);
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, [hydrate]);
+  }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || hydratedRef.current) return;
+    
+    hydratedRef.current = true;
+    hydrate();
+  }, [mounted, hydrate]);
+
+  useEffect(() => {
+    if (!mounted || isHydrating) return;
     
     if (!isAuthenticated && pathname?.startsWith('/dashboard')) {
       router.replace('/login');

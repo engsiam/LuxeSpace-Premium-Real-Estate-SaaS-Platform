@@ -43,17 +43,15 @@ import {
 
 import { useChatStore } from '@/store/useChatStore';
 
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore, useUser, useIsAuthenticated } from '@/store/useAuthStore';
 
 export default function Navbar() {
 
   const router = useRouter();
 
-  const {
-    user,
-    isAuthenticated,
-    logout,
-  } = useAuthStore();
+  const user = useUser();
+  const isAuthenticated = useIsAuthenticated();
+  const { logout } = useAuthStore();
 
   const {
     toggleChat,
