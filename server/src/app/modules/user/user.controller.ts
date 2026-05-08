@@ -1,30 +1,47 @@
 import { Response } from 'express';
+import jwt from 'jsonwebtoken';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import * as userService from './user.service';
 import { registerSchema, loginSchema, updateUserSchema, adminUpdateUserSchema, googleAuthSchema } from './user.validation';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 import { uploadImageToCloudinary } from '../../middlewares/upload.middleware';
+import env from '../../../config';
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+};
 
 export const register = catchAsync(async (req, res) => {
   const validated = registerSchema.parse(req.body);
-  const result = await userService.registerUser(validated);
+  const { accessToken, refreshToken, user } = await userService.registerUser(validated);
+  
+  res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+  res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 });
+  
   sendResponse(res, {
     statusCode: 201,
     success: true,
     message: 'User registered successfully',
-    data: result,
+    data: { user },
   });
 });
 
 export const login = catchAsync(async (req, res) => {
   const validated = loginSchema.parse(req.body);
-  const result = await userService.loginUser(validated.email, validated.password);
+  const { accessToken, refreshToken, user } = await userService.loginUser(validated.email, validated.password);
+  
+  res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+  res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 });
+  
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Login successful',
-    data: result,
+    data: { user },
   });
 });
 
@@ -51,23 +68,77 @@ export const uploadAvatar = catchAsync(async (req: AuthRequest, res) => {
 
 export const googleAuth = catchAsync(async (req, res) => {
   const validated = googleAuthSchema.parse(req.body);
-  const result = await userService.googleAuth(validated);
+  const { accessToken, refreshToken, user } = await userService.googleAuth(validated);
+  
+  res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+  res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 });
+  
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Google authentication successful',
-    data: result,
+    data: { user },
   });
 });
 
 export const refreshToken = catchAsync(async (req, res) => {
-  const { refreshToken } = req.body;
-  const result = await userService.refreshToken(refreshToken);
+  const refreshTokenFromCookie = req.cookies.refreshToken;
+  const refreshTokenFromBody = req.body?.refreshToken;
+  const result = await userService.refreshToken(refreshTokenFromCookie || refreshTokenFromBody);
+  
+  if (result.accessToken) {
+    res.cookie('accessToken', result.accessToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+  }
+  
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Token refreshed',
     data: result,
+  });
+});
+
+export const getSession = catchAsync(async (req, res) => {
+  const token = req.cookies.accessToken;
+  
+  if (!token) {
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'No session',
+      data: { user: null, isAuthenticated: false },
+    });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string; role: string };
+    const user = await userService.getUserById(decoded.id);
+    
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Session active',
+      data: { user, isAuthenticated: true },
+    });
+  } catch {
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Invalid session',
+      data: { user: null, isAuthenticated: false },
+    });
+  }
+});
+
+export const logout = catchAsync(async (req, res) => {
+  res.clearCookie('accessToken', { ...cookieOptions });
+  res.clearCookie('refreshToken', { ...cookieOptions });
+  
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Logged out successfully',
+    data: null,
   });
 });
 

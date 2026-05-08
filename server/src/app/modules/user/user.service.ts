@@ -70,7 +70,7 @@ export const loginUser = async (email: string, password: string) => {
     where: { email },
   });
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
     throw new ApiError(401, 'Invalid email or password');
   }
 
@@ -92,6 +92,7 @@ export const loginUser = async (email: string, password: string) => {
     { expiresIn: '30d' } as SignOptions
   );
 
+  // Return tokens in response for frontend to store if needed (deprecated - use cookies)
   return { user: userWithoutPassword, accessToken, refreshToken };
 };
 

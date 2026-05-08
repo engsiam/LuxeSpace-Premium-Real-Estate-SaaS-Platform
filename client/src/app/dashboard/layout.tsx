@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
-import { useSession } from 'next-auth/react';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,22 +14,34 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: session, status } = useSession();
+  const { user, isAuthenticated, isHydrating } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
+    if (!isHydrating && !isAuthenticated) {
+      router.replace('/login');
     }
-  }, [status, router]);
+  }, [isAuthenticated, isHydrating, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const role = user.role || 'USER';
+    
+    if (pathname.includes('/dashboard/admin') && role !== 'ADMIN') {
+      router.replace('/dashboard');
+    } else if (pathname.includes('/dashboard/agent') && role !== 'AGENT' && role !== 'ADMIN') {
+      router.replace('/dashboard');
+    }
+  }, [user, pathname, router]);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
 
-  if (status === 'loading') {
+  if (isHydrating || !isAuthenticated) {
     return (
       <div className="flex min-h-screen bg-background">
         <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">
@@ -52,7 +64,7 @@ export default function DashboardLayout({
     );
   }
 
-  const role = session?.user?.role || 'USER';
+  const role = user?.role || 'USER';
 
   if (pathname.includes('/dashboard/admin') && role !== 'ADMIN') {
     router.push('/dashboard');

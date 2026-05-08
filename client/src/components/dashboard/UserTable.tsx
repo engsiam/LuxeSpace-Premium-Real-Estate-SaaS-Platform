@@ -26,6 +26,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -121,32 +122,35 @@ export default function UserTable({
               </TableCell>
               <TableCell className="text-right pr-8">
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
+                  {/* @ts-expect-error - asChild prop for Slot component */}
+                  <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl hover:bg-white/10 transition-all">
                       <MoreVertical size={18} className="text-muted-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-card border-border rounded-2xl p-2 shadow-2xl">
-                    <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Admin Controls</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-white/5" />
-                    <DropdownMenuItem 
-                      onClick={() => onEditRole(user.id)}
-                      className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-all"
-                    >
-                      <UserCog size={18} />
-                      <span className="font-bold text-sm">Modify Role</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => onDeactivate(user.id)}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all ${
-                        user.isActive 
-                          ? 'hover:bg-rose-500/10 hover:text-rose-500' 
-                          : 'hover:bg-emerald-500/10 hover:text-emerald-500'
-                      }`}
-                    >
-                      {user.isActive ? <PowerOff size={18} /> : <Power size={18} />}
-                      <span className="font-bold text-sm">{user.isActive ? 'Deactivate Account' : 'Reactivate Account'}</span>
-                    </DropdownMenuItem>
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Admin Controls</DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-white/5" />
+                      <DropdownMenuItem 
+                        onClick={() => onEditRole(user.id)}
+                        className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-all"
+                      >
+                        <UserCog size={18} />
+                        <span className="font-bold text-sm">Modify Role</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => onDeactivate(user.id)}
+                        className={`flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all ${
+                          user.isActive 
+                            ? 'hover:bg-rose-500/10 hover:text-rose-500' 
+                            : 'hover:bg-emerald-500/10 hover:text-emerald-500'
+                        }`}
+                      >
+                        {user.isActive ? <PowerOff size={18} /> : <Power size={18} />}
+                        <span className="font-bold text-sm">{user.isActive ? 'Deactivate Account' : 'Reactivate Account'}</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

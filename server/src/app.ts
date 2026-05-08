@@ -8,8 +8,15 @@ import routes from './app/routes';
 
 const app: Application = express();
 
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'pragma'],
+};
+
 // Middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(cookieParser());

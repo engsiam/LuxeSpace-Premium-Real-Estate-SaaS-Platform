@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, User, LogOut, LayoutDashboard, Globe, X, ChevronRight, Sparkles, Settings, Home, Bot, Building } from 'lucide-react';
-import { useSession, signOut } from 'next-auth/react';
+import { Menu, LogOut, LayoutDashboard, Globe, X, ChevronRight, Sparkles, Building, User as UserIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,11 +20,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useChatStore } from '@/store/useChatStore';
-import { useUserStore } from '@/store/useUserStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function Navbar() {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuthStore();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -36,11 +36,11 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isLoggedIn = status === 'authenticated';
-  const userRole = session?.user?.role || 'USER';
+  const userRole = user?.role || 'USER';
 
   const navLinks = [
     { href: '/', label: 'Home' },
+    // { href: '/properties', label: 'Properties' },
     { href: '/explore', label: 'Explore' },
     { href: '/blog', label: 'Blog' },
     { href: '/about', label: 'About' },
@@ -54,8 +54,12 @@ export default function Navbar() {
   };
 
   const { toggleChat } = useChatStore();
-  const { user: storedUser } = useUserStore();
-  const avatarUrl = storedUser?.avatar || session?.user?.avatar || session?.user?.image || '';
+  const avatarUrl = user?.avatar || '';
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
 
   return (
     <nav 
@@ -76,7 +80,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Navigation - Center */}
         <div className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2">
           {navLinks.map((link) => (
             <Link
@@ -114,24 +117,21 @@ export default function Navbar() {
           <div className={cn('p-0.5 rounded-full border transition-colors', scrolled ? 'border-border bg-card/50' : 'border-white/10 bg-white/5')}>
             <ThemeToggle />
           </div>
-         
-          {/* Auth Section */}
+          
           <div className="hidden lg:flex items-center gap-4">
-            {status === 'loading' ? (
-              <div className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-            ) : isLoggedIn ? (
+            {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger className="outline-none">
                   <div className="flex items-center gap-3 px-3 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all group cursor-pointer">
                     <Avatar className="w-10 h-10 border-2 border-primary/20">
                       <AvatarImage src={avatarUrl} />
                       <AvatarFallback className="bg-primary text-secondary-foreground font-black">
-                        {session?.user?.name?.[0]?.toUpperCase() || 'U'}
+                        {user?.name?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col items-start">
                       <span className={cn('text-xs font-black tracking-tight leading-none mb-1', scrolled ? 'text-foreground' : 'text-white')}>
-                        {session?.user?.name?.split(' ')[0]}
+                        {user?.name?.split(' ')[0]}
                       </span>
                       <span className="text-[9px] font-black uppercase tracking-widest text-primary leading-none">
                         {userRole}
@@ -140,42 +140,42 @@ export default function Navbar() {
                   </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64 mt-4 p-3 bg-card border-border rounded-[1.5rem] shadow-3xl">
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel className="px-4 py-3">
-                      <p className="text-sm font-black text-foreground">{session?.user?.name}</p>
-                      <p className="text-xs text-muted-foreground font-medium">{session?.user?.email}</p>
-                    </DropdownMenuLabel>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator className="bg-border/50 my-2" />
-                  <DropdownMenuItem onClick={() => router.push(getDashboardLink())}>
-                    <LayoutDashboard size={18} />
-                    <span className="font-bold text-sm">Dashboard</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push(`${getDashboardLink()}/profile`)}>
-                    <User size={18} />
-                    <span className="font-bold text-sm">My Profile</span>
-                  </DropdownMenuItem>
-                  {userRole === 'USER' && (
-                    <DropdownMenuItem onClick={() => router.push('/dashboard/user/bookings')}>
-                      <Building size={18} />
-                      <span className="font-bold text-sm">My Bookings</span>
-                    </DropdownMenuItem>
-                  )}
-                  {userRole === 'AGENT' && (
-                    <DropdownMenuItem onClick={() => router.push('/dashboard/agent/my-properties')}>
-                      <Building size={18} />
-                      <span className="font-bold text-sm">My Properties</span>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator className="bg-border/50 my-2" />
-                  <DropdownMenuItem 
-                    onClick={() => signOut()}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 transition-colors"
-                  >
-                    <LogOut size={18} />
-                    <span className="font-bold text-sm">Sign Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="px-4 py-3">
+                        <p className="text-sm font-black text-foreground">{user?.name}</p>
+                        <p className="text-xs text-muted-foreground font-medium">{user?.email}</p>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-border/50 my-2" />
+                      <DropdownMenuItem onClick={() => router.push(getDashboardLink())}>
+                        <LayoutDashboard size={18} />
+                        <span className="font-bold text-sm">Dashboard</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push(`${getDashboardLink()}/profile`)}>
+                        <UserIcon size={18} />
+                        <span className="font-bold text-sm">My Profile</span>
+                      </DropdownMenuItem>
+                      {userRole === 'USER' && (
+                        <DropdownMenuItem onClick={() => router.push('/dashboard/user/bookings')}>
+                          <Building size={18} />
+                          <span className="font-bold text-sm">My Bookings</span>
+                        </DropdownMenuItem>
+                      )}
+                      {userRole === 'AGENT' && (
+                        <DropdownMenuItem onClick={() => router.push('/dashboard/agent/my-properties')}>
+                          <Building size={18} />
+                          <span className="font-bold text-sm">My Properties</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator className="bg-border/50 my-2" />
+                      <DropdownMenuItem 
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 transition-colors"
+                      >
+                        <LogOut size={18} />
+                        <span className="font-bold text-sm">Sign Out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <>
@@ -193,7 +193,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Trigger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className={cn(
@@ -206,7 +205,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div 
@@ -235,11 +233,7 @@ export default function Navbar() {
               ))}
 
               <div className="pt-2 border-t border-border/50">
-                {status === 'loading' ? (
-                  <div className="flex justify-center p-2">
-                    <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                  </div>
-                ) : !isLoggedIn ? (
+                {!isAuthenticated ? (
                   <div className="grid grid-cols-2 gap-2">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full">
                       <Button variant="outline" className="w-full h-10 rounded-lg font-bold text-xs uppercase">
@@ -272,7 +266,7 @@ export default function Navbar() {
                     </Button>
                     <Button 
                       variant="outline" 
-                      onClick={() => signOut()}
+                      onClick={handleLogout}
                       className="w-full h-10 rounded-lg font-bold text-xs uppercase text-rose-500 border-rose-500/20"
                     >
                       Sign Out
@@ -288,7 +282,7 @@ export default function Navbar() {
   );
 }
 
-function Loader2({ className, size = 24 }: { className?: string; size?: number }) {
+function Bot({ className, size = 24 }: { className?: string; size?: number }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -300,9 +294,15 @@ function Loader2({ className, size = 24 }: { className?: string; size?: number }
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={cn("animate-spin", className)}
+      className={className}
     >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+      <path d="M12 8a4 4 0 1 0-4 4v2h8v-2" />
+      <path d="M8 12a4 4 0 0 0 8 0" />
+      <path d="M9 12h6" />
+      <path d="M12 9v6" />
+      <path d="M10 2h4" />
+      <path d="M8.5 2a2.5 2.5 0 0 0 0 5" />
+      <path d="M15.5 2a2.5 2.5 0 0 1 0 5" />
     </svg>
   );
 }

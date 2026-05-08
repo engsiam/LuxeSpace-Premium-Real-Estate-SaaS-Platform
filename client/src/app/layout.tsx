@@ -60,12 +60,14 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('luxespace-theme');
-                  if (!theme) {
-                    theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  if(typeof window !== 'undefined'){
+                    var theme = localStorage.getItem('luxespace-theme');
+                    if (!theme) {
+                      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    }
+                    document.documentElement.classList.add(theme);
+                    document.documentElement.setAttribute('data-theme', theme);
                   }
-                  document.documentElement.classList.add(theme);
-                  document.documentElement.setAttribute('data-theme', theme);
                 } catch (e) {}
               })();
             `,

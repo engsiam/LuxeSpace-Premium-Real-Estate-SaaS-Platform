@@ -64,7 +64,9 @@ export default function AddProperty() {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
-  const form = useForm({
+  const form = useForm<
+    z.infer<typeof propertySchema>
+  >({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       title: '',
@@ -76,7 +78,7 @@ export default function AddProperty() {
       bhk: 1,
       size: 0,
       type: '',
-      amenities: [],
+      amenities: [] as string[],
     },
   });
 
@@ -84,7 +86,7 @@ export default function AddProperty() {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setSelectedImages((prev) => [...prev, ...files]);
-      
+
       const newPreviews = files.map((file) => URL.createObjectURL(file));
       setPreviews((prev) => [...prev, ...newPreviews]);
     }
@@ -96,11 +98,19 @@ export default function AddProperty() {
   };
 
   const toggleAmenity = (amenity: string) => {
-    const current = form.getValues('amenities') || [];
+    const current =
+      (form.getValues('amenities') as string[]) || [];
+
     if (current.includes(amenity)) {
-      form.setValue('amenities', current.filter((a) => a !== amenity));
+      form.setValue(
+        'amenities',
+        current.filter((a) => a !== amenity)
+      );
     } else {
-      form.setValue('amenities', [...current, amenity]);
+      form.setValue('amenities', [
+        ...current,
+        amenity,
+      ]);
     }
   };
 
@@ -120,7 +130,7 @@ export default function AddProperty() {
           formData.append(key, value.toString());
         }
       });
-      
+
       selectedImages.forEach((image) => {
         formData.append('images', image);
       });
@@ -185,10 +195,10 @@ export default function AddProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">Description</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Describe the property, amenities, etc." 
+                      <Textarea
+                        placeholder="Describe the property, amenities, etc."
                         className="min-h-[120px] bg-background/50 border-white/10 px-6 py-4 text-white placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -322,15 +332,13 @@ export default function AddProperty() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => toggleAmenity(amenity)}
-                      className={`flex items-center gap-3 p-4 rounded-2xl border transition-all text-left ${
-                        isSelected 
-                          ? 'bg-primary/10 border-primary text-primary shadow-[0_0_20px_-5px_rgba(201,167,77,0.3)]' 
-                          : 'bg-background/50 border-white/5 text-muted-foreground hover:border-white/20'
-                      }`}
+                      className={`flex items-center gap-3 p-4 rounded-2xl border transition-all text-left ${isSelected
+                        ? 'bg-primary/10 border-primary text-primary shadow-[0_0_20px_-5px_rgba(201,167,77,0.3)]'
+                        : 'bg-background/50 border-white/5 text-muted-foreground hover:border-white/20'
+                        }`}
                     >
-                      <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-primary border-primary' : 'border-white/20'
-                      }`}>
+                      <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary' : 'border-white/20'
+                        }`}>
                         {isSelected && <CheckCircle2 size={14} className="text-secondary" />}
                       </div>
                       <span className="text-xs font-bold uppercase tracking-wider">{amenity}</span>
@@ -349,10 +357,10 @@ export default function AddProperty() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {previews.map((preview, index) => (
                   <div key={index} className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 group">
-                    <Image 
-                      src={preview} 
-                      alt={`Preview ${index}`} 
-                      fill 
+                    <Image
+                      src={preview}
+                      alt={`Preview ${index}`}
+                      fill
                       className="object-cover transition-transform group-hover:scale-110 duration-500"
                     />
                     <button
@@ -369,10 +377,10 @@ export default function AddProperty() {
                     <ImagePlus className="w-6 h-6" />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Add Media</span>
-                  <input 
-                    type="file" 
-                    multiple 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    multiple
+                    className="hidden"
                     accept="image/*"
                     onChange={handleImageChange}
                   />
@@ -381,8 +389,8 @@ export default function AddProperty() {
             </div>
 
             <div className="flex justify-center pt-10">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
                 className="w-full max-w-md h-16 text-xl bg-primary text-secondary-foreground rounded-[2rem] font-black shadow-[0_0_40px_-10px_rgba(201,167,77,0.4)] hover:shadow-[0_0_50px_-5px_rgba(201,167,77,0.5)] hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50"
               >

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Property } from '@/types';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Eye, Trash2, Home, Ruler, BedDouble, Sparkles, PencilLine } from 'lucide-react';
 
 interface PropertyTableProps {
@@ -63,11 +64,18 @@ export default function PropertyTable({
               <TableCell className="py-6">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-12 rounded-xl overflow-hidden border border-white/10 relative flex-shrink-0">
-                    <img 
-                      src={property.images?.[0] || '/placeholder.jpg'} 
-                      alt="" 
-                      className="object-cover w-full h-full"
-                    />
+                    {property.images?.[0] ? (
+                      <Image 
+                        src={property.images[0]} 
+                        alt="" 
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-secondary flex items-center justify-center">
+                        <Home className="text-muted-foreground h-4 w-4" />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <p className="text-white font-black tracking-tight leading-none mb-1.5">{property.title}</p>

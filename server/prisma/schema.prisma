@@ -7,6 +7,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Better Auth Models
+model Session {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  expiresAt DateTime
+  token    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @db.ObjectId
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at       Int?
+  token_type       String?
+  scope            String?
+  id_token         String?
+  session_state    String?
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  password      String?
+  role          Role      @default(USER)
+  phone         String?
+  avatar        String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions     Session[]
+  accounts     Account[]
+  properties    Property[]
+  bookings      Booking[]
+  reviews       Review[]
+  blogs         Blog[]
+  transactions  Transaction[]
+
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt(sort: Desc)])
+}
+
 enum Role {
   USER
   AGENT
@@ -32,29 +90,6 @@ enum TransactionStatus {
   FAILED
 }
 
-model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  email         String    @unique
-  password      String
-  role          Role      @default(USER)
-  phone         String?
-  avatar        String?
-  isActive      Boolean   @default(true)
-  properties    Property[]
-  bookings      Booking[]
-  reviews       Review[]
-  blogs         Blog[]
-  transactions  Transaction[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Indexes
-  @@index([role])
-  @@index([isActive])
-  @@index([createdAt(sort: Desc)])
-}
-
 model Property {
   id            String          @id @default(auto()) @map("_id") @db.ObjectId
   title         String
@@ -65,7 +100,7 @@ model Property {
   area          String
   bhk           Int
   size          Int
-  type          String          // Apartment, Villa, Commercial, etc.
+  type          String
   images        String[]
   amenities     String[]
   status        PropertyStatus  @default(AVAILABLE)
@@ -77,7 +112,6 @@ model Property {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
-  // Indexes for faster queries
   @@index([status])
   @@index([isFeatured])
   @@index([type])
@@ -107,7 +141,6 @@ model Booking {
   bKashTrxId      String?
   bKashPaymentID  String?
 
-  // Indexes
   @@index([status])
   @@index([paymentStatus])
   @@index([userId])
@@ -129,7 +162,6 @@ model Transaction {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
-  // Indexes
   @@index([status])
   @@index([userId])
   @@index([bookingId])
@@ -146,7 +178,6 @@ model Review {
   comment     String
   createdAt   DateTime  @default(now())
 
-  // Indexes
   @@index([propertyId])
   @@index([userId])
   @@index([createdAt(sort: Desc)])
@@ -164,7 +195,6 @@ model Blog {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // Indexes
   @@index([isPublished])
   @@index([createdAt(sort: Desc)])
   @@index([authorId])
@@ -183,11 +213,9 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Indexes for faster queries
   @@index([createdAt(sort: Desc)])
   @@index([isRead])
   @@index([status])
-  @@index([email])
 }
 
 model Settings {
@@ -197,11 +225,11 @@ model Settings {
   faviconUrl    String?
   supportEmail String?
   bkashTrxId   String?
-  heroVideos   String[]  // Hero section background videos
-  heroTitle    String?   // Hero section title
-  heroSubtitle String?   // Hero section subtitle
-  sliderInterval Int    @default(8)     // Slider auto-slide interval in seconds
-  sliderAutoPlay Boolean @default(true) // Auto-play videos
+  heroVideos   String[]
+  heroTitle    String?
+  heroSubtitle String?
+  sliderInterval Int    @default(8)
+  sliderAutoPlay Boolean @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

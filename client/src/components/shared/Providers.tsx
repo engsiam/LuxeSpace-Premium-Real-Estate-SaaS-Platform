@@ -1,12 +1,12 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import LenisProvider from '@/components/shared/LenisProvider';
 import { Toaster } from 'sonner';
 import ThemeInitializer from '@/components/shared/ThemeInitializer';
 import { UserStoreProvider } from '@/components/providers/UserStoreProvider';
 import PWAProvider from '@/components/shared/PWAProvider';
+import { SessionProvider } from '@/lib/auth/session-provider';
 import dynamic from 'next/dynamic';
 
 const AIChatSidebar = dynamic(() => import('@/components/shared/AIChatSidebar'), {
@@ -20,8 +20,8 @@ const ScrollToTop = dynamic(() => import('@/components/shared/ScrollToTop'), {
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
-      <TooltipProvider>
+    <TooltipProvider>
+      <SessionProvider>
         <LenisProvider>
           <ThemeInitializer />
           <PWAProvider>
@@ -33,7 +33,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           </PWAProvider>
         </LenisProvider>
         <Toaster richColors position="top-right" />
-      </TooltipProvider>
-    </SessionProvider>
+      </SessionProvider>
+    </TooltipProvider>
   );
 }

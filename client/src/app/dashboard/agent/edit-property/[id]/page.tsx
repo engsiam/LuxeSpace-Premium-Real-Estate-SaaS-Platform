@@ -67,7 +67,9 @@ export default function EditProperty() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
-  const form = useForm({
+  const form = useForm<
+    z.infer<typeof propertySchema>
+  >({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       title: '',
@@ -79,7 +81,7 @@ export default function EditProperty() {
       bhk: 1,
       size: 0,
       type: '',
-      amenities: [],
+      amenities: [] as string[],
       status: 'AVAILABLE',
     },
   });
@@ -89,7 +91,7 @@ export default function EditProperty() {
       try {
         const response = await axiosInstance.get(`/properties/${id}`);
         const property = response.data.data;
-        
+
         form.reset({
           title: property.title,
           description: property.description,
@@ -103,7 +105,7 @@ export default function EditProperty() {
           amenities: Array.isArray(property.amenities) ? property.amenities : [],
           status: property.status,
         });
-        
+
         setExistingImages(property.images || []);
       } catch (error) {
         toast.error('Failed to load property data');
@@ -120,7 +122,7 @@ export default function EditProperty() {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setSelectedImages((prev) => [...prev, ...files]);
-      
+
       const newPreviews = files.map((file) => URL.createObjectURL(file));
       setPreviews((prev) => [...prev, ...newPreviews]);
     }
@@ -148,7 +150,7 @@ export default function EditProperty() {
     setLoading(true);
     try {
       const formData = new FormData();
-      
+
       // Explicitly append each field
       formData.append('title', values.title);
       formData.append('description', values.description);
@@ -160,13 +162,13 @@ export default function EditProperty() {
       formData.append('size', values.size.toString());
       formData.append('type', values.type);
       formData.append('status', values.status);
-      
+
       // Handle amenities correctly
       formData.append('amenities', JSON.stringify(values.amenities));
-      
+
       // Handle existing images
       formData.append('existingImages', JSON.stringify(existingImages));
-      
+
       // Handle new images
       selectedImages.forEach((image) => {
         formData.append('images', image);
@@ -264,10 +266,10 @@ export default function EditProperty() {
                 <FormItem>
                   <FormLabel className="text-muted-foreground uppercase tracking-widest text-[10px] font-black">Exquisite Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Narrate the property's unique charm..." 
+                    <Textarea
+                      placeholder="Narrate the property's unique charm..."
                       className="min-h-[160px] bg-background/50 border-white/10 px-8 py-6 text-white rounded-[2rem] focus:border-primary text-lg leading-relaxed"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -284,11 +286,11 @@ export default function EditProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground uppercase tracking-widest text-[10px] font-black">Valuation (BDT)</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         type="number"
-                        value={field.value as number | string} 
-                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))} 
-                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" 
+                        value={field.value as number | string}
+                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl"
                       />
                     </FormControl>
                     <FormMessage />
@@ -325,11 +327,11 @@ export default function EditProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground uppercase tracking-widest text-[10px] font-black">Dimension (sqft)</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         value={field.value as number | string}
                         onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" 
+                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl"
                       />
                     </FormControl>
                     <FormMessage />
@@ -374,11 +376,11 @@ export default function EditProperty() {
                   <FormItem>
                     <FormLabel className="text-muted-foreground uppercase tracking-widest text-[10px] font-black">Bedrooms</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         type="number"
                         value={field.value as number | string}
                         onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl" 
+                        className="bg-background/50 border-white/10 px-6 text-white h-14 rounded-2xl"
                       />
                     </FormControl>
                     <FormMessage />
@@ -408,15 +410,13 @@ export default function EditProperty() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => toggleAmenity(amenity)}
-                      className={`flex items-center gap-3 p-5 rounded-2xl border transition-all text-left ${
-                        isSelected 
-                          ? 'bg-primary/10 border-primary text-primary shadow-[0_0_20px_-5px_rgba(201,167,77,0.3)]' 
+                      className={`flex items-center gap-3 p-5 rounded-2xl border transition-all text-left ${isSelected
+                          ? 'bg-primary/10 border-primary text-primary shadow-[0_0_20px_-5px_rgba(201,167,77,0.3)]'
                           : 'bg-background/50 border-white/5 text-muted-foreground hover:border-white/20'
-                      }`}
+                        }`}
                     >
-                      <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-primary border-primary' : 'border-white/20'
-                      }`}>
+                      <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary' : 'border-white/20'
+                        }`}>
                         {isSelected && <CheckCircle2 size={14} className="text-secondary" />}
                       </div>
                       <span className="text-[9px] font-black uppercase tracking-widest">{amenity}</span>
@@ -452,7 +452,7 @@ export default function EditProperty() {
                     <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg text-[8px] font-black uppercase text-primary border border-primary/20">Current</div>
                   </div>
                 ))}
-                
+
                 {/* New Image Previews */}
                 {previews.map((preview, index) => (
                   <div key={`new-${index}`} className="relative aspect-video rounded-2xl overflow-hidden border-2 border-primary/30 group">
@@ -467,7 +467,7 @@ export default function EditProperty() {
                     <div className="absolute bottom-3 left-3 bg-primary/80 backdrop-blur-md px-3 py-1 rounded-lg text-[8px] font-black uppercase text-secondary-foreground">New Asset</div>
                   </div>
                 ))}
-                
+
                 <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:bg-white/5 transition-all group">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-3 group-hover:scale-110 transition-transform">
                     <ImagePlus className="w-6 h-6" />
@@ -479,8 +479,8 @@ export default function EditProperty() {
             </div>
 
             <div className="flex justify-center pt-10">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
                 className="w-full max-w-md h-20 text-xl bg-primary text-secondary-foreground rounded-[2rem] font-black shadow-[0_20px_40px_-10px_rgba(201,167,77,0.4)] hover:shadow-[0_25px_50px_-10px_rgba(201,167,77,0.5)] hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center gap-4"
               >

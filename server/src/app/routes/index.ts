@@ -12,8 +12,9 @@ import contactRoute from '../modules/contact/contact.route';
 import aiRoute from '../modules/ai/ai.route';
 import statsRoute from '../modules/stats.route';
 import settingsRoute from '../modules/settings/settings.route';
+import authRoute from '../modules/auth/auth.route';
 
-router.use('/auth', userRoute);
+router.use('/auth', authRoute);
 router.use('/users', userRoute);
 router.use('/properties', propertyRoute);
 router.use('/bookings', bookingRoute);

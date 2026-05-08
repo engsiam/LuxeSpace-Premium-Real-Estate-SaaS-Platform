@@ -38,11 +38,13 @@ export default function AgentProfile() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<ProfileFormValues>({
+  const form = useForm<
+    z.infer<typeof profileSchema>
+  >({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
-      phone: '',
+      phone: undefined,
     },
   });
 
@@ -135,16 +137,16 @@ export default function AgentProfile() {
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] p-8 text-center relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
-            
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*" 
-              onChange={handleImageUpload} 
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleImageUpload}
             />
-            
-            <div 
+
+            <div
               onClick={() => fileInputRef.current?.click()}
               className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-primary/20 group-hover:scale-110 transition-transform duration-500 overflow-hidden relative cursor-pointer"
             >
@@ -169,7 +171,7 @@ export default function AgentProfile() {
             </div>
             <h2 className="text-2xl font-black text-white">{form.getValues().name}</h2>
             <p className="text-sm text-muted-foreground font-medium mb-6 italic">Certified Elite Agent</p>
-            
+
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 py-2 rounded-full border border-emerald-500/20">
                 <CheckCircle2 size={12} />
@@ -239,8 +241,8 @@ export default function AgentProfile() {
                   </div>
 
                   <div className="flex justify-end pt-4">
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       disabled={updating}
                       className="h-14 px-10 bg-primary text-secondary-foreground rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                     >

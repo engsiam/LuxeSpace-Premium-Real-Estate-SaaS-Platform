@@ -1,30 +1,39 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useEffect, useRef } from 'react';
-import { useUserStore } from '@/store/useUserStore';
+import { useEffect, useState, useRef } from 'react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter, usePathname } from 'next/navigation';
 
 export function UserStoreProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
-  const { setUser } = useUserStore();
-  const initialized = useRef(false);
+  const { hydrate, isHydrating, isAuthenticated } = useAuthStore();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.user && !initialized.current) {
-      const user = session.user as any;
-      setUser({
-        id: user.id || '',
-        name: user.name || '',
-        email: user.email || '',
-        avatar: user.avatar || user.image || '',
-        role: user.role || 'USER',
-      });
-      initialized.current = true;
-    } else if (status === 'unauthenticated') {
-      setUser(null);
-      initialized.current = false;
+    if (!hydratedRef.current) {
+      hydratedRef.current = true;
+      setMounted(true);
+      hydrate();
     }
-  }, [status, session, setUser]);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || isHydrating) return;
+    
+    if (!isAuthenticated && pathname?.startsWith('/dashboard')) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, isHydrating, router, pathname, mounted]);
+
+  if (!mounted || isHydrating) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }

@@ -3,8 +3,14 @@
 import Link from 'next/link';
 import { Globe, Mail, Phone, MapPin } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import { useEffect, useState } from 'react';
 
 export default function Footer() {
+  const [year, setYear] = useState<number>(2026);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
   return (
     <footer className="bg-card text-foreground pt-24 pb-12 px-4 relative overflow-hidden border-t border-border/50">
       {/* Decorative accent */}
@@ -120,7 +126,7 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto pt-12 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-8">
         <p className="text-muted-foreground text-sm font-bold">
-          © {new Date().getFullYear()} LUXESPACE. All rights reserved.
+          © {year} LUXESPACE. All rights reserved.
         </p>
         <div className="flex gap-10 text-xs font-black uppercase tracking-widest text-muted-foreground">
           <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>

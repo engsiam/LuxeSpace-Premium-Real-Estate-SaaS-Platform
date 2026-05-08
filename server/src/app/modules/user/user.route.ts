@@ -10,8 +10,9 @@ const router = Router();
 // Auth routes
 router.post('/register', validateRequest(registerSchema), userController.register);
 router.post('/login', validateRequest(loginSchema), userController.login);
+router.post('/logout', userController.logout);
 router.post('/google', userController.googleAuth);
-router.post('/refresh-token', userController.refreshToken);
+router.get('/session', userController.getSession);
 
 // User routes
 router.get('/', authGuard('ADMIN'), userController.getUsers);

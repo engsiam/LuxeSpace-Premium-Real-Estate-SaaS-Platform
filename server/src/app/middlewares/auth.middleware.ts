@@ -7,16 +7,27 @@ export interface AuthRequest extends Request {
   user?: { id: string; role: string };
 }
 
+const getToken = (req: Request): string | null => {
+  // First check Authorization header
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+  
+  // Then check cookie
+  const cookies = req.cookies;
+  return cookies?.accessToken || null;
+};
+
 export const authGuard = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const authHeader = req.headers.authorization;
+      const token = getToken(req);
       
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (!token) {
         throw new ApiError(401, 'Unauthorized: No token provided');
       }
 
-      const token = authHeader.split(' ')[1];
       const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string; role: string };
 
       if (roles.length && !roles.includes(decoded.role)) {

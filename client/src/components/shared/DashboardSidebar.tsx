@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
@@ -20,8 +20,8 @@ import {
   ChevronRight,
   Wallet
 } from 'lucide-react';
-import { signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface SidebarItem {
   href: string;
@@ -36,6 +36,8 @@ interface DashboardSidebarProps {
 
 export default function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuthStore();
 
   const adminItems: SidebarItem[] = [
     { href: '/dashboard/admin', label: 'Overview', icon: <LayoutDashboard size={20} /> },
@@ -65,8 +67,9 @@ export default function DashboardSidebar({ role, onClose }: DashboardSidebarProp
 
   const items = role === 'ADMIN' ? adminItems : role === 'AGENT' ? agentItems : userItems;
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: '/' });
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
   };
 
   const handleLinkClick = () => {

@@ -3,17 +3,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axiosInstance';
-import type { User } from '@/types';
 import { toast } from 'sonner';
-import { User as UserIcon, Mail, Phone, ShieldCheck, CheckCircle2, Camera, Loader2 } from 'lucide-react';
+import { User as UserIcon, Phone, CheckCircle2, Camera, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
-import { useSession } from 'next-auth/react';
-import { useUserStore } from '@/store/useUserStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -34,8 +31,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function UserProfile() {
   const router = useRouter();
-  const { update } = useSession();
-  const { updateAvatar: updateUserStoreAvatar } = useUserStore();
+  const { user, fetchCurrentUser } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [avatar, setAvatar] = useState('');
@@ -43,7 +39,7 @@ export default function UserProfile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(profileSchema) as any,
     defaultValues: {
       name: '',
       phone: '',
@@ -51,25 +47,15 @@ export default function UserProfile() {
   });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axiosInstance.get('/users/me');
-        const user = response.data.data;
-        form.reset({
-          name: user.name,
-          phone: user.phone || '',
-        });
-        if (user.avatar) {
-          setAvatar(user.avatar);
-        }
-      } catch (error) {
-        toast.error('Failed to fetch profile');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [form]);
+    if (user) {
+      form.reset({
+        name: user.name,
+        phone: user.phone || '',
+      });
+      setAvatar(user.avatar || '');
+      setLoading(false);
+    }
+  }, [user, form]);
 
   const onSubmit = async (data: ProfileFormValues) => {
     setUpdating(true);
@@ -96,11 +82,7 @@ export default function UserProfile() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (response.data.success) {
-        const newAvatarUrl = response.data.data.avatar;
-        setAvatar(newAvatarUrl);
-        updateUserStoreAvatar(newAvatarUrl);
-        await update({ avatar: newAvatarUrl });
-        router.refresh();
+        setAvatar(response.data.data.avatar);
         toast.success('Profile picture updated!');
       }
     } catch (error: any) {
@@ -137,7 +119,6 @@ export default function UserProfile() {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 max-w-6xl">
-        {/* Left - Profile Preview */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] p-8 text-center relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
@@ -187,13 +168,12 @@ export default function UserProfile() {
           <div className="bg-primary p-8 rounded-[2.5rem] shadow-xl text-secondary-foreground space-y-4">
             <h3 className="font-black uppercase tracking-widest text-xs opacity-60">Security Protocol</h3>
             <div className="flex items-center gap-3">
-              <ShieldCheck size={20} />
+              <CheckCircle2 size={20} />
               <p className="text-sm font-bold">2FA is currently active</p>
             </div>
           </div>
         </div>
 
-        {/* Right - Edit Form */}
         <div className="lg:col-span-2">
           <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden">
             <div className="p-8 border-b border-border bg-background/20 flex items-center gap-4">

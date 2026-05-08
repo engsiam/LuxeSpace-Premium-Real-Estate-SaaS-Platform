@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,12 +14,13 @@ import axiosInstance from '@/lib/axiosInstance';
 import { Property } from '@/types';
 import BookingModal from '@/components/property/BookingModal';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  MapPin, Maximize, BedDouble, Building2, CheckCircle2, 
-  Star, User, Phone, Mail, ShieldCheck, FileText, 
+import {
+  MapPin, Maximize, BedDouble, Building2, CheckCircle2,
+  Star, User, Phone, Mail, ShieldCheck, FileText,
   Sparkles, MessageSquare, ChevronLeft, ChevronRight, Share2, Heart
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const reviewSchema = z.object({
   rating: z.number().min(1).max(5),
@@ -30,7 +30,7 @@ const reviewSchema = z.object({
 export default function PropertyDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { status } = useSession();
+  const { isAuthenticated } = useAuthStore();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,9 +38,14 @@ export default function PropertyDetailsPage() {
   const [activeTab, setActiveTab] = useState('description');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const reviewForm = useForm({
+  const reviewForm = useForm<
+    z.infer<typeof reviewSchema>
+  >({
     resolver: zodResolver(reviewSchema),
-    defaultValues: { rating: 5, comment: '' },
+    defaultValues: {
+      rating: 5,
+      comment: '',
+    },
   });
 
   useEffect(() => {
@@ -59,7 +64,9 @@ export default function PropertyDetailsPage() {
     if (id) fetchProperty();
   }, [id]);
 
-  const onSubmitReview = async (data: { rating: number; comment: string }) => {
+  const onSubmitReview = async (
+    data: z.infer<typeof reviewSchema>
+  ) => {
     try {
       await axiosInstance.post('/reviews', { propertyId: id, ...data });
       toast.success('Review submitted successfully!');
@@ -118,26 +125,26 @@ export default function PropertyDetailsPage() {
       <div className="max-w-7xl mx-auto px-4">
         {/* Gallery / Hero Carousel */}
         <div className="relative mb-16">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className="relative h-[500px] md:h-[650px] rounded-[3rem] overflow-hidden border border-white/5 shadow-3xl"
           >
             <AnimatePresence mode="wait">
-              <motion.img 
+              <motion.img
                 key={currentImageIndex}
                 initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                src={images[currentImageIndex]} 
-                alt={property.title} 
-                className="w-full h-full object-cover" 
+                src={images[currentImageIndex]}
+                alt={property.title}
+                className="w-full h-full object-cover"
               />
             </AnimatePresence>
-            
+
             <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F1A] via-transparent to-transparent opacity-80" />
-            
+
             {/* Carousel Controls */}
             {images.length > 1 && (
               <>
@@ -191,8 +198,8 @@ export default function PropertyDetailsPage() {
           {images.length > 1 && (
             <div className="flex gap-4 mt-6 overflow-x-auto pb-4 scrollbar-hide">
               {images.map((img, i) => (
-                <button 
-                  key={i} 
+                <button
+                  key={i}
                   onClick={() => setCurrentImageIndex(i)}
                   className={`relative w-24 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${currentImageIndex === i ? 'border-primary' : 'border-white/5 opacity-50 hover:opacity-100'}`}
                 >
@@ -231,9 +238,9 @@ export default function PropertyDetailsPage() {
                   { value: 'amenities', label: 'Amenities', icon: Sparkles },
                   { value: 'reviews', label: 'Resident Reviews', icon: MessageSquare },
                 ].map((tab) => (
-                  <button 
-                    key={tab.value} 
-                    onClick={() => setActiveTab(tab.value)} 
+                  <button
+                    key={tab.value}
+                    onClick={() => setActiveTab(tab.value)}
                     className={`flex items-center gap-3 px-10 py-6 font-black text-[10px] uppercase tracking-[0.2em] transition-all relative ${activeTab === tab.value ? 'text-primary' : 'text-white/40 hover:text-white'}`}
                   >
                     <tab.icon size={16} />
@@ -242,9 +249,9 @@ export default function PropertyDetailsPage() {
                   </button>
                 ))}
               </div>
-              
+
               <AnimatePresence mode="wait">
-                <motion.div 
+                <motion.div
                   key={activeTab}
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -299,8 +306,8 @@ export default function PropertyDetailsPage() {
                           </motion.div>
                         )) : <p className="text-white/40">No reviews yet. Share your experience below.</p>}
                       </div>
-                      
-                      {status === 'authenticated' && (
+
+                      {isAuthenticated && (
                         <div className="bg-white/5 rounded-[2.5rem] border border-white/5 p-10">
                           <h4 className="text-xl font-black text-white mb-8">Post a Review</h4>
                           <form onSubmit={reviewForm.handleSubmit(onSubmitReview)} className="space-y-8">
@@ -330,21 +337,21 @@ export default function PropertyDetailsPage() {
           <div className="space-y-8">
             <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="bg-card border border-white/5 p-10 rounded-[3rem] sticky top-32 shadow-3xl">
               <h3 className="text-2xl font-black text-white mb-8 leading-tight">Inquire about this <span className="text-primary italic font-serif">Residence?</span></h3>
-              <Button 
+              <Button
                 onClick={() => {
-                  if (status !== 'authenticated') {
+                  if (!isAuthenticated) {
                     toast.error('Please login to book a viewing');
                     router.push(`/login?callbackUrl=/properties/${id}`);
                   } else {
                     setIsBookingOpen(true);
                   }
-                }} 
+                }}
                 className="w-full h-20 bg-primary text-secondary-foreground font-black text-xl rounded-[2rem] hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(201,167,77,0.4)] mb-10 group"
               >
                 <span>Reserve Consultation</span>
                 <ChevronRight className="ml-2 group-hover:translate-x-2 transition-transform" />
               </Button>
-              
+
               <div className="space-y-8 pt-8 border-t border-white/5">
                 <div className="flex items-center gap-5">
                   <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center border border-white/5">

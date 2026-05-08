@@ -3,8 +3,14 @@
 import { motion } from 'framer-motion';
 import { FileText, Scale, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export default function TermsPage() {
+  const [lastUpdated, setLastUpdated] = useState('');
+
+  useEffect(() => {
+    setLastUpdated(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+  }, []);
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-4xl mx-auto px-4">
@@ -198,7 +204,7 @@ export default function TermsPage() {
           </div>
 
           <p className="text-sm text-muted-foreground pt-4">
-            <strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            <strong>Last Updated:</strong> {lastUpdated || 'Loading...'}
           </p>
         </motion.div>
       </div>
