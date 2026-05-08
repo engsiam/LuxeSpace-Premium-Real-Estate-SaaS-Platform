@@ -22,12 +22,27 @@ import {
 } from '@/components/ui/select';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Globe, User as UserIcon, Mail, Lock, Sparkles, ChevronRight, Eye, EyeOff, Check, Star, ShieldCheck, Briefcase } from 'lucide-react';
 import Image from 'next/image';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore, useUser } from '@/store/useAuthStore';
+import { useAuthLoading } from '@/components/providers/UserStoreProvider';
+
+function AuthLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative">
+          <div className="h-12 w-12 rounded-full border-4 border-primary/20"></div>
+          <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        </div>
+        <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -44,10 +59,26 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const user = useUser();
+  const { isAuthReady } = useAuthLoading();
   const { register, isLoading } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  useEffect(() => {
+    if (isAuthReady && user) {
+      router.replace('/dashboard/user');
+    }
+  }, [isAuthReady, user, router]);
+
+  if (!isAuthReady) {
+    return <AuthLoader />;
+  }
+
+  if (user) {
+    return <AuthLoader />;
+  }
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 

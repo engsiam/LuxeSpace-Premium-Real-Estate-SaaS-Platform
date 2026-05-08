@@ -17,7 +17,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore, useUser } from '@/store/useAuthStore';
+import { useAuthLoading } from '@/components/providers/UserStoreProvider';
 import { motion } from 'framer-motion';
 import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -28,23 +29,32 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+const demoCredentials = {
+  admin: { email: 'admin@luxespace.com', password: 'Admin@123' },
+  agent: { email: 'agent1@luxespace.com', password: 'Agent@123' },
+  user: { email: 'user1@luxespace.com', password: 'User@123' },
+};
+
+function AuthLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative">
+          <div className="h-12 w-12 rounded-full border-4 border-primary/20"></div>
+          <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        </div>
+        <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
-  const { login, user } = useAuthStore();
+  const user = useUser();
+  const { isAuthReady } = useAuthLoading();
+  const { login } = useAuthStore();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'agent'>('user');
-
-  const demoCredentials = {
-    admin: { email: 'admin@luxespace.com', password: 'Admin@123' },
-    agent: { email: 'agent1@luxespace.com', password: 'Agent@123' },
-    user: { email: 'user1@luxespace.com', password: 'User@123' },
-  };
-
-  useEffect(() => {
-    if (user) {
-      router.replace('/dashboard/user');
-    }
-  }, [user, router]);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -53,6 +63,20 @@ export default function LoginPage() {
       password: '',
     },
   });
+
+  useEffect(() => {
+    if (isAuthReady && user) {
+      router.replace('/dashboard/user');
+    }
+  }, [isAuthReady, user, router]);
+
+  if (!isAuthReady) {
+    return <AuthLoader />;
+  }
+
+  if (user) {
+    return <AuthLoader />;
+  }
 
   const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
     let email = '';
