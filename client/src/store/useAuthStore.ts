@@ -18,6 +18,7 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   isHydrating: boolean;
+  isHydrated: boolean;
   error: string | null;
   isAuthenticated: boolean;
 
@@ -34,6 +35,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: false,
   isHydrating: false,
+  isHydrated: false,
   error: null,
   isAuthenticated: false,
 
@@ -104,7 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   hydrate: async () => {
-    if (get().isHydrating) return;
+    if (get().isHydrating || get().isHydrated) return;
     
     set({ isHydrating: true });
 
@@ -123,12 +125,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           user: data.data.user,
           isAuthenticated: true,
           isHydrating: false,
+          isHydrated: true,
         });
       } else {
-        set({ isHydrating: false, isAuthenticated: false });
+        set({ 
+          isHydrating: false, 
+          isAuthenticated: false,
+          isHydrated: true,
+        });
       }
     } catch {
-      set({ isHydrating: false, isAuthenticated: false });
+      set({ 
+        isHydrating: false, 
+        isAuthenticated: false,
+        isHydrated: true,
+      });
     }
   },
 
@@ -176,5 +187,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 export const useUser = () => useAuthStore((state) => state.user);
 export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
 export const useIsHydrating = () => useAuthStore((state) => state.isHydrating);
+export const useIsHydrated = () => useAuthStore((state) => state.isHydrated);
 export const useIsLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);

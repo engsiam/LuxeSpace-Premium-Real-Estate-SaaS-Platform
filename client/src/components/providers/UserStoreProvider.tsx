@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, createContext, useContext, ReactNode } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore, useIsHydrated, useIsAuthenticated } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 
 interface AuthLoadingContextType {
@@ -33,7 +33,9 @@ function AuthLoadingScreen() {
 }
 
 export function UserStoreProvider({ children }: { children: React.ReactNode }) {
-  const { hydrate, isHydrating, isAuthenticated } = useAuthStore();
+  const { hydrate, isHydrating } = useAuthStore();
+  const isHydrated = useIsHydrated();
+  const isAuthenticated = useIsAuthenticated();
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -51,14 +53,14 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
   }, [mounted, hydrate]);
 
   useEffect(() => {
-    if (!mounted || isHydrating) return;
+    if (!mounted || !isHydrated) return;
     
     if (!isAuthenticated && pathname?.startsWith('/dashboard')) {
       router.replace('/login');
     }
-  }, [isAuthenticated, isHydrating, router, pathname, mounted]);
+  }, [isHydrated, isAuthenticated, router, pathname, mounted]);
 
-  const isAuthReady = mounted && !isHydrating;
+  const isAuthReady = mounted && isHydrated;
 
   return (
     <AuthLoadingContext.Provider value={{ isHydrating, isAuthReady }}>

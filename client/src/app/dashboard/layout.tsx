@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
-import { useAuthStore, useUser, useIsAuthenticated, useIsHydrating } from '@/store/useAuthStore';
+import { useAuthStore, useUser, useIsAuthenticated, useIsHydrated, useIsHydrating } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,6 +16,7 @@ export default function DashboardLayout({
 }) {
   const user = useUser();
   const isAuthenticated = useIsAuthenticated();
+  const isHydrated = useIsHydrated();
   const isHydrating = useIsHydrating();
   const { hydrate } = useAuthStore();
   const router = useRouter();
@@ -36,15 +37,15 @@ export default function DashboardLayout({
   }, [mounted, hydrate]);
 
   useEffect(() => {
-    if (!mounted || isHydrating) return;
+    if (!mounted || !isHydrated) return;
     
     if (!isAuthenticated) {
       router.replace('/login');
     }
-  }, [isAuthenticated, isHydrating, router, mounted]);
+  }, [isHydrated, isAuthenticated, router, mounted]);
 
   useEffect(() => {
-    if (!user || isHydrating) return;
+    if (!user || !isHydrated) return;
     
     const role = user.role || 'USER';
     
