@@ -1,13 +1,30 @@
 import prisma from '../../../prisma/client';
-import env from '../../../config';
+import env, { getServerUrl, getClientUrl } from '../../../config';
 
-const API_BASE = process.env.SERVER_URL || 'http://localhost:5000';
+const getApiBase = (): string => {
+  try {
+    return getServerUrl();
+  } catch {
+    throw new Error('SERVER_URL is required');
+  }
+};
+
+const getExploreUrl = (): string => {
+  try {
+    return `${getClientUrl()}/explore`;
+  } catch {
+    throw new Error('CLIENT_URL is required');
+  }
+};
 
 export const chatWithAI = async (prompt: string) => {
+  const apiBase = getApiBase();
+  const exploreUrl = getExploreUrl();
+
   // Fetch recent properties from API
   let propertyList: any[] = [];
   try {
-    const propRes = await fetch(`${API_BASE}/api/v1/properties/ai-recent`);
+    const propRes = await fetch(`${apiBase}/api/v1/properties/ai-recent`);
     const propData = await propRes.json() as { success: boolean; data?: any[] };
     if (propData.success && propData.data) {
       propertyList = propData.data;
@@ -33,6 +50,7 @@ export const chatWithAI = async (prompt: string) => {
   });
 
   const context = JSON.stringify(allProperties);
+  const clientUrl = getClientUrl();
 
   const contactInfo = `
 **For Premium Property Services, Contact:**
@@ -40,7 +58,7 @@ Md. Shohrab Hossain
 📞 Phone: 01742080475
 💬 WhatsApp: https://wa.me/8801742080475
 📧 Email: shohrab@luxespace.com
-🌐 Website: https://luxspace-beta.vercel.app
+🌐 Website: ${clientUrl}
 `;
 
   // Check if user is asking about properties - return direct formatted response
@@ -52,7 +70,7 @@ Md. Shohrab Hossain
       .map(p => `[PROP]{"id":"${p.id}","title":"${p.title}","price":"${p.price}","location":"${p.location}","image":"${p.image || ''}"}[/PROP]`)
       .join('\n');
     
-    return `Here are our latest available properties:\n\n${propertyResponse}\n\n[LINK]http://localhost:3000/explore[/LINK]\n\n**For more details or to schedule a viewing, contact:**\n📞 01742080475\n💬 https://wa.me/8801742080475`;
+    return `Here are our latest available properties:\n\n${propertyResponse}\n\n[LINK]${exploreUrl}[/LINK]\n\n**For more details or to schedule a viewing, contact:**\n📞 01742080475\n💬 https://wa.me/8801742080475`;
   }
 
   try {
@@ -125,7 +143,7 @@ Example: [PROP]{"id":"123","title":"Modern Apartment in Gulshan","price":"৳50,
 
 - IMPORTANT: The price in the recent properties list ALREADY includes the ৳ symbol - use it exactly as shown
 - DO NOT make up any property - only use the 5 properties from the list
-- After showing properties, ALWAYS add: [LINK]http://localhost:3000/explore[/LINK]
+- After showing properties, ALWAYS add: [LINK]${exploreUrl}[/LINK]
 - NEVER show more than 5 properties
 - Never show fake/placeholder data
 - Short intro (1-2 sentences), then show properties, then contact info`,

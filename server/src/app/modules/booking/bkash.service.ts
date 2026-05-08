@@ -1,5 +1,5 @@
 import axios from 'axios';
-import env from '../../../config';
+import env, { getServerUrl } from '../../../config';
 
 let bkashToken: string | null = null;
 let tokenExpiry: number | null = null;
@@ -32,7 +32,8 @@ export const getBkashToken = async () => {
 
 export const createPayment = async (amount: number, invoiceNumber: string, userId: string) => {
   const token = await getBkashToken();
-  const callbackURL = `${env.SERVER_URL || 'http://localhost:5000'}/api/v1/bookings/callback`;
+  const serverUrl = getServerUrl();
+  const callbackURL = `${serverUrl}/api/v1/bookings/callback`;
 
   const response = await axios.post(
     `${env.BKASH_BASE_URL}/tokenized/checkout/create`,

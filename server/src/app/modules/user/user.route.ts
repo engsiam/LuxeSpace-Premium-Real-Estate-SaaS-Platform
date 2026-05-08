@@ -4,6 +4,7 @@ import * as userController from './user.controller';
 import { registerSchema, loginSchema, updateUserSchema, adminUpdateUserSchema } from './user.validation';
 import { validateRequest } from '../../middlewares/validate.middleware';
 import { upload } from '../../middlewares/upload.middleware';
+import { getClientUrl, getServerUrl } from '../../../config';
 
 const router = Router();
 
@@ -29,11 +30,12 @@ router.post('/auth/login', validateRequest(loginSchema), userController.login);
 // Google OAuth - GET for redirect-based auth
 router.get('/auth/google', (req, res) => {
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
-  const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+  const serverUrl = getServerUrl();
+  const clientUrl = getClientUrl();
   const redirectUri = `${serverUrl}/api/v1/users/auth/google/callback`;
   
   if (!googleClientId || googleClientId === 'your-google-client-id') {
-    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=google_not_configured`);
+    return res.redirect(`${clientUrl}/login?error=google_not_configured`);
   }
   
   const scope = 'openid email profile';

@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { getClientUrl } from '../../../../config';
 
 export interface IPaymentResponse {
   success: boolean;
@@ -13,11 +14,8 @@ export interface IPaymentResponse {
 
 export class MockBkashProvider {
   async createPayment(amount: number, invoiceNumber: string): Promise<string> {
-    // In a real scenario, this would return a bKash URL.
-    // For our mock, we redirect to our own internal processing page.
-    // We pass the invoice number so we know what we're paying for.
-    const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-    return `${baseUrl}/payment/processing?invoice=${invoiceNumber}&amount=${amount}&method=bkash`;
+    const clientUrl = getClientUrl();
+    return `${clientUrl}/payment/processing?invoice=${invoiceNumber}&amount=${amount}&method=bkash`;
   }
 
   async executePayment(paymentID: string): Promise<IPaymentResponse> {

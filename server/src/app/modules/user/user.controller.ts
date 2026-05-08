@@ -6,7 +6,7 @@ import * as userService from './user.service';
 import { registerSchema, loginSchema, updateUserSchema, adminUpdateUserSchema, googleAuthSchema } from './user.validation';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 import { uploadImageToCloudinary } from '../../middlewares/upload.middleware';
-import env from '../../../config';
+import env, { getClientUrl, getServerUrl } from '../../../config';
 
 const cookieOptions = {
   httpOnly: true,
@@ -83,23 +83,24 @@ export const googleAuth = catchAsync(async (req, res) => {
 
 export const googleAuthCallback = catchAsync(async (req, res) => {
   const { code, error } = req.query;
+  const clientUrl = getClientUrl();
   
   if (error) {
-    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=${error}`);
+    return res.redirect(`${clientUrl}/login?error=${error}`);
   }
   
   if (!code) {
-    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=no_code`);
+    return res.redirect(`${clientUrl}/login?error=no_code`);
   }
   
   try {
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
     const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    const serverUrl = getServerUrl();
     const redirectUri = `${serverUrl}/api/v1/users/auth/google/callback`;
     
     if (!googleClientId || !googleClientSecret || googleClientId === 'your-google-client-id') {
-      return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=google_not_configured`);
+      return res.redirect(`${clientUrl}/login?error=google_not_configured`);
     }
     
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -117,7 +118,7 @@ export const googleAuthCallback = catchAsync(async (req, res) => {
     const tokens = await tokenResponse.json() as { access_token?: string };
     
     if (!tokens.access_token) {
-      return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=token_exchange_failed`);
+      return res.redirect(`${clientUrl}/login?error=token_exchange_failed`);
     }
     
     const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -146,10 +147,10 @@ export const googleAuthCallback = catchAsync(async (req, res) => {
       sameSite: 'lax',
     });
     
-    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/dashboard`);
+    res.redirect(`${clientUrl}/dashboard/user`);
   } catch (err) {
     console.error('Google auth callback error:', err);
-    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=auth_failed`);
+    res.redirect(`${clientUrl}/login?error=auth_failed`);
   }
 });
 

@@ -1,7 +1,15 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import prisma from '../prisma/client';
-import env from '../config';
+import env, { getServerUrl, getTrustedOrigins } from '../config';
+
+const getGoogleRedirectUri = (): string => {
+  const serverUrl = env.SERVER_URL || process.env.SERVER_URL;
+  if (!serverUrl) {
+    throw new Error('SERVER_URL is required for Google OAuth');
+  }
+  return `${serverUrl}/api/v1/auth/callback/google`;
+};
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -15,7 +23,7 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      redirectURI: `${process.env.SERVER_URL}/api/v1/auth/callback/google`,
+      redirectURI: getGoogleRedirectUri(),
     },
   },
   session: {
@@ -27,7 +35,7 @@ export const auth = betterAuth({
     },
   },
   advanced: {},
-  trustedOrigins: (process.env.TRUSTED_ORIGINS || 'http://localhost:3000').split(','),
+  trustedOrigins: getTrustedOrigins(),
 });
 
 export type Session = typeof auth.$Infer.Session;
