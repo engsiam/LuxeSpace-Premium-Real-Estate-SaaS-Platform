@@ -1,1 +1,5 @@
-export const BASE_URL = 'http://localhost:5000/api/v1';
+const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+if (!baseUrl) {
+  throw new Error('NEXT_PUBLIC_API_URL is not defined');
+}
+export const BASE_URL = baseUrl;
