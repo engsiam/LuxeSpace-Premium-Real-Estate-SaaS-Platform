@@ -112,7 +112,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   hydrate: async () => {
+    const currentUser = get().user;
+    const currentIsAuthenticated = get().isAuthenticated;
+    
     if (get().isHydrating || get().isHydrated) return;
+    if (currentUser && currentIsAuthenticated) {
+      set({ isHydrated: true, isHydrating: false });
+      return;
+    }
 
     set({ isHydrating: true });
 
@@ -124,6 +131,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         },
       });
 
+      if (!response.ok) {
+        throw new Error(`Session check failed: ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.success && data.data?.isAuthenticated && data.data?.user) {
@@ -134,18 +145,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isHydrated: true,
         });
       } else {
+        const shouldKeepUser = currentUser && currentIsAuthenticated;
         set({
-          user: null,
+          user: shouldKeepUser ? currentUser : null,
           isHydrating: false,
-          isAuthenticated: false,
+          isAuthenticated: shouldKeepUser ? currentIsAuthenticated : false,
           isHydrated: true,
         });
       }
-    } catch {
+    } catch (error) {
+      console.error('[Hydrate] Session check failed:', error);
+      const shouldKeepUser = currentUser && currentIsAuthenticated;
       set({
-        user: null,
+        user: shouldKeepUser ? currentUser : null,
         isHydrating: false,
-        isAuthenticated: false,
+        isAuthenticated: shouldKeepUser ? currentIsAuthenticated : false,
         isHydrated: true,
       });
     }
