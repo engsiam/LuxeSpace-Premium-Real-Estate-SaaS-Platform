@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthStore } from '@/store/useAuthStore';
+import { useIsHydrated, useIsAuthenticated } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -11,7 +11,8 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
-  const { isAuthenticated, isHydrating, hydrate } = useAuthStore();
+  const isHydrated = useIsHydrated();
+  const isAuthenticated = useIsAuthenticated();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -20,14 +21,14 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   }, []);
 
   useEffect(() => {
-    if (!mounted || isHydrating) return;
+    if (!mounted || !isHydrated) return;
     
     if (!isAuthenticated) {
       router.replace('/login');
     }
-  }, [isAuthenticated, isHydrating, router, mounted]);
+  }, [isHydrated, isAuthenticated, router, mounted]);
 
-  if (!mounted || isHydrating) {
+  if (!mounted || !isHydrated) {
     return (
       fallback || (
         <div className="flex items-center justify-center min-h-screen">

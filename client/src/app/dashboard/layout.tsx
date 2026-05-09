@@ -54,13 +54,13 @@ export default function DashboardLayout({
     } else if (pathname.includes('/dashboard/agent') && role !== 'AGENT' && role !== 'ADMIN') {
       router.replace('/dashboard');
     }
-  }, [user, pathname, router, isHydrating]);
+  }, [user, pathname, router, isHydrated]);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
 
-  if (!mounted || isHydrating || !isAuthenticated) {
+  if (!mounted || !isHydrated || !isAuthenticated) {
     return (
       <div className="flex min-h-screen bg-background">
         <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">

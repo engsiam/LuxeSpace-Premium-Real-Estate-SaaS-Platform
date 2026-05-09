@@ -13,10 +13,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, User as UserIcon, LayoutDashboard } from 'lucide-react';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore, useIsHydrated } from '@/store/useAuthStore';
 
 export default function DashboardHeader() {
-  const { user, logout, isHydrating } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const isHydrated = useIsHydrated();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -24,7 +25,7 @@ export default function DashboardHeader() {
     setMounted(true);
   }, []);
 
-  if (!mounted || isHydrating || !user) return null;
+  if (!mounted || !isHydrated || !user) return null;
 
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
   const userImage = user.avatar || '';
