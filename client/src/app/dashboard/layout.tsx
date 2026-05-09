@@ -3,11 +3,34 @@
 import { useEffect, useState, useRef } from 'react';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
-import { useUser, useIsHydrated, useIsHydrating } from '@/store/useAuthStore';
+import { useUser } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+
+function DashboardLoadingScreen() {
+  return (
+    <div className="flex min-h-screen bg-background">
+      <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <Skeleton className="h-10 w-full rounded-lg" />
+      </div>
+      <div className="flex-1 p-4 lg:p-6 space-y-6">
+        <Skeleton className="h-8 w-32 rounded-lg" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+        </div>
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardLayout({
   children,
@@ -15,112 +38,64 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = useUser();
-  const isHydrated = useIsHydrated();
-  const isHydrating = useIsHydrating();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const redirectChecked = useRef(false);
+  const redirectHandled = useRef(false);
+
+  console.log('[Dashboard Layout] Render:', { 
+    mounted, 
+    user: !!user, 
+    userEmail: user?.email,
+    role: user?.role 
+  });
 
   useEffect(() => {
+    console.log('[Dashboard] Mounted');
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    console.log('[Dashboard] Effect:', { mounted, user: !!user, isHydrating });
-    if (!mounted || redirectChecked.current) return;
-    if (isHydrating) return;
-    
+    if (!mounted) return;
+    if (redirectHandled.current) return;
     if (!user) {
-      console.log('[Dashboard] No user after hydration, redirecting to login');
-      redirectChecked.current = true;
-      router.replace('/login');
-    } else {
-      console.log('[Dashboard] User found:', user.email, 'role:', user.role);
+      console.log('[Dashboard] No user yet, waiting for auth...');
+      return;
     }
-  }, [mounted, user, isHydrating, router]);
-
-  useEffect(() => {
-    if (!user || redirectChecked.current) return;
+    
+    console.log('[Dashboard] User authenticated, role:', user.role);
     
     const role = user.role || 'USER';
+    const currentPath = pathname || '';
     
-    if (pathname.includes('/dashboard/admin') && role !== 'ADMIN') {
-      redirectChecked.current = true;
+    if (currentPath.includes('/dashboard/admin') && role !== 'ADMIN') {
+      console.log('[Dashboard] Admin page but not admin, redirecting to /dashboard');
+      redirectHandled.current = true;
       router.replace('/dashboard');
-    } else if (pathname.includes('/dashboard/agent') && role !== 'AGENT' && role !== 'ADMIN') {
-      redirectChecked.current = true;
+    } else if (currentPath.includes('/dashboard/agent') && role !== 'AGENT' && role !== 'ADMIN') {
+      console.log('[Dashboard] Agent page but not agent, redirecting to /dashboard');
+      redirectHandled.current = true;
       router.replace('/dashboard');
     }
-  }, [user, pathname, router]);
+  }, [mounted, user, pathname, router]);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
 
   if (!mounted) {
-    return (
-      <div className="flex min-h-screen bg-background">
-        <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-lg" />
-        </div>
-        <div className="flex-1 p-4 lg:p-6 space-y-6">
-          <Skeleton className="h-8 w-32 rounded-lg" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-          </div>
-          <Skeleton className="h-64 w-full rounded-2xl" />
-        </div>
-      </div>
-    );
+    console.log('[Dashboard] Not mounted, showing loading');
+    return <DashboardLoadingScreen />;
   }
 
-  // Show loading while checking auth (only on initial load without user)
-  if (!user && isHydrating) {
-    return (
-      <div className="flex min-h-screen bg-background">
-        <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-lg" />
-        </div>
-        <div className="flex-1 p-4 lg:p-6 space-y-6">
-          <Skeleton className="h-8 w-32 rounded-lg" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-          </div>
-          <Skeleton className="h-64 w-full rounded-2xl" />
-        </div>
-      </div>
-    );
-  }
-
-  // No user after hydration complete - redirect to login
   if (!user) {
-    return null; // Will be handled by redirect effect
+    console.log('[Dashboard] No user, showing loading (waiting for hydration or auth)');
+    return <DashboardLoadingScreen />;
   }
 
+console.log('[Dashboard] Rendering dashboard with user:', user.email);
   const role = user?.role || 'USER';
-
-  if (pathname.includes('/dashboard/admin') && role !== 'ADMIN') {
-    router.push('/dashboard');
-    return null;
-  }
-  if (pathname.includes('/dashboard/agent') && role !== 'AGENT' && role !== 'ADMIN') {
-    router.push('/dashboard');
-    return null;
-  }
 
   return (
     <div className="flex min-h-screen bg-background overflow-hidden">
