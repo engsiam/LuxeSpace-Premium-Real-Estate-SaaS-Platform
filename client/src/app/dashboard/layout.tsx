@@ -31,8 +31,11 @@ export default function DashboardLayout({
     if (!mounted || redirectChecked.current) return;
     
     if (!user) {
+      console.log('[Dashboard] No user, checking if we should redirect to login');
       redirectChecked.current = true;
       router.replace('/login');
+    } else {
+      console.log('[Dashboard] User found:', user.email, 'role:', user.role);
     }
   }, [mounted, user, router]);
 

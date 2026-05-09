@@ -34,9 +34,10 @@ export default function LoginPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
   
-  const { login, user, isLoading, isAuthenticated } = useAuthStore();
+  const { login, user, isAuthenticated, isLoading } = useAuthStore();
+
+  console.log('[Login] Render:', { user: !!user, isAuthenticated, isLoading, mounted });
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -51,19 +52,20 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    if (!mounted || redirecting) return;
-    
-    if (isAuthenticated && user) {
-      setRedirecting(true);
+    console.log('[Login] Auth changed:', { user: !!user, isAuthenticated });
+    if (user && isAuthenticated) {
+      console.log('[Login] Redirecting to /dashboard/user');
       router.replace('/dashboard/user');
     }
-  }, [mounted, isAuthenticated, user, router, redirecting]);
+  }, [user, isAuthenticated, router]);
 
   const onSubmit = useCallback(async (data: LoginFormValues) => {
+    console.log('[Login] Submitting login...');
     setIsLoggingIn(true);
     
     try {
       const success = await login(data.email, data.password);
+      console.log('[Login] Login result:', success);
       
       if (success) {
         toast.success('Welcome back!');
@@ -71,6 +73,7 @@ export default function LoginPage() {
         toast.error('Invalid email or password');
       }
     } catch (error) {
+      console.error('[Login] Login error:', error);
       toast.error('Login failed. Please try again.');
     } finally {
       setIsLoggingIn(false);
@@ -98,7 +101,7 @@ export default function LoginPage() {
     );
   }
 
-  if (isAuthenticated && user && !redirecting) {
+  if (isAuthenticated && user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
