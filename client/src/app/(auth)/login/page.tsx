@@ -14,8 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore, useUser } from '@/store/useAuthStore';
 import { motion } from 'framer-motion';
@@ -49,7 +48,6 @@ function AuthLoader() {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const user = useUser();
   const { login } = useAuthStore();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -62,16 +60,23 @@ export default function LoginPage() {
     },
   });
 
+
+  const redirectedRef = useRef(false);
+
   useEffect(() => {
-    if (user) {
-      router.replace('/dashboard/user');
+    if (user && !redirectedRef.current) {
+      redirectedRef.current = true;
+
+      console.log('Redirecting user...');
+
+      window.location.href = '/dashboard/user';
     }
-  }, [user, router]);
+  }, [user]);
 
   const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
     let email = '';
     let password = '';
-    
+
     if (role === 'admin') {
       email = 'admin@luxespace.com';
       password = 'Admin@123';
@@ -82,7 +87,7 @@ export default function LoginPage() {
       email = 'user1@luxespace.com';
       password = 'User@123';
     }
-    
+
     form.setValue('email', email);
     form.setValue('password', password);
     toast.success(`${role.toUpperCase()} credentials loaded - click SIGN IN to login`);
@@ -91,10 +96,9 @@ export default function LoginPage() {
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     setIsLoggingIn(true);
     const success = await login(data.email, data.password);
-    
+
     if (success) {
       toast.success('Welcome back!');
-      router.replace('/dashboard/user');
     } else {
       toast.error('Invalid email or password');
     }
