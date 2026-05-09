@@ -1,6 +1,6 @@
 'use client';
 
-import { useIsHydrated, useIsAuthenticated } from '@/store/useAuthStore';
+import { useUser, useIsHydrated } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   const isHydrated = useIsHydrated();
-  const isAuthenticated = useIsAuthenticated();
+  const user = useUser();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -23,10 +23,10 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   useEffect(() => {
     if (!mounted || !isHydrated) return;
     
-    if (!isAuthenticated) {
+    if (!user) {
       router.replace('/login');
     }
-  }, [isHydrated, isAuthenticated, router, mounted]);
+  }, [isHydrated, user, router, mounted]);
 
   if (!mounted || !isHydrated) {
     return (
@@ -38,7 +38,7 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return null;
   }
 

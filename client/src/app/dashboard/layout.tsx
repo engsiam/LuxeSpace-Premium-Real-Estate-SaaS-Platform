@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
-import { useUser, useIsAuthenticated, useIsHydrated } from '@/store/useAuthStore';
+import { useUser } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,8 +15,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = useUser();
-  const isAuthenticated = useIsAuthenticated();
-  const isHydrated = useIsHydrated();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,7 +29,7 @@ export default function DashboardLayout({
     if (!mounted || redirectChecked.current) return;
     
     if (!user) {
-      console.log('[Dashboard] No user, checking if we should redirect to login');
+      console.log('[Dashboard] No user, redirecting to login');
       redirectChecked.current = true;
       router.replace('/login');
     } else {

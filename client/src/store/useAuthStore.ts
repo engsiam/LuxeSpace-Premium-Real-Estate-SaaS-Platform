@@ -198,3 +198,14 @@ export const useIsHydrating = () => useAuthStore((state) => state.isHydrating);
 export const useIsHydrated = () => useAuthStore((state) => state.isHydrated);
 export const useIsLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);
+
+export const useAuth = () => {
+  const user = useUser();
+  const isAuthenticated = useIsAuthenticated();
+  const isLoading = useIsLoading();
+  const isHydrated = useIsHydrated();
+  const isHydrating = useIsHydrating();
+  const error = useAuthError();
+  
+  return { user, isAuthenticated, isLoading, isHydrated, isHydrating, error };
+};

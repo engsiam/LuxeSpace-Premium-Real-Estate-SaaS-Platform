@@ -33,9 +33,8 @@ function AuthLoadingScreen() {
 }
 
 export function UserStoreProvider({ children }: { children: React.ReactNode }) {
-  const { hydrate, isHydrating } = useAuthStore();
+  const { hydrate, isHydrating, user, isAuthenticated } = useAuthStore();
   const isHydrated = useIsHydrated();
-  const isAuthenticated = useIsAuthenticated();
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -47,21 +46,24 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!mounted || hydratedRef.current) return;
-    
+    if (user && isAuthenticated) {
+      hydratedRef.current = true;
+      return;
+    }
     hydratedRef.current = true;
     hydrate();
-  }, [mounted, hydrate]);
+  }, [mounted, hydrate, user, isAuthenticated]);
 
   useEffect(() => {
     if (!mounted || !isHydrated) return;
     
     const isOnDashboard = pathname?.startsWith('/dashboard');
-    const shouldRedirect = !isAuthenticated && isOnDashboard;
+    const shouldRedirect = !user && isOnDashboard;
     
     if (shouldRedirect) {
       router.replace('/login');
     }
-  }, [isHydrated, isAuthenticated, router, pathname, mounted]);
+  }, [isHydrated, user, router, pathname, mounted]);
 
   const isAuthReady = mounted && isHydrated;
 

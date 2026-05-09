@@ -34,10 +34,11 @@ export default function LoginPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [redirectChecked, setRedirectChecked] = useState(false);
   
   const { login, user, isAuthenticated, isLoading } = useAuthStore();
 
-  console.log('[Login] Render:', { user: !!user, isAuthenticated, isLoading, mounted });
+  console.log('[Login] Render:', { user: !!user, isAuthenticated, isLoading, mounted, redirectChecked });
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -52,12 +53,13 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    console.log('[Login] Auth changed:', { user: !!user, isAuthenticated });
+    if (!mounted || isLoading || redirectChecked) return;
     if (user && isAuthenticated) {
+      setRedirectChecked(true);
       console.log('[Login] Redirecting to /dashboard/user');
       router.replace('/dashboard/user');
     }
-  }, [user, isAuthenticated, router]);
+  }, [mounted, user, isAuthenticated, isLoading, router, redirectChecked]);
 
   const onSubmit = useCallback(async (data: LoginFormValues) => {
     console.log('[Login] Submitting login...');
@@ -93,15 +95,20 @@ export default function LoginPage() {
     toast.success(`${role.toUpperCase()} credentials loaded`);
   };
 
-  if (!mounted) {
+  if (!mounted || isLoading || isLoggingIn) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-muted-foreground">
+            {isLoggingIn ? 'Logging in...' : 'Loading...'}
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (isAuthenticated && user) {
+  if (user && isAuthenticated && !redirectChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
