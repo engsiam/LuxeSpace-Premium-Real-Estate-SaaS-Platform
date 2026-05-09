@@ -14,46 +14,31 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { useAuthStore, useUser } from '@/store/useAuthStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { motion } from 'framer-motion';
 import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { GoogleButton } from '@/components/auth/GoogleButton';
-import { useRouter } from 'next/navigation';
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
+  email: z.string().email('Please enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-const demoCredentials = {
-  admin: { email: 'admin@luxespace.com', password: 'Admin@123' },
-  agent: { email: 'agent1@luxespace.com', password: 'Agent@123' },
-  user: { email: 'user1@luxespace.com', password: 'User@123' },
-};
-
-function AuthLoader() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative">
-          <div className="h-12 w-12 rounded-full border-4 border-primary/20"></div>
-          <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-        </div>
-        <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
-      </div>
-    </div>
-  );
-}
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const user = useUser();
-  const { login } = useAuthStore();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  
+  const { login, user, isLoading, isAuthenticated } = useAuthStore();
 
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -61,57 +46,69 @@ export default function LoginPage() {
     },
   });
 
-
-const router = useRouter();
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (user) {
+    if (!mounted || redirecting) return;
+    
+    if (isAuthenticated && user) {
+      setRedirecting(true);
       router.replace('/dashboard/user');
     }
-  }, [user, router]);
+  }, [mounted, isAuthenticated, user, router, redirecting]);
 
-  if (user) {
+  const onSubmit = useCallback(async (data: LoginFormValues) => {
+    setIsLoggingIn(true);
+    
+    try {
+      const success = await login(data.email, data.password);
+      
+      if (success) {
+        toast.success('Welcome back!');
+      } else {
+        toast.error('Invalid email or password');
+      }
+    } catch (error) {
+      toast.error('Login failed. Please try again.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  }, [login]);
+
+  const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
+    const credentials = {
+      admin: { email: 'admin@luxespace.com', password: 'Admin@123' },
+      agent: { email: 'agent1@luxespace.com', password: 'Agent@123' },
+      user: { email: 'user1@luxespace.com', password: 'User@123' },
+    };
+    
+    const cred = credentials[role];
+    form.setValue('email', cred.email);
+    form.setValue('password', cred.password);
+    toast.success(`${role.toUpperCase()} credentials loaded`);
+  };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && user && !redirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">Redirecting...</p>
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
         </div>
       </div>
     );
   }
-  const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
-    let email = '';
-    let password = '';
 
-    if (role === 'admin') {
-      email = 'admin@luxespace.com';
-      password = 'Admin@123';
-    } else if (role === 'agent') {
-      email = 'agent1@luxespace.com';
-      password = 'Agent@123';
-    } else {
-      email = 'user1@luxespace.com';
-      password = 'User@123';
-    }
-
-    form.setValue('email', email);
-    form.setValue('password', password);
-    toast.success(`${role.toUpperCase()} credentials loaded - click SIGN IN to login`);
-  };
-
-  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
-    setIsLoggingIn(true);
-    const success = await login(data.email, data.password);
-
-    if (success) {
-      toast.success('Welcome back!');
-    } else {
-      toast.error('Invalid email or password');
-    }
-    setIsLoggingIn(false);
-  };
- 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -230,7 +227,11 @@ const router = useRouter();
                     )}
                   />
 
-                  <Button type="submit" disabled={isLoggingIn} className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)] transition-all hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(255,215,0,0.35)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                  <Button 
+                    type="submit" 
+                    disabled={isLoggingIn} 
+                    className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)] transition-all hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(255,215,0,0.35)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  >
                     {isLoggingIn ? (
                       <div className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /><span>SIGNING IN...</span></div>
                     ) : (
@@ -255,11 +256,7 @@ const router = useRouter();
                       onClick={() => fillDemoCredentials(role.id as any)}
                       className="group flex flex-col items-center gap-2 p-4 rounded-2xl border border-white/10 bg-white/[0.03] transition-all hover:border-primary/40 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoggingIn ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                      ) : (
-                        <role.icon className="h-5 w-5 text-white/40 transition group-hover:text-primary" />
-                      )}
+                      <role.icon className="h-5 w-5 text-white/40 transition group-hover:text-primary" />
                       <span className="text-[10px] font-black uppercase tracking-wider text-white/60 group-hover:text-white">{role.label}</span>
                     </button>
                   ))}
