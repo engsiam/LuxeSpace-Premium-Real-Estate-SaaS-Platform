@@ -111,7 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
-  hydrate: async () => {
+  hydrate: async (retries = 0) => {
     const currentUser = get().user;
     const currentIsAuthenticated = get().isAuthenticated;
     
@@ -130,6 +130,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           'Content-Type': 'application/json',
         },
       });
+
+      if (response.status === 503 && retries < 3) {
+        console.log(`[Hydrate] Backend sleeping, retry ${retries + 1}/3...`);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const hydrateFn = get().hydrate as (retries?: number) => Promise<void>;
+        return hydrateFn(retries + 1);
+      }
 
       if (!response.ok) {
         throw new Error(`Session check failed: ${response.status}`);

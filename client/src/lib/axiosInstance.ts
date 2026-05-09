@@ -13,16 +13,23 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+let retryCount = 0;
+const MAX_RETRIES = 3;
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
 
-    if (status === 503) {
-      console.error('[API] Service unavailable (503):', originalRequest.url);
-      return Promise.reject(error);
+    if (status === 503 && retryCount < MAX_RETRIES) {
+      retryCount++;
+      console.log(`[API] Backend sleeping, retry ${retryCount}/${MAX_RETRIES}...`);
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      return axiosInstance(originalRequest);
     }
+
+    retryCount = 0;
 
     if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
