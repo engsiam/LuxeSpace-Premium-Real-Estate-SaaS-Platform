@@ -28,16 +28,16 @@ export default function DashboardLayout({
   }, []);
 
   useEffect(() => {
-    if (!mounted || !isHydrated || redirectChecked.current) return;
+    if (!mounted || redirectChecked.current) return;
     
-    if (!isAuthenticated) {
+    if (!user) {
       redirectChecked.current = true;
       router.replace('/login');
     }
-  }, [isHydrated, isAuthenticated, router, mounted]);
+  }, [mounted, user, router]);
 
   useEffect(() => {
-    if (!user || !isHydrated || redirectChecked.current) return;
+    if (!user || redirectChecked.current) return;
     
     const role = user.role || 'USER';
     
@@ -48,13 +48,13 @@ export default function DashboardLayout({
       redirectChecked.current = true;
       router.replace('/dashboard');
     }
-  }, [user, pathname, router, isHydrated]);
+  }, [user, pathname, router]);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
 
-  if (!mounted || !isHydrated || (isHydrated && !isAuthenticated)) {
+  if (!mounted || !user) {
     return (
       <div className="flex min-h-screen bg-background">
         <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">

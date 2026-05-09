@@ -55,7 +55,10 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted || !isHydrated) return;
     
-    if (!isAuthenticated && pathname?.startsWith('/dashboard')) {
+    const isOnDashboard = pathname?.startsWith('/dashboard');
+    const shouldRedirect = !isAuthenticated && isOnDashboard;
+    
+    if (shouldRedirect) {
       router.replace('/login');
     }
   }, [isHydrated, isAuthenticated, router, pathname, mounted]);

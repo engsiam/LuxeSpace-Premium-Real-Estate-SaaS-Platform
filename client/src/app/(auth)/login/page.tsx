@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore, useUser } from '@/store/useAuthStore';
 import { motion } from 'framer-motion';
@@ -62,20 +62,23 @@ export default function LoginPage() {
   });
 
 
-  const router = useRouter();
+const router = useRouter();
 
   useEffect(() => {
-    if (!user) return;
-
-    const timeout = setTimeout(() => {
+    if (user) {
       router.replace('/dashboard/user');
-    }, 100);
-
-    return () => clearTimeout(timeout);
+    }
   }, [user, router]);
 
- if (user) {
-    return <AuthLoader />;
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
   const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
     let email = '';
