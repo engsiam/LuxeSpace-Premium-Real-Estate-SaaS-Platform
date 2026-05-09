@@ -54,6 +54,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({
         user: response.data.data.user,
         isAuthenticated: true,
+        isHydrated: true,
+        isHydrating: false,
         isLoading: false,
       });
 
@@ -79,6 +81,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({
         user: response.data.data.user,
         isAuthenticated: true,
+        isHydrated: true,
+        isHydrating: false,
         isLoading: false,
       });
 
@@ -96,10 +100,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch {
       // Ignore logout errors
     }
-    
+
     set({
       user: null,
       isAuthenticated: false,
+      isHydrated: true,
+      isHydrating: false,
       error: null,
       isLoading: false,
     });
@@ -107,7 +113,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   hydrate: async () => {
     if (get().isHydrating || get().isHydrated) return;
-    
+
     set({ isHydrating: true });
 
     try {
@@ -117,9 +123,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           'Content-Type': 'application/json',
         },
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.data?.isAuthenticated && data.data?.user) {
         set({
           user: data.data.user,
@@ -128,15 +134,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isHydrated: true,
         });
       } else {
-        set({ 
-          isHydrating: false, 
+        set({
+          user: null,
+          isHydrating: false,
           isAuthenticated: false,
           isHydrated: true,
         });
       }
     } catch {
-      set({ 
-        isHydrating: false, 
+      set({
+        user: null,
+        isHydrating: false,
         isAuthenticated: false,
         isHydrated: true,
       });
@@ -148,7 +156,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const response = await axios.get(`${BASE_URL}/users/session`, {
         withCredentials: true,
       });
-      
+
       if (response.data.success && response.data.data?.isAuthenticated && response.data.data?.user) {
         set({
           user: response.data.data.user,
@@ -167,7 +175,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const response = await axios.get(`${BASE_URL}/users/session`, {
         withCredentials: true,
       });
-      
+
       if (response.data.success && response.data.data?.isAuthenticated && response.data.data?.user) {
         set({
           user: response.data.data.user,
