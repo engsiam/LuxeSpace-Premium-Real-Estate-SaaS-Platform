@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { motion } from 'framer-motion';
@@ -34,11 +34,11 @@ export default function LoginPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [redirectChecked, setRedirectChecked] = useState(false);
   
+  const redirectRef = useRef(false);
   const { login, user, isAuthenticated, isLoading } = useAuthStore();
 
-  console.log('[Login] Render:', { user: !!user, isAuthenticated, isLoading, mounted, redirectChecked });
+  console.log('[Login] Render:', { user: !!user, isAuthenticated, isLoading, mounted });
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -53,14 +53,31 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    console.log('[Login] Auth effect:', { mounted, user: !!user, isAuthenticated, isLoading, redirectChecked });
-    if (!mounted || isLoading || redirectChecked) return;
-    if (user && isAuthenticated) {
-      setRedirectChecked(true);
-      console.log('[Login] Redirecting to /dashboard/user with user:', user.email, user.role);
-      router.replace('/dashboard/user');
+    if (!mounted) return;
+    if (isLoading || isLoggingIn) return;
+    if (redirectRef.current) {
+      console.log('[Login] Redirect already triggered, skipping');
+      return;
     }
-  }, [mounted, user, isAuthenticated, isLoading, router, redirectChecked]);
+    
+    if (user && isAuthenticated) {
+      redirectRef.current = true;
+      console.log('[Login] REDIRECT START - user:', user.email, 'role:', user.role);
+      
+      const role = user.role || 'USER';
+      const targetUrl = role === 'ADMIN' ? '/dashboard/admin' : role === 'AGENT' ? '/dashboard/agent' : '/dashboard/user';
+      
+      console.log('[Login] Target URL:', targetUrl);
+      
+      router.replace(targetUrl).then(() => {
+        console.log('[Login] router.replace completed');
+      }).catch((err) => {
+        console.error('[Login] router.replace failed:', err);
+        console.log('[Login] Fallback to window.location');
+        window.location.href = targetUrl;
+      });
+    }
+  }, [mounted, user, isAuthenticated, isLoading, isLoggingIn, router]);
 
   const onSubmit = useCallback(async (data: LoginFormValues) => {
     console.log('[Login] Submitting login...');
@@ -109,7 +126,7 @@ export default function LoginPage() {
     );
   }
 
-  if (user && isAuthenticated && !redirectChecked) {
+  if (user && isAuthenticated && redirectRef.current) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
