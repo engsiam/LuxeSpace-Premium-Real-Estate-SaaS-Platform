@@ -68,14 +68,9 @@ export default function LoginPage() {
       const targetUrl = role === 'ADMIN' ? '/dashboard/admin' : role === 'AGENT' ? '/dashboard/agent' : '/dashboard/user';
       
       console.log('[Login] Target URL:', targetUrl);
-      
-      router.replace(targetUrl).then(() => {
-        console.log('[Login] router.replace completed');
-      }).catch((err) => {
-        console.error('[Login] router.replace failed:', err);
-        console.log('[Login] Fallback to window.location');
-        window.location.href = targetUrl;
-      });
+      console.log('[Login] Calling router.replace...');
+      router.replace(targetUrl);
+      console.log('[Login] router.replace called, waiting for navigation...');
     }
   }, [mounted, user, isAuthenticated, isLoading, isLoggingIn, router]);
 
