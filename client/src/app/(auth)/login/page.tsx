@@ -18,7 +18,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore, useUser } from '@/store/useAuthStore';
-import { useAuthLoading } from '@/components/providers/UserStoreProvider';
 import { motion } from 'framer-motion';
 import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -52,7 +51,6 @@ function AuthLoader() {
 export default function LoginPage() {
   const router = useRouter();
   const user = useUser();
-  const { isAuthReady } = useAuthLoading();
   const { login } = useAuthStore();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -65,18 +63,10 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (isAuthReady && user) {
+    if (user) {
       router.replace('/dashboard/user');
     }
-  }, [isAuthReady, user, router]);
-
-  if (!isAuthReady) {
-    return <AuthLoader />;
-  }
-
-  if (user) {
-    return <AuthLoader />;
-  }
+  }, [user, router]);
 
   const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
     let email = '';

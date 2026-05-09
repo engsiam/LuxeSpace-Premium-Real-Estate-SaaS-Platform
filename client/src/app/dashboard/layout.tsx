@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
-import { useAuthStore, useUser, useIsAuthenticated, useIsHydrated, useIsHydrating } from '@/store/useAuthStore';
+import { useUser, useIsAuthenticated, useIsHydrated } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,41 +17,35 @@ export default function DashboardLayout({
   const user = useUser();
   const isAuthenticated = useIsAuthenticated();
   const isHydrated = useIsHydrated();
-  const isHydrating = useIsHydrating();
-  const { hydrate } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const hydratedRef = useRef(false);
+  const redirectChecked = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!mounted || hydratedRef.current) return;
-    
-    hydratedRef.current = true;
-    hydrate();
-  }, [mounted, hydrate]);
-
-  useEffect(() => {
-    if (!mounted || !isHydrated) return;
+    if (!mounted || !isHydrated || redirectChecked.current) return;
     
     if (!isAuthenticated) {
+      redirectChecked.current = true;
       router.replace('/login');
     }
   }, [isHydrated, isAuthenticated, router, mounted]);
 
   useEffect(() => {
-    if (!user || !isHydrated) return;
+    if (!user || !isHydrated || redirectChecked.current) return;
     
     const role = user.role || 'USER';
     
     if (pathname.includes('/dashboard/admin') && role !== 'ADMIN') {
+      redirectChecked.current = true;
       router.replace('/dashboard');
     } else if (pathname.includes('/dashboard/agent') && role !== 'AGENT' && role !== 'ADMIN') {
+      redirectChecked.current = true;
       router.replace('/dashboard');
     }
   }, [user, pathname, router, isHydrated]);
@@ -60,7 +54,7 @@ export default function DashboardLayout({
     setSidebarOpen(false);
   }, [pathname]);
 
-  if (!mounted || !isHydrated || !isAuthenticated) {
+  if (!mounted || !isHydrated || (isHydrated && !isAuthenticated)) {
     return (
       <div className="flex min-h-screen bg-background">
         <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">
