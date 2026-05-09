@@ -24,20 +24,21 @@ const getCorsOrigins = (): string[] => {
 };
 
 const corsOptions = {
-  origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     const origins = getCorsOrigins();
     console.log('[CORS] Request origin:', origin);
-    console.log('[CORS] Allowed origins:', origins);
     
     if (!origin) {
+      console.log('[CORS] No origin, allowing...');
       callback(null, true);
       return;
     }
     
     if (origins.includes(origin)) {
+      console.log('[CORS] Origin allowed:', origin);
       callback(null, true);
     } else {
-      console.log('[CORS] Origin not allowed:', origin);
+      console.log('[CORS] Origin NOT allowed:', origin, 'Expected:', origins);
       callback(new Error('Not allowed by CORS'), false);
     }
   },

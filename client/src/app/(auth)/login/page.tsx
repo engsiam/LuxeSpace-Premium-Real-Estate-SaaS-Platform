@@ -53,10 +53,11 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
+    console.log('[Login] Auth effect:', { mounted, user: !!user, isAuthenticated, isLoading, redirectChecked });
     if (!mounted || isLoading || redirectChecked) return;
     if (user && isAuthenticated) {
       setRedirectChecked(true);
-      console.log('[Login] Redirecting to /dashboard/user');
+      console.log('[Login] Redirecting to /dashboard/user with user:', user.email, user.role);
       router.replace('/dashboard/user');
     }
   }, [mounted, user, isAuthenticated, isLoading, router, redirectChecked]);

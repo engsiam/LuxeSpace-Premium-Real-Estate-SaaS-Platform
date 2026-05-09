@@ -25,7 +25,7 @@ export default function DashboardHeader() {
     setMounted(true);
   }, []);
 
-  if (!mounted || !isHydrated || !user) return null;
+  if (!mounted || !user) return null;
 
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
   const userImage = user.avatar || '';

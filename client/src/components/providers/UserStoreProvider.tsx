@@ -38,34 +38,43 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
-  const hydratedRef = useRef(false);
+  const hydrationAttempted = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Skip hydration if already logged in (from login action)
   useEffect(() => {
-    if (!mounted || hydratedRef.current) return;
+    if (!mounted) return;
+    
     if (user && isAuthenticated) {
-      hydratedRef.current = true;
+      console.log('[UserStoreProvider] Already logged in, skipping hydrate');
+      hydrationAttempted.current = true;
       return;
     }
-    hydratedRef.current = true;
+    
+    if (hydrationAttempted.current) return;
+    hydrationAttempted.current = true;
+    
+    console.log('[UserStoreProvider] Calling hydrate, user:', !!user);
     hydrate();
   }, [mounted, hydrate, user, isAuthenticated]);
 
+  // Don't redirect from dashboard if user is logged in
   useEffect(() => {
-    if (!mounted || !isHydrated) return;
+    if (!mounted) return;
     
     const isOnDashboard = pathname?.startsWith('/dashboard');
-    const shouldRedirect = !user && isOnDashboard;
+    const shouldRedirect = !user && isOnDashboard && isHydrated;
     
     if (shouldRedirect) {
+      console.log('[UserStoreProvider] No user, redirecting to login');
       router.replace('/login');
     }
   }, [isHydrated, user, router, pathname, mounted]);
 
-  const isAuthReady = mounted && isHydrated;
+  const isAuthReady = mounted && (isHydrated || Boolean(user && isAuthenticated));
 
   return (
     <AuthLoadingContext.Provider value={{ isHydrating, isAuthReady }}>

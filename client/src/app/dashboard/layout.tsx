@@ -28,6 +28,7 @@ export default function DashboardLayout({
   }, []);
 
   useEffect(() => {
+    console.log('[Dashboard] Effect:', { mounted, user: !!user, isHydrating });
     if (!mounted || redirectChecked.current) return;
     if (isHydrating) return;
     
@@ -58,7 +59,7 @@ export default function DashboardLayout({
     setSidebarOpen(false);
   }, [pathname]);
 
-  if (!mounted || !user) {
+  if (!mounted) {
     return (
       <div className="flex min-h-screen bg-background">
         <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">
@@ -79,6 +80,35 @@ export default function DashboardLayout({
         </div>
       </div>
     );
+  }
+
+  // Show loading while checking auth (only on initial load without user)
+  if (!user && isHydrating) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <div className="w-20 lg:w-80 border-r border-border p-4 lg:p-6 space-y-4 bg-card/50">
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-lg" />
+        </div>
+        <div className="flex-1 p-4 lg:p-6 space-y-6">
+          <Skeleton className="h-8 w-32 rounded-lg" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+          </div>
+          <Skeleton className="h-64 w-full rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
+
+  // No user after hydration complete - redirect to login
+  if (!user) {
+    return null; // Will be handled by redirect effect
   }
 
   const role = user?.role || 'USER';
