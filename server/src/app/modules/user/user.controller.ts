@@ -188,18 +188,48 @@ export const refreshToken = catchAsync(async (req, res) => {
 });
 
 export const getSession = catchAsync(async (req, res) => {
-  const token = req.cookies.accessToken;
-
-  console.log('Session check - cookies:', req.cookies);
-  console.log('Session check - token:', token ? 'present' : 'missing');
-
+  console.log('========== SESSION CHECK ==========');
+  console.log('Headers Cookie:', req.headers.cookie);
+  console.log('Cookies object:', req.cookies);
+  console.log('Raw cookies:', JSON.stringify(req.cookies));
+  
+  const token = req.cookies?.accessToken || req.cookies?.access_token;
+  console.log('Extracted token:', token ? 'present' : 'missing');
+  
   if (!token) {
+    console.log('Session check - No token found, returning no session');
     return sendResponse(res, {
       statusCode: 200,
       success: true,
       message: 'No session',
       data: { user: null, isAuthenticated: false },
     });
+  }
+
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { id?: string; userId?: string; role?: string };
+    console.log('Session check - decoded:', decoded);
+    const userId = decoded.id || decoded.userId;
+    if (!userId) throw new Error('No user ID in token');
+    const user = await userService.getUserById(userId);
+    console.log('Session check - user found:', user?.email);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Session active',
+      data: { user, isAuthenticated: true },
+    });
+  } catch (error) {
+    console.log('Session check - error:', error);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Invalid session',
+      data: { user: null, isAuthenticated: false },
+    });
+  }
+});
   }
 
   try {

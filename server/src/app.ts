@@ -9,6 +9,8 @@ import env, { getClientUrl, getTrustedOrigins } from './config';
 
 const app: Application = express();
 
+app.set('trust proxy', 1);
+
 const getCorsOrigins = (): string[] => {
   try {
     const origins = getTrustedOrigins();
@@ -22,10 +24,27 @@ const getCorsOrigins = (): string[] => {
 };
 
 const corsOptions = {
-  origin: getCorsOrigins(),
+  origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    const origins = getCorsOrigins();
+    console.log('[CORS] Request origin:', origin);
+    console.log('[CORS] Allowed origins:', origins);
+    
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    
+    if (origins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('[CORS] Origin not allowed:', origin);
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'pragma'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'pragma', 'Cookie'],
+  exposedHeaders: ['Set-Cookie'],
 };
 
 // Middlewares

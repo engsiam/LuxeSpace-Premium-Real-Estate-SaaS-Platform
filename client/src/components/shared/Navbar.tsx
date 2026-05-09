@@ -385,8 +385,7 @@ export default function Navbar() {
             className={cn(
               `
                 p-0.5
-                rounded-full
-                border
+               
                 transition-colors
               `,
               scrolled
