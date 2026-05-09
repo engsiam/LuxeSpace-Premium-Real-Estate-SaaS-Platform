@@ -104,6 +104,9 @@ export default function LoginPage() {
     }
     setIsLoggingIn(false);
   };
+  if (user) {
+  return <AuthLoader />;
+}
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
