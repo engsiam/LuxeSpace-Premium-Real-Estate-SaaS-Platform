@@ -12,10 +12,18 @@ import { getCookieOptions, getCrossDomainCookieOptions, cookieOptions } from '..
 export const register = catchAsync(async (req, res) => {
   const validated = registerSchema.parse(req.body);
   const { accessToken, refreshToken, user } = await userService.registerUser(validated);
-  
-  res.cookie('accessToken', accessToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 7 });
-  res.cookie('refreshToken', refreshToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 30 });
-  
+
+  res.cookie(
+    'accessToken',
+    accessToken,
+    getCrossDomainCookieOptions(60 * 60 * 24 * 7)
+  );
+  res.cookie(
+    'refreshToken',
+    refreshToken,
+    getCrossDomainCookieOptions(60 * 60 * 24 * 30)
+  );
+
   sendResponse(res, {
     statusCode: 201,
     success: true,
@@ -27,10 +35,18 @@ export const register = catchAsync(async (req, res) => {
 export const login = catchAsync(async (req, res) => {
   const validated = loginSchema.parse(req.body);
   const { accessToken, refreshToken, user } = await userService.loginUser(validated.email, validated.password);
-  
-  res.cookie('accessToken', accessToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 7 });
-  res.cookie('refreshToken', refreshToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 30 });
-  
+
+  res.cookie(
+    'accessToken',
+    accessToken,
+    getCrossDomainCookieOptions(60 * 60 * 24 * 7)
+  );
+  res.cookie(
+    'refreshToken',
+    refreshToken,
+    getCrossDomainCookieOptions(60 * 60 * 24 * 30)
+  );
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -48,10 +64,10 @@ export const uploadAvatar = catchAsync(async (req: AuthRequest, res) => {
       data: null,
     });
   }
-  
+
   const fileUrl = await uploadImageToCloudinary(req.file.buffer, { folder: 'luxespace/avatars' });
   const result = await userService.updateUser(req.user!.id, { avatar: fileUrl });
-  
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -63,10 +79,18 @@ export const uploadAvatar = catchAsync(async (req: AuthRequest, res) => {
 export const googleAuth = catchAsync(async (req, res) => {
   const validated = googleAuthSchema.parse(req.body);
   const { accessToken, refreshToken, user } = await userService.googleAuth(validated);
-  
-  res.cookie('accessToken', accessToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 7 });
-  res.cookie('refreshToken', refreshToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 30 });
-  
+
+  res.cookie(
+    'accessToken',
+    accessToken,
+    getCrossDomainCookieOptions(60 * 60 * 24 * 7)
+  );
+  res.cookie(
+    'refreshToken',
+    refreshToken,
+    getCrossDomainCookieOptions(60 * 60 * 24 * 30)
+  );
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -78,25 +102,25 @@ export const googleAuth = catchAsync(async (req, res) => {
 export const googleAuthCallback = catchAsync(async (req, res) => {
   const { code, error } = req.query;
   const clientUrl = getClientUrl();
-  
+
   if (error) {
     return res.redirect(`${clientUrl}/login?error=${error}`);
   }
-  
+
   if (!code) {
     return res.redirect(`${clientUrl}/login?error=no_code`);
   }
-  
+
   try {
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
     const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const serverUrl = getServerUrl();
     const redirectUri = `${serverUrl}/api/v1/users/auth/google/callback`;
-    
+
     if (!googleClientId || !googleClientSecret || googleClientId === 'your-google-client-id') {
       return res.redirect(`${clientUrl}/login?error=google_not_configured`);
     }
-    
+
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -108,33 +132,33 @@ export const googleAuthCallback = catchAsync(async (req, res) => {
         redirect_uri: redirectUri,
       }),
     });
-    
+
     const tokens = await tokenResponse.json() as { access_token?: string };
-    
+
     if (!tokens.access_token) {
       return res.redirect(`${clientUrl}/login?error=token_exchange_failed`);
     }
-    
+
     const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${tokens.access_token}` },
     });
-    
+
     const googleUser = await userResponse.json() as { email?: string; name?: string; picture?: string };
-    
+
     const { accessToken, refreshToken, user } = await userService.googleAuth({
       email: googleUser.email || '',
       name: googleUser.name || '',
       avatar: googleUser.picture || '',
       role: 'USER',
     });
-    
-    res.cookie('accessToken', accessToken, { 
+
+    res.cookie('accessToken', accessToken, {
       ...getCrossDomainCookieOptions(60 * 60 * 24 * 7),
     });
-    res.cookie('refreshToken', refreshToken, { 
+    res.cookie('refreshToken', refreshToken, {
       ...getCrossDomainCookieOptions(60 * 60 * 24 * 30),
     });
-    
+
     res.redirect(`${clientUrl}/dashboard/user`);
   } catch (err) {
     console.error('Google auth callback error:', err);
@@ -146,11 +170,15 @@ export const refreshToken = catchAsync(async (req, res) => {
   const refreshTokenFromCookie = req.cookies.refreshToken;
   const refreshTokenFromBody = req.body?.refreshToken;
   const result = await userService.refreshToken(refreshTokenFromCookie || refreshTokenFromBody);
-  
-if (result.accessToken) {
-      res.cookie('accessToken', result.accessToken, { ...getCookieOptions(), maxAge: 60 * 60 * 24 * 7 });
-    }
-  
+
+  if (result.accessToken) {
+    res.cookie(
+      'accessToken',
+      result.accessToken,
+      getCrossDomainCookieOptions(60 * 60 * 24 * 7)
+    );
+  }
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -161,10 +189,10 @@ if (result.accessToken) {
 
 export const getSession = catchAsync(async (req, res) => {
   const token = req.cookies.accessToken;
-  
+
   console.log('Session check - cookies:', req.cookies);
   console.log('Session check - token:', token ? 'present' : 'missing');
-  
+
   if (!token) {
     return sendResponse(res, {
       statusCode: 200,
@@ -173,7 +201,7 @@ export const getSession = catchAsync(async (req, res) => {
       data: { user: null, isAuthenticated: false },
     });
   }
-  
+
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET) as { id?: string; userId?: string; role?: string };
     console.log('Session check - decoded:', decoded);
@@ -181,7 +209,7 @@ export const getSession = catchAsync(async (req, res) => {
     if (!userId) throw new Error('No user ID in token');
     const user = await userService.getUserById(userId);
     console.log('Session check - user found:', user?.email);
-    
+
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -199,10 +227,10 @@ export const getSession = catchAsync(async (req, res) => {
 });
 
 export const logout = catchAsync(async (req, res) => {
-  const clearOptions = getCookieOptions();
+  const clearOptions = getCrossDomainCookieOptions(0);
   res.clearCookie('accessToken', clearOptions);
   res.clearCookie('refreshToken', clearOptions);
-  
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
