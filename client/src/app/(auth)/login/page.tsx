@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { GoogleButton } from '@/components/auth/GoogleButton';
+import { useRouter } from 'next/navigation';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -61,18 +62,21 @@ export default function LoginPage() {
   });
 
 
-  const redirectedRef = useRef(false);
+  const router = useRouter();
 
   useEffect(() => {
-    if (user && !redirectedRef.current) {
-      redirectedRef.current = true;
+    if (!user) return;
 
-      console.log('Redirecting user...');
+    const timeout = setTimeout(() => {
+      router.replace('/dashboard/user');
+    }, 100);
 
-      window.location.href = '/dashboard/user';
-    }
-  }, [user]);
+    return () => clearTimeout(timeout);
+  }, [user, router]);
 
+ if (user) {
+    return <AuthLoader />;
+  }
   const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
     let email = '';
     let password = '';
@@ -104,9 +108,7 @@ export default function LoginPage() {
     }
     setIsLoggingIn(false);
   };
-  if (user) {
-  return <AuthLoader />;
-}
+ 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
