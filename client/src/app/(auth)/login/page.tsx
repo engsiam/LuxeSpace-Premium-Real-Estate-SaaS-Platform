@@ -14,15 +14,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/store/useAuthStore';
 import { motion } from 'framer-motion';
 import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import FullScreenLoading from '@/components/shared/FullScreenLoading';
+import axios from 'axios';
+import { BASE_URL } from '@/lib/config';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -32,16 +32,9 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const redirectedRef = useRef(false);
-
-
-  const login = useAuthStore((state) => state.login);
-  const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const isLoading = useAuthStore((state) => state.isLoading);
+  const [redirecting, setRedirecting] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -55,44 +48,34 @@ export default function LoginPage() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-
-    if (isLoading) return;
-
-    if (!user || !isAuthenticated) return;
-
-    // prevent multiple redirects
-    if (redirectedRef.current) return;
-
-    redirectedRef.current = true;
-
-    const role = user.role?.toLowerCase() || 'user';
-
-    router.replace(`/dashboard/${role}`);
-  }, [
-    mounted,
-    user,
-    isAuthenticated,
-    isLoading,
-    router,
-  ]);
-
   const onSubmit = useCallback(async (data: LoginFormValues) => {
     setIsLoggingIn(true);
+    
     try {
-      const success = await login(data.email, data.password);
-      if (success) {
+      const response = await axios.post(
+        `${BASE_URL}/users/login`,
+        { email: data.email, password: data.password },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
         toast.success('Welcome back!');
+        setRedirecting(true);
+        
+        const role = response.data.data.user?.role?.toLowerCase() || 'user';
+        setTimeout(() => {
+          window.location.href = `/dashboard/${role}`;
+        }, 500);
       } else {
-        toast.error('Invalid email or password');
+        toast.error(response.data.error || 'Login failed');
       }
-    } catch {
-      toast.error('Login failed. Please try again.');
+    } catch (error: any) {
+      const message = error.response?.data?.error || error.message || 'Login failed';
+      toast.error(message);
     } finally {
       setIsLoggingIn(false);
     }
-  }, [login]);
+  }, []);
 
   const fillDemoCredentials = (role: 'admin' | 'user' | 'agent') => {
     const credentials = {
@@ -110,19 +93,9 @@ export default function LoginPage() {
     return <FullScreenLoading message="Loading" subMessage="Initializing..." />;
   }
 
-  if (isLoggingIn) {
-    return <FullScreenLoading message="Authenticating" subMessage="Verifying credentials..." />;
+  if (isLoggingIn || redirecting) {
+    return <FullScreenLoading message={redirecting ? "Redirecting to Dashboard" : "Authenticating"} />;
   }
-
-  if (user && isAuthenticated) {
-    return (
-      <FullScreenLoading
-        message="Redirecting"
-        subMessage="Opening dashboard..."
-      />
-    );
-  }
-
 
   return (
     <motion.div
@@ -133,13 +106,7 @@ export default function LoginPage() {
     >
       <div className="flex flex-col lg:flex-row min-h-[600px] lg:min-h-[850px]">
         <div className="relative overflow-hidden w-full lg:w-[58%] min-h-[300px] lg:min-h-auto order-1">
-          <Image
-            src="/login.jpg"
-            alt="Luxury Property"
-            fill
-            priority
-            className="object-cover"
-          />
+          <Image src="/login.jpg" alt="Luxury Property" fill priority className="object-cover" />
           <div className="absolute inset-0 bg-black/45" />
           <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/30 to-[#020817]/80" />
 
@@ -214,7 +181,7 @@ export default function LoginPage() {
                         <FormControl>
                           <div className="relative">
                             <UserIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
-                            <Input {...field} placeholder="you@example.com" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20" />
+                            <Input {...field} placeholder="you@example.com" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20 focus-visible:border-primary" />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -234,7 +201,7 @@ export default function LoginPage() {
                         <FormControl>
                           <div className="relative">
                             <Lock className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
-                            <Input {...field} type="password" placeholder="••••••••" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20" />
+                            <Input {...field} type="password" placeholder="••••••••" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20 focus-visible:border-primary" />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -242,16 +209,9 @@ export default function LoginPage() {
                     )}
                   />
 
-                  <Button
-                    type="submit"
-                    disabled={isLoggingIn}
-                    className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)] transition-all hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(255,215,0,0.35)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  >
-                    {isLoggingIn ? (
-                      <div className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /><span>SIGNING IN...</span></div>
-                    ) : (
-                      <div className="flex items-center gap-2"><span>SIGN IN</span><ChevronRight className="h-5 w-5" /></div>
-                    )}
+                  <Button type="submit" className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)]">
+                    <span>SIGN IN</span>
+                    <ChevronRight className="h-5 w-5 ml-2" />
                   </Button>
                 </form>
               </Form>
@@ -267,9 +227,8 @@ export default function LoginPage() {
                     <button
                       key={role.id}
                       type="button"
-                      disabled={isLoggingIn}
                       onClick={() => fillDemoCredentials(role.id as any)}
-                      className="group flex flex-col items-center gap-2 p-4 rounded-2xl border border-white/10 bg-white/[0.03] transition-all hover:border-primary/40 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="group flex flex-col items-center gap-2 p-4 rounded-2xl border border-white/10 bg-white/[0.03] transition-all hover:border-primary/40 hover:bg-primary/10"
                     >
                       <role.icon className="h-5 w-5 text-white/40 transition group-hover:text-primary" />
                       <span className="text-[10px] font-black uppercase tracking-wider text-white/60 group-hover:text-white">{role.label}</span>
