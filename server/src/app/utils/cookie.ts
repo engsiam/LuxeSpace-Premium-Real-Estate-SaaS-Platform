@@ -16,29 +16,28 @@ export interface CookieOptions {
 
 export const getCookieOptions = (maxAge?: number): CookieOptions => {
   const isProduction = env.NODE_ENV === 'production';
-  
+
   return {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     path: '/',
-    ...(maxAge && { maxAge }),
+    ...(maxAge && { maxAge: maxAge * 1000 }),
   };
 };
 
 // Always use cross-domain settings for auth cookies between Vercel frontend and Render backend
 export const getCrossDomainCookieOptions = (maxAge: number): CookieOptions => {
   const isProduction = env.NODE_ENV === 'production';
-  
+
   return {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     path: '/',
-    maxAge,
+    maxAge: maxAge * 1000,
   };
 };
-
 export const cookieOptions = getCookieOptions();
 export const accessTokenCookieOptions = getCookieOptions(60 * 60 * 24 * 7);
 export const refreshTokenCookieOptions = getCookieOptions(60 * 60 * 24 * 30);
