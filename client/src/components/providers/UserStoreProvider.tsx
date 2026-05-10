@@ -1,31 +1,17 @@
 'use client';
 
-import { useEffect, useState, useRef, createContext, useContext, ReactNode } from 'react';
-import { useAuthStore, useIsHydrated, useIsAuthenticated } from '@/store/useAuthStore';
-import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState, useRef, ReactNode } from 'react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { usePathname } from 'next/navigation';
 import FullScreenLoading from '@/components/shared/FullScreenLoading';
 
-interface AuthLoadingContextType {
-  isHydrating: boolean;
-  isAuthReady: boolean;
-}
-
-const AuthLoadingContext = createContext<AuthLoadingContextType>({
-  isHydrating: true,
-  isAuthReady: false,
-});
-
-export function useAuthLoading() {
-  return useContext(AuthLoadingContext);
-}
-
-export function UserStoreProvider({ children }: { children: React.ReactNode }) {
-  const { hydrate, isHydrating, user, isAuthenticated } = useAuthStore();
-  const isHydrated = useIsHydrated();
-  const router = useRouter();
+export function UserStoreProvider({ children }: { children: ReactNode }) {
+  const hydrate = useAuthStore((state) => state.hydrate);
+  const user = useAuthStore((state) => state.user);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
-  const hydrationAttempted = useRef(false);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -33,34 +19,26 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!mounted) return;
-    
-    if (user && isAuthenticated) {
-      hydrationAttempted.current = true;
+    if (initialCheckDone) return;
+    if (user) {
+      setInitialCheckDone(true);
       return;
     }
-    
-    if (hydrationAttempted.current) return;
-    hydrationAttempted.current = true;
-    
+    setInitialCheckDone(true);
     hydrate();
-  }, [mounted, hydrate, user, isAuthenticated]);
+  }, [mounted, user, initialCheckDone, hydrate]);
 
   useEffect(() => {
-    if (!mounted) return;
-    
-    const isOnDashboard = pathname?.startsWith('/dashboard');
-    const shouldRedirect = !user && isOnDashboard && isHydrated;
-    
-    if (shouldRedirect) {
-      router.replace('/login');
+    if (!mounted || !isHydrated) return;
+    const isDashboard = pathname?.startsWith('/dashboard');
+    if (isDashboard && !user) {
+      window.location.href = '/login';
     }
-  }, [isHydrated, user, router, pathname, mounted]);
+  }, [mounted, isHydrated, user, pathname]);
 
-  const isAuthReady = mounted && (isHydrated || Boolean(user && isAuthenticated));
+  if (!mounted) {
+    return <FullScreenLoading message="Loading" subMessage="Initializing..." />;
+  }
 
-  return (
-    <AuthLoadingContext.Provider value={{ isHydrating, isAuthReady }}>
-      {!mounted ? <FullScreenLoading message="Loading" subMessage="Initializing app..." /> : children}
-    </AuthLoadingContext.Provider>
-  );
+  return <>{children}</>;
 }
