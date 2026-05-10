@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { User as UserIcon, Phone, ShieldCheck, CheckCircle2, Camera, Loader2 } from 'lucide-react';
+import { User as UserIcon, Phone, ShieldCheck, CheckCircle2, Camera, Loader2, Lock, Eye, EyeOff, ShieldAlert } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -23,12 +23,28 @@ import FullScreenLoading from '@/components/shared/FullScreenLoading';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
+const DEMO_ACCOUNTS = [
+  'admin@luxespace.com',
+  'agent1@luxespace.com',
+  'user1@luxespace.com',
+];
+
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   phone: z.string().optional(),
 });
 
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters'),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 type ProfileFormValues = z.infer<typeof profileSchema>;
+type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export default function AdminProfile() {
   const [loading, setLoading] = useState(true);
@@ -36,6 +52,9 @@ export default function AdminProfile() {
   const [avatar, setAvatar] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [isDemoAccount, setIsDemoAccount] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
@@ -43,6 +62,15 @@ export default function AdminProfile() {
     defaultValues: {
       name: '',
       phone: '',
+    },
+  });
+
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
     },
   });
 
@@ -66,6 +94,7 @@ export default function AdminProfile() {
         if (user.avatar) {
           setAvatar(user.avatar);
         }
+        setIsDemoAccount(DEMO_ACCOUNTS.some(demo => user.email?.toLowerCase() === demo.toLowerCase()));
       } catch {
         toast.error('Failed to fetch profile');
       } finally {
@@ -113,6 +142,24 @@ export default function AdminProfile() {
     } finally {
       setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const onPasswordSubmit = async (data: PasswordFormValues) => {
+    setChangingPassword(true);
+    try {
+      await axios.post(`${BASE_URL}/users/change-password`, {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      }, {
+        withCredentials: true,
+      });
+      toast.success('Password changed successfully');
+      passwordForm.reset();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to change password');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -203,7 +250,7 @@ export default function AdminProfile() {
           </div>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
           <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden">
             <div className="p-8 border-b border-border bg-background/20 flex items-center gap-4">
               <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
@@ -267,6 +314,110 @@ export default function AdminProfile() {
               </Form>
             </div>
           </div>
+
+          {isDemoAccount ? (
+            <div className="bg-amber-500/10 border border-amber-500/20 p-8 rounded-[2.5rem]">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500 shrink-0">
+                  <ShieldAlert size={24} />
+                </div>
+                <div>
+                  <h4 className="text-lg font-black text-amber-500 mb-2">Demo Account</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Password change is disabled for demo accounts. This account is for demonstration purposes only.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden">
+              <div className="p-8 border-b border-border bg-background/20 flex items-center gap-4">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                  <Lock size={20} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-white tracking-tight">Security</h3>
+                  <p className="text-xs text-muted-foreground font-medium">Change your password</p>
+                </div>
+              </div>
+
+              <div className="p-10">
+                <Form {...passwordForm}>
+                  <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
+                    <FormField
+                      control={passwordForm.control}
+                      name="currentPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">Current Password</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
+                              <Input type={showPasswords.current ? 'text' : 'password'} {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 pr-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                              <button type="button" onClick={() => setShowPasswords(p => ({ ...p, current: !p.current }))} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                                {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-xs font-bold" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={passwordForm.control}
+                      name="newPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">New Password</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
+                              <Input type={showPasswords.new ? 'text' : 'password'} {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 pr-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                              <button type="button" onClick={() => setShowPasswords(p => ({ ...p, new: !p.new }))} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                                {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-xs font-bold" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={passwordForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">Confirm Password</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
+                              <Input type={showPasswords.confirm ? 'text' : 'password'} {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 pr-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                              <button type="button" onClick={() => setShowPasswords(p => ({ ...p, confirm: !p.confirm }))} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                                {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-xs font-bold" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex justify-end pt-4">
+                      <Button
+                        type="submit"
+                        disabled={changingPassword}
+                        className="h-14 px-10 bg-primary text-secondary-foreground rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        {changingPassword ? 'CHANGING...' : 'CHANGE PASSWORD'}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

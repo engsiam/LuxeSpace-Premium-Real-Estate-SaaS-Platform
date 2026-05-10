@@ -302,3 +302,34 @@ export const deleteUser = catchAsync(async (req, res) => {
     message: 'User deleted',
   });
 });
+
+export const changePassword = catchAsync(async (req: AuthRequest, res) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  if (!currentPassword || !newPassword) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: 'Current password and new password are required',
+      data: null,
+    });
+  }
+
+  if (newPassword.length < 8) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: 'New password must be at least 8 characters',
+      data: null,
+    });
+  }
+
+  const result = await userService.changePassword(req.user!.id, currentPassword, newPassword);
+  
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Password changed successfully',
+    data: result,
+  });
+});

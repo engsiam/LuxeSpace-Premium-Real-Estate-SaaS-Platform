@@ -20,6 +20,7 @@ router.get('/', authGuard('ADMIN'), userController.getUsers);
 router.get('/me', authGuard(), userController.getMe);
 router.patch('/me', authGuard(), validateRequest(updateUserSchema), userController.updateMe);
 router.post('/avatar', authGuard(), upload.single('file'), userController.uploadAvatar);
+router.post('/change-password', authGuard(), userController.changePassword);
 router.patch('/:id', authGuard('ADMIN'), validateRequest(adminUpdateUserSchema), userController.updateUser);
 router.delete('/:id', authGuard('ADMIN'), userController.deleteUser);
 
