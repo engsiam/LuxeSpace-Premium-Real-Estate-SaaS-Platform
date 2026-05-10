@@ -8,15 +8,19 @@ export interface AuthRequest extends Request {
 }
 
 const getToken = (req: Request): string | null => {
-  // First check Authorization header
+  // First check cookie (set by login/register - preferred for cross-origin)
+  const cookieToken = req.cookies?.accessToken;
+  if (cookieToken) {
+    return cookieToken;
+  }
+  
+  // Fallback to Authorization header (for API clients)
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.split(' ')[1];
   }
   
-  // Then check cookie
-  const cookies = req.cookies;
-  return cookies?.accessToken || null;
+  return null;
 };
 
 export const authGuard = (...roles: string[]) => {
@@ -25,6 +29,7 @@ export const authGuard = (...roles: string[]) => {
       const token = getToken(req);
       
       if (!token) {
+        console.log('[Auth] No token found in cookies or Authorization header');
         throw new ApiError(401, 'Unauthorized: No token provided');
       }
 

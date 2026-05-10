@@ -189,14 +189,16 @@ export const refreshToken = catchAsync(async (req, res) => {
 
 export const getSession = catchAsync(async (req, res) => {
   console.log('========== SESSION CHECK ==========');
+  console.log('req.cookies:', JSON.stringify(req.cookies));
   console.log('Headers Cookie:', req.headers.cookie);
-  console.log('Cookies object:', req.cookies);
   
-  const token = req.cookies?.accessToken || req.cookies?.access_token;
-  console.log('Extracted token:', token ? 'present' : 'missing');
+  // Read from cookies (set by cookie-parser middleware)
+  // Must match exact cookie name set in login/register: 'accessToken'
+  const token = req.cookies?.accessToken;
+  console.log('Extracted token from cookies:', token ? 'PRESENT' : 'MISSING');
   
   if (!token) {
-    console.log('Session check - No token found, returning no session');
+    console.log('No token found in cookies');
     return sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -207,21 +209,24 @@ export const getSession = catchAsync(async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET) as { id?: string; userId?: string; role?: string };
-    console.log('Session check - decoded:', decoded);
+    console.log('Decoded JWT:', decoded);
     const userId = decoded.id || decoded.userId;
-    if (!userId) throw new Error('No user ID in token');
+    if (!userId) {
+      console.log('No user ID in token payload');
+      throw new Error('No user ID in token');
+    }
     const user = await userService.getUserById(userId);
-    console.log('Session check - user found:', user?.email);
+    console.log('User found:', user?.email);
 
-    sendResponse(res, {
+    return sendResponse(res, {
       statusCode: 200,
       success: true,
       message: 'Session active',
       data: { user, isAuthenticated: true },
     });
   } catch (error) {
-    console.log('Session check - error:', error);
-    sendResponse(res, {
+    console.log('JWT verification failed:', error);
+    return sendResponse(res, {
       statusCode: 200,
       success: true,
       message: 'Invalid session',

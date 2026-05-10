@@ -1,5 +1,11 @@
 import env from '../../config';
 
+// Cross-origin auth requires specific cookie settings:
+// - httpOnly: prevents XSS attacks, browser-only access
+// - secure: HTTPS only in production (required for cross-origin cookies)
+// - sameSite: 'none' for cross-origin in production (Vercel↔Render)
+// - sameSite: 'lax' for localhost (browsers allow localhost to work)
+
 export interface CookieOptions {
   httpOnly: boolean;
   secure: boolean;
@@ -20,11 +26,14 @@ export const getCookieOptions = (maxAge?: number): CookieOptions => {
   };
 };
 
+// Always use cross-domain settings for auth cookies between Vercel frontend and Render backend
 export const getCrossDomainCookieOptions = (maxAge: number): CookieOptions => {
+  const isProduction = env.NODE_ENV === 'production';
+  
   return {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/',
     maxAge,
   };

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useUser, useIsHydrated } from '@/store/useAuthStore';
+import DashboardSidebar from '@/components/shared/DashboardSidebar';
+import DashboardHeader from '@/components/shared/DashboardHeader';
 
 export default function DashboardLayout({
   children,
@@ -25,13 +27,6 @@ export default function DashboardLayout({
     if (!mounted) return;
     if (!hydrated) return;
 
-    console.log('[Dashboard Auth]', {
-      mounted,
-      hydrated,
-      hasUser: !!user,
-      pathname,
-    });
-
     if (!user) {
       router.replace('/login');
     }
@@ -53,5 +48,15 @@ export default function DashboardLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen bg-background">
+      <DashboardSidebar role={user.role || 'USER'} />
+      <div className="flex-1 flex flex-col min-h-screen">
+        <DashboardHeader />
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
 }

@@ -1,10 +1,8 @@
 import axios from 'axios';
+import { BASE_URL } from './config';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-if (!BASE_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not defined');
-}
-
+// withCredentials: true is REQUIRED for cross-origin cookie sharing
+// Without it, browser won't send cookies to different origin (Vercel → Render)
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -35,11 +33,8 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const response = await axios.post(
-          `${BASE_URL}/users/session`,
-          {},
-          { withCredentials: true }
-        );
+        // Use axiosInstance with withCredentials to send cookies to session endpoint
+        const response = await axiosInstance.post('/users/session');
 
         if (response.data.success) {
           return axiosInstance(originalRequest);

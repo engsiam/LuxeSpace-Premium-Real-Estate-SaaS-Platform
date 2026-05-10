@@ -1,47 +1,40 @@
-import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { NextRequest, NextResponse } from 'next/server';
+import axios from 'axios';
+import { BASE_URL } from '@/lib/config';
 
-const JWT_SECRET = process.env.NEXT_PUBLIC_JWT_SECRET || 'luxespace-secret-key-change-in-production';
-
-export async function GET(request: Request) {
-  const cookieHeader = request.headers.get('cookie') || '';
-  const cookies = Object.fromEntries(
-    cookieHeader.split('; ').map(c => c.split('='))
-  );
-  
-  const token = cookies.session_token;
-  
-  if (!token) {
-    return NextResponse.json({ session: null });
-  }
-  
+// Session check calls backend /users/session which reads cookies.accessToken
+// Must use withCredentials to send cookies cross-origin (Vercel → Render)
+export async function GET(request: NextRequest) {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return NextResponse.json({ session: { user: decoded } });
-  } catch {
+    const response = await axios.get(`${BASE_URL}/users/session`, {
+      withCredentials: true,
+    });
+    
+    if (response.data.success && response.data.data.isAuthenticated) {
+      return NextResponse.json({
+        session: { user: response.data.data.user }
+      });
+    }
+    
+    return NextResponse.json({ session: null });
+  } catch (error) {
+    console.error('[Session] Backend session check failed:', error);
     return NextResponse.json({ session: null });
   }
 }
 
-export async function POST(request: Request) {
-  const cookieHeader = request.headers.get('cookie') || '';
-  const cookies = Object.fromEntries(
-    cookieHeader.split('; ').map(c => c.split('='))
-  );
-  
-  const token = cookies.session_token;
-  
-  if (!token) {
-    return NextResponse.json({ success: false });
-  }
-  
+// Logout clears cookies by calling backend
+export async function POST(request: NextRequest) {
   try {
-    jwt.verify(token, JWT_SECRET);
+    await axios.post(
+      `${BASE_URL}/users/logout`,
+      {},
+      { withCredentials: true }
+    );
     
-    const response = NextResponse.json({ success: true });
-    response.cookies.set('session_token', '', { maxAge: 0, path: '/' });
-    return response;
-  } catch {
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('[Session] Logout failed:', error);
     return NextResponse.json({ success: false });
   }
 }
