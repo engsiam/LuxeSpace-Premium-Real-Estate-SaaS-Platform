@@ -8,17 +8,28 @@ const router = Router();
 router.get('/google', (req: Request, res: Response) => {
   const serverUrl = process.env.SERVER_URL;
   const clientUrl = process.env.CLIENT_URL;
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  
+  console.log('[Google Auth] SERVER_URL:', serverUrl);
+  console.log('[Google Auth] CLIENT_URL:', clientUrl);
+  console.log('[Google Auth] GOOGLE_CLIENT_ID exists:', !!googleClientId);
   
   if (!serverUrl || !clientUrl) {
     console.error('Missing SERVER_URL or CLIENT_URL env vars');
     return res.redirect(`${clientUrl}/login?error=server_config_missing`);
   }
   
-  const redirectUri = `${serverUrl}/api/v1/auth/callback/google`;
-  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid email profile&access_type=offline&prompt=consent`;
+  if (!googleClientId) {
+    console.error('Missing GOOGLE_CLIENT_ID env var');
+    return res.redirect(`${clientUrl}/login?error=google_not_configured`);
+  }
   
-  console.log('[Google Auth] Generated auth URL:', googleAuthUrl);
-  console.log('[Google Auth] Redirect URI:', redirectUri);
+  const redirectUri = `${serverUrl}/api/v1/auth/callback/google`;
+  
+  console.log('[Google Auth] Full redirect URI:', redirectUri);
+  console.log('[Google Auth] Make sure this URI is added in Google Cloud Console -> Credentials');
+  
+  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid email profile&access_type=offline&prompt=consent`;
   
   res.redirect(googleAuthUrl);
 });
@@ -28,22 +39,23 @@ router.get('/callback/google', async (req: Request, res: Response) => {
   const clientUrl = process.env.CLIENT_URL;
   const { code, error } = req.query;
   
-  console.log('[Google Callback] Received callback with code:', code ? 'present' : 'missing');
-  console.log('[Google Callback] Error:', error);
+  const expectedRedirectUri = `${serverUrl}/api/v1/auth/callback/google`;
+  console.log('[Google Callback] Expected redirect_uri:', expectedRedirectUri);
+  console.log('[Google Callback] Received code:', code ? 'YES' : 'NO');
+  console.log('[Google Callback] Error from Google:', error);
   
   if (error) {
-    console.error('[Google Callback] Error from Google:', error);
+    console.error('[Google Callback] Google error:', error);
     return res.redirect(`${clientUrl}/login?error=${error}`);
   }
   
   if (!code) {
-    console.error('[Google Callback] No code received');
+    console.error('[Google Callback] No authorization code received');
     return res.redirect(`${clientUrl}/login?error=no_code`);
   }
   
   try {
     const redirectUri = `${serverUrl}/api/v1/auth/callback/google`;
-    console.log('[Google Callback] Exchanging code for token with redirect_uri:', redirectUri);
     
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -57,21 +69,23 @@ router.get('/callback/google', async (req: Request, res: Response) => {
       }),
     });
     
-    const tokenData = await tokenRes.json() as { access_token?: string; error?: string };
+    const tokenData = await tokenRes.json() as { access_token?: string; error?: string; error_description?: string };
     
-    if (!tokenData.access_token) {
-      console.error('[Google Callback] Token exchange failed:', tokenData);
-      return res.redirect(`${clientUrl}/login?error=token_failed`);
+    console.log('[Google Callback] Token response status:', tokenRes.status);
+    if (tokenData.error) {
+      console.error('[Google Callback] Token error:', tokenData.error, tokenData.error_description);
     }
     
-    console.log('[Google Callback] Token exchanged successfully');
+    if (!tokenData.access_token) {
+      return res.redirect(`${clientUrl}/login?error=token_failed`);
+    }
     
     const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
     
     const userData = await userRes.json() as { email: string; name?: string; picture?: string };
-    console.log('[Google Callback] Got user info:', userData.email);
+    console.log('[Google Callback] User email:', userData.email);
     
     let user = await prisma.user.findFirst({
       where: { email: userData.email }
@@ -87,8 +101,6 @@ router.get('/callback/google', async (req: Request, res: Response) => {
           role: 'USER',
         }
       });
-    } else {
-      console.log('[Google Callback] Found existing user:', user.id);
     }
     
     const jwtToken = jwt.sign(
@@ -97,10 +109,9 @@ router.get('/callback/google', async (req: Request, res: Response) => {
       { expiresIn: '7d' }
     );
     
-    console.log('[Google Callback] Setting JWT cookie, token length:', jwtToken.length);
     res.cookie('accessToken', jwtToken, getCrossDomainCookieOptions(60 * 60 * 24 * 7));
     
-    console.log('[Google Callback] Redirecting to:', `${clientUrl}/dashboard/user`);
+    console.log('[Google Callback] Success! Redirecting to dashboard');
     res.redirect(`${clientUrl}/dashboard/user`);
   } catch (error) {
     console.error('[Google Callback] Error:', error);
