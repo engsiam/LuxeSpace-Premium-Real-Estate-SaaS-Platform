@@ -35,8 +35,8 @@ export default function LoginPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [showRedirecting, setShowRedirecting] = useState(false);
-  
+
+
   const login = useAuthStore((state) => state.login);
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -56,17 +56,21 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!mounted) return;
-    if (isLoading || isLoggingIn) return;
-    
+
+    if (isLoading) return;
+
     if (user && isAuthenticated) {
-      setShowRedirecting(true);
-      const role = user.role || 'USER';
-      const targetUrl = role === 'ADMIN' ? '/dashboard/admin' : role === 'AGENT' ? '/dashboard/agent' : '/dashboard/user';
-      setTimeout(() => {
-        window.location.href = targetUrl;
-      }, 500);
+      const role = user.role?.toLowerCase() || 'user';
+
+      router.replace(`/dashboard/${role}`);
     }
-  }, [mounted, user, isAuthenticated, isLoading, isLoggingIn]);
+  }, [
+    mounted,
+    user,
+    isAuthenticated,
+    isLoading,
+    router,
+  ]);
 
   const onSubmit = useCallback(async (data: LoginFormValues) => {
     setIsLoggingIn(true);
@@ -104,9 +108,7 @@ export default function LoginPage() {
     return <FullScreenLoading message="Authenticating" subMessage="Verifying credentials..." />;
   }
 
-  if (showRedirecting) {
-    return <FullScreenLoading message="Redirecting to Dashboard" />;
-  }
+
 
   return (
     <motion.div
@@ -226,9 +228,9 @@ export default function LoginPage() {
                     )}
                   />
 
-                  <Button 
-                    type="submit" 
-                    disabled={isLoggingIn} 
+                  <Button
+                    type="submit"
+                    disabled={isLoggingIn}
                     className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)] transition-all hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(255,215,0,0.35)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     {isLoggingIn ? (
