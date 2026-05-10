@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { motion } from 'framer-motion';
@@ -35,6 +35,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const redirectedRef = useRef(false);
 
 
   const login = useAuthStore((state) => state.login);
@@ -59,11 +60,16 @@ export default function LoginPage() {
 
     if (isLoading) return;
 
-    if (user && isAuthenticated) {
-      const role = user.role?.toLowerCase() || 'user';
+    if (!user || !isAuthenticated) return;
 
-      router.replace(`/dashboard/${role}`);
-    }
+    // prevent multiple redirects
+    if (redirectedRef.current) return;
+
+    redirectedRef.current = true;
+
+    const role = user.role?.toLowerCase() || 'user';
+
+    router.replace(`/dashboard/${role}`);
   }, [
     mounted,
     user,
@@ -108,6 +114,14 @@ export default function LoginPage() {
     return <FullScreenLoading message="Authenticating" subMessage="Verifying credentials..." />;
   }
 
+  if (user && isAuthenticated) {
+    return (
+      <FullScreenLoading
+        message="Redirecting"
+        subMessage="Opening dashboard..."
+      />
+    );
+  }
 
 
   return (

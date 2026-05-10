@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 import { useAuthStore } from '@/store/useAuthStore';
+
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
 
@@ -10,8 +13,11 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
   const user = useAuthStore((state) => state.user);
   const isHydrated = useAuthStore((state) => state.isHydrated);
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -20,15 +26,18 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!mounted || !isHydrated) return;
+
     if (!user) {
-      window.location.href = '/login';
+      router.replace('/login');
     }
-  }, [mounted, isHydrated, user]);
+  }, [mounted, isHydrated, user, router]);
 
   if (!mounted || !isHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-primary font-bold animate-pulse">Loading...</div>
+        <div className="text-primary font-bold animate-pulse">
+          Loading...
+        </div>
       </div>
     );
   }
@@ -40,8 +49,10 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar role={user.role || 'USER'} />
+
       <div className="flex-1 flex flex-col min-h-screen">
         <DashboardHeader />
+
         <main className="flex-1">
           {children}
         </main>
