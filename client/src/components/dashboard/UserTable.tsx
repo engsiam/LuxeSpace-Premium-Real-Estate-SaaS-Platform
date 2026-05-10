@@ -14,8 +14,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { User } from '@/types';
 import { 
   ShieldCheck, 
-  User as UserIcon, 
-  ShieldAlert, 
   Power, 
   PowerOff, 
   Mail, 
@@ -48,53 +46,53 @@ export default function UserTable({
 }: UserTableProps) {
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
-          <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white/5" />
+          <Skeleton key={i} className="h-16 lg:h-20 w-full rounded-xl bg-white/5" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="rounded-[2rem] border border-white/5 overflow-hidden bg-background/30 backdrop-blur-md">
+    <div className="rounded-xl lg:rounded-[2rem] border border-white/5 overflow-hidden bg-background/30 backdrop-blur-md min-w-[600px]">
       <Table>
         <TableHeader className="bg-white/5">
           <TableRow className="border-white/5 hover:bg-transparent">
-            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-16 pl-8">Identity</TableHead>
-            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-16">Contact</TableHead>
-            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-16">Privilege</TableHead>
-            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-16 text-center">Account Status</TableHead>
-            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-16 text-right pr-8">Management</TableHead>
+            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-12 lg:h-16 pl-4 lg:pl-8">Identity</TableHead>
+            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-12 lg:h-16 hidden sm:table-cell">Contact</TableHead>
+            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-12 lg:h-16">Privilege</TableHead>
+            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-12 lg:h-16 text-center">Status</TableHead>
+            <TableHead className="text-muted-foreground font-black uppercase tracking-widest text-[10px] h-12 lg:h-16 text-right pr-4 lg:pr-8">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.map((user) => (
             <TableRow key={user.id} className="border-white/5 hover:bg-white/2 transition-all group">
-              <TableCell className="py-6 pl-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary font-black group-hover:scale-110 transition-transform">
+              <TableCell className="py-4 lg:py-6 pl-4 lg:pl-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 lg:w-12 h-10 lg:h-12 rounded-lg lg:rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary font-black group-hover:scale-110 transition-transform text-sm lg:text-base">
                     {user.name[0].toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-white font-black tracking-tight leading-none mb-1.5">{user.name}</p>
-                    <div className="flex items-center gap-2 text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
-                      <Calendar size={12} className="text-primary/40" />
+                    <p className="text-white font-black tracking-tight leading-none mb-1 text-sm lg:text-base">{user.name}</p>
+                    <div className="hidden lg:flex items-center gap-2 text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
+                      <Calendar size={10} className="text-primary/40" />
                       <span>Joined {new Date(user.createdAt || '').toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
               </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2 text-white/70 font-medium">
-                  <Mail size={14} className="text-primary/40" />
-                  <span className="text-sm">{user.email}</span>
+              <TableCell className="hidden sm:table-cell">
+                <div className="flex items-center gap-2 text-white/70 font-medium text-sm">
+                  <Mail size={12} className="text-primary/40" />
+                  <span className="truncate max-w-[150px]">{user.email}</span>
                 </div>
               </TableCell>
               <TableCell>
                 <Badge 
                   variant="outline" 
-                  className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.1em] border-2 ${
+                  className={`px-2 lg:px-3 py-1 rounded-lg text-[9px] lg:text-xs font-black uppercase tracking-wider border-2 ${
                     user.role === 'ADMIN' 
                       ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' 
                       : user.role === 'AGENT'
@@ -102,53 +100,49 @@ export default function UserTable({
                       : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
                   }`}
                 >
-                  <span className="mr-1.5">
-                    {user.role === 'ADMIN' ? '◈' : user.role === 'AGENT' ? '◇' : '○'}
-                  </span>
                   {user.role}
                 </Badge>
               </TableCell>
               <TableCell className="text-center">
                 <Badge
-                  className={`rounded-full px-4 py-1 text-[9px] font-black uppercase tracking-[0.2em] border-0 ${
+                  className={`rounded-full px-2 lg:px-4 py-1 text-[9px] lg:text-xs font-black uppercase tracking-wider border-0 ${
                     user.isActive
-                      ? 'bg-emerald-500/10 text-emerald-500 shadow-[0_0_15px_-5px_rgba(16,185,129,0.3)]'
-                      : 'bg-rose-500/10 text-rose-500 shadow-[0_0_15px_-5px_rgba(244,63,94,0.3)]'
+                      ? 'bg-emerald-500/10 text-emerald-500'
+                      : 'bg-rose-500/10 text-rose-500'
                   }`}
                 >
-                  <div className={`w-1.5 h-1.5 rounded-full mr-2 animate-pulse ${user.isActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${user.isActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                   {user.isActive ? 'Active' : 'Deactivated'}
                 </Badge>
               </TableCell>
-              <TableCell className="text-right pr-8">
+              <TableCell className="text-right">
                 <DropdownMenu>
-                  {/* @ts-expect-error - asChild prop for Slot component */}
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl hover:bg-white/10 transition-all">
-                      <MoreVertical size={18} className="text-muted-foreground" />
+                    <Button variant="ghost" size="icon" className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl hover:bg-white/10 transition-all">
+                      <MoreVertical size={14} className="lg:w-[18px] lg:h-[18px] text-muted-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-card border-border rounded-2xl p-2 shadow-2xl">
+                  <DropdownMenuContent align="end" className="w-48 lg:w-56 bg-card border-border rounded-xl lg:rounded-2xl p-1.5 lg:p-2 shadow-2xl">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Admin Controls</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-white/5" />
                       <DropdownMenuItem 
                         onClick={() => onEditRole(user.id)}
-                        className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-all"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-primary/10 hover:text-primary transition-all text-sm"
                       >
-                        <UserCog size={18} />
-                        <span className="font-bold text-sm">Modify Role</span>
+                        <UserCog size={16} />
+                        <span className="font-bold">Modify Role</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={() => onDeactivate(user.id)}
-                        className={`flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all ${
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm ${
                           user.isActive 
                             ? 'hover:bg-rose-500/10 hover:text-rose-500' 
                             : 'hover:bg-emerald-500/10 hover:text-emerald-500'
                         }`}
                       >
-                        {user.isActive ? <PowerOff size={18} /> : <Power size={18} />}
-                        <span className="font-bold text-sm">{user.isActive ? 'Deactivate Account' : 'Reactivate Account'}</span>
+                        {user.isActive ? <PowerOff size={16} /> : <Power size={16} />}
+                        <span className="font-bold">{user.isActive ? 'Deactivate' : 'Reactivate'}</span>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                   </DropdownMenuContent>

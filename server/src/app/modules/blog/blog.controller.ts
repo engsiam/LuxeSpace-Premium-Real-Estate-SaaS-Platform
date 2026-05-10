@@ -44,3 +44,23 @@ export const getAllBlogs = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+export const updateBlog = catchAsync(async (req: AuthRequest, res) => {
+  const result = await blogService.updateBlog(req.params.id, req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Blog updated successfully',
+    data: result,
+  });
+});
+
+export const deleteBlog = catchAsync(async (req: AuthRequest, res) => {
+  await blogService.deleteBlog(req.params.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Blog deleted successfully',
+    data: null,
+  });
+});

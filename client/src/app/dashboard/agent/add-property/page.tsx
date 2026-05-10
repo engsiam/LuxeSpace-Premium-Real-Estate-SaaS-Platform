@@ -152,7 +152,7 @@ export default function AddProperty() {
   };
 
   return (
-    <div className="p-10 space-y-12 bg-background min-h-screen">
+    <div className="p-4 md:p-6 lg:p-10 space-y-4 md:space-y-6 lg:space-y-12 bg-background min-h-screen">
       <div>
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-0.5 bg-primary rounded-full" />
@@ -161,8 +161,8 @@ export default function AddProperty() {
         <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">Add <span className="text-primary italic">Property</span></h1>
       </div>
 
-      <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden p-10 max-w-5xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
+      <div className="bg-card border border-border shadow-2xl rounded-xl lg:rounded-[2.5rem] overflow-hidden p-4 md:p-6 lg:p-10 max-w-5xl mx-auto">
+        <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
             <Home size={24} />
           </div>
@@ -173,7 +173,7 @@ export default function AddProperty() {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8 lg:space-y-10">
             <div className="space-y-6">
               <FormField
                 control={form.control}
@@ -207,7 +207,7 @@ export default function AddProperty() {
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
                 <FormField
                   control={form.control}
                   name="price"
@@ -215,7 +215,7 @@ export default function AddProperty() {
                     <FormItem>
                       <FormLabel className="text-muted-foreground">Price (BDT)</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} value={field.value as any} className="bg-background/50 border-white/10 px-6 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                        <Input type="number" {...field} value={field.value as any} className="bg-background/50 border-white/10 px-4 md:px-6 text-white h-12 md:h-14 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -228,7 +228,7 @@ export default function AddProperty() {
                     <FormItem>
                       <FormLabel className="text-muted-foreground">City</FormLabel>
                       <FormControl>
-                        <Input placeholder="Dhaka" {...field} className="bg-background/50 border-white/10 px-6 text-white placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                        <Input placeholder="Dhaka" {...field} className="bg-background/50 border-white/10 px-4 md:px-6 text-white placeholder:text-muted-foreground h-12 md:h-14 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -241,7 +241,7 @@ export default function AddProperty() {
                     <FormItem>
                       <FormLabel className="text-muted-foreground">Location</FormLabel>
                       <FormControl>
-                        <Input placeholder="Gulshan 2" {...field} className="bg-background/50 border-white/10 px-6 text-white placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                        <Input placeholder="Gulshan 2" {...field} className="bg-background/50 border-white/10 px-4 md:px-6 text-white placeholder:text-muted-foreground h-12 md:h-14 focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -249,7 +249,7 @@ export default function AddProperty() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
                 <FormField
                   control={form.control}
                   name="area"
@@ -299,7 +299,7 @@ export default function AddProperty() {
                     <FormLabel className="text-muted-foreground">Property Type</FormLabel>
                     <Select onValueChange={(val) => field.onChange(val || '')} defaultValue={field.value as string}>
                       <FormControl>
-                        <SelectTrigger className="h-14 bg-background/50 border-white/10 rounded-2xl px-6 text-white focus:ring-primary/20 transition-all">
+                        <SelectTrigger className="h-12 md:h-14 bg-background/50 border-white/10 rounded-xl lg:rounded-2xl px-4 md:px-6 text-white focus:ring-primary/20 transition-all">
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                       </FormControl>
@@ -350,12 +350,12 @@ export default function AddProperty() {
             </div>
 
             {/* Images Section */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               <div className="flex items-center gap-3">
-                <ImagePlus className="text-primary w-5 h-5" />
-                <FormLabel className="text-lg font-black text-white m-0">Property Visuals</FormLabel>
+                <ImagePlus className="text-primary w-4 h-4 md:w-5 md:h-5" />
+                <FormLabel className="text-base md:text-lg font-black text-white m-0">Property Visuals</FormLabel>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
                 {previews.map((preview, index) => (
                   <div key={index} className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 group">
                     <Image
@@ -389,7 +389,7 @@ export default function AddProperty() {
               </div>
             </div>
 
-            <div className="flex justify-center pt-10">
+            <div className="flex justify-center pt-6 md:pt-8 lg:pt-10">
               <Button
                 type="submit"
                 disabled={loading}

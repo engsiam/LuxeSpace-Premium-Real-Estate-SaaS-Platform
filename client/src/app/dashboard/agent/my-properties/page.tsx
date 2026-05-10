@@ -111,9 +111,9 @@ export default function AgentProperties() {
         </div>
         
         {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+          <div className="space-y-3 md:space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-20 md:h-24 w-full rounded-xl lg:rounded-2xl" />
             ))}
           </div>
         ) : properties.length === 0 ? (
@@ -130,11 +130,13 @@ export default function AgentProperties() {
             </Link>
           </div>
         ) : (
-          <PropertyTable 
-            properties={properties} 
-            loading={loading} 
-            onDelete={handleDelete}
-          />
+          <div className="overflow-x-auto">
+            <PropertyTable 
+              properties={properties} 
+              loading={loading} 
+              onDelete={handleDelete}
+            />
+          </div>
         )}
       </div>
     </div>

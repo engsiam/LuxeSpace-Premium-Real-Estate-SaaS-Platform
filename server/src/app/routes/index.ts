@@ -13,6 +13,7 @@ import aiRoute from '../modules/ai/ai.route';
 import statsRoute from '../modules/stats.route';
 import settingsRoute from '../modules/settings/settings.route';
 import authRoute from '../modules/auth/auth.route';
+import uploadRoute from '../modules/upload/upload.route';
 
 router.use('/auth', authRoute);
 router.use('/users', userRoute);
@@ -24,5 +25,6 @@ router.use('/contact', contactRoute);
 router.use('/ai', aiRoute);
 router.use('/stats', statsRoute);
 router.use('/settings', settingsRoute);
+router.use('/upload', uploadRoute);
 
 export default router;

@@ -700,6 +700,73 @@ export default function Navbar() {
             )}
           </button>
         </div>
+
+        {/* MOBILE MENU PANEL */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden absolute top-full left-0 right-0 bg-background border-b border-border p-4 z-40">
+            <div className="flex flex-col gap-3">
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.href}
+                  href={link.href} 
+                  className="px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-accent"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              
+              <button 
+                onClick={() => { toggleChat(); setMobileMenuOpen(false); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent"
+              >
+                <Bot size={18} />
+                <span className="text-sm font-bold uppercase tracking-wider">Ask AI</span>
+              </button>
+              
+              {user ? (
+                <>
+                  <div className="border-t border-border my-2 pt-2">
+                    <div className="px-4 py-2 text-sm font-medium text-muted-foreground">
+                      {user.name}
+                    </div>
+                  </div>
+                  <Link 
+                    href={getDashboardLink()} 
+                    className="px-4 py-3 rounded-lg hover:bg-accent font-bold"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button 
+                    onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                    className="text-left px-4 py-3 rounded-lg text-rose-500 hover:bg-rose-500/10 font-bold"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="border-t border-border my-2 pt-2" />
+                  <Link 
+                    href="/login" 
+                    className="px-4 py-3 rounded-lg hover:bg-accent font-bold"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    href="/register" 
+                    className="px-4 py-3 rounded-lg bg-primary text-primary-foreground text-center font-bold"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Join Now
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

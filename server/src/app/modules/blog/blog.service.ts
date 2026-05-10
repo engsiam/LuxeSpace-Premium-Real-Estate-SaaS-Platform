@@ -95,3 +95,48 @@ export const getAllBlogs = async () => {
     orderBy: { createdAt: 'desc' },
   });
 };
+
+export const updateBlog = async (id: string, data: any) => {
+  const blog = await prisma.blog.findUnique({
+    where: { id },
+  });
+
+  if (!blog) {
+    throw new ApiError(404, 'Blog not found');
+  }
+
+  let slug = blog.slug;
+  if (data.title && data.title !== blog.title) {
+    slug = data.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
+
+  return prisma.blog.update({
+    where: { id },
+    data: {
+      ...data,
+      slug,
+    },
+    include: {
+      author: {
+        select: { id: true, name: true, avatar: true },
+      },
+    },
+  });
+};
+
+export const deleteBlog = async (id: string) => {
+  const blog = await prisma.blog.findUnique({
+    where: { id },
+  });
+
+  if (!blog) {
+    throw new ApiError(404, 'Blog not found');
+  }
+
+  return prisma.blog.delete({
+    where: { id },
+  });
+};

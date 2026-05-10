@@ -187,7 +187,9 @@ model Blog {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   slug        String    @unique
+  excerpt     String?
   content     String
+  category    String?
   coverImage  String
   isPublished Boolean   @default(true)
   authorId    String    @db.ObjectId
@@ -198,6 +200,7 @@ model Blog {
   @@index([isPublished])
   @@index([createdAt(sort: Desc)])
   @@index([authorId])
+  @@index([category])
 }
 
 model Contact {

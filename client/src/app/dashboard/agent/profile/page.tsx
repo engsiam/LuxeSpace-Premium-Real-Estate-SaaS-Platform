@@ -158,18 +158,27 @@ export default function AgentProfile() {
 
   if (loading) {
     return (
-      <div className="p-10 space-y-10 bg-background min-h-screen">
+      <div className="p-4 md:p-6 lg:p-10 space-y-4 md:space-y-6 lg:space-y-10 bg-background min-h-screen">
         <div className="flex flex-col gap-2">
-          <Skeleton className="h-10 w-64 rounded-xl" />
-          <Skeleton className="h-4 w-48 rounded-xl" />
+          <Skeleton className="h-8 w-40 md:h-10 md:w-64 rounded-xl lg:rounded-2xl" />
+          <Skeleton className="h-3 w-32 md:h-4 md:w-48 rounded-xl lg:rounded-2xl" />
         </div>
-        <Skeleton className="h-[400px] w-full max-w-4xl rounded-[2.5rem]" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
+          <div className="space-y-4 md:space-y-6">
+            <Skeleton className="h-64 md:h-72 lg:h-80 w-full rounded-xl lg:rounded-2xl" />
+            <Skeleton className="h-24 md:h-28 lg:h-32 w-full rounded-xl lg:rounded-2xl" />
+          </div>
+          <div className="md:col-span-1 lg:col-span-2 space-y-4 md:space-y-6">
+            <Skeleton className="h-48 md:h-56 lg:h-64 w-full rounded-xl lg:rounded-2xl" />
+            <Skeleton className="h-56 md:h-64 lg:h-72 w-full rounded-xl lg:rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-10 space-y-12 bg-background min-h-screen">
+    <div className="p-4 md:p-6 lg:p-10 space-y-4 md:space-y-6 lg:space-y-12 bg-background min-h-screen">
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -181,9 +190,9 @@ export default function AgentProfile() {
         <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">Identity <span className="text-primary italic">Settings</span></h1>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 max-w-6xl">
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] p-8 text-center relative overflow-hidden group">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10 max-w-6xl">
+        <div className="lg:col-span-1 space-y-4 md:space-y-6">
+          <div className="bg-card border border-border shadow-2xl rounded-xl lg:rounded-[2.5rem] p-4 md:p-6 lg:p-8 text-center relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
 
             <input
@@ -228,7 +237,7 @@ export default function AgentProfile() {
             </div>
           </div>
 
-          <div className="bg-primary p-8 rounded-[2.5rem] shadow-xl text-secondary-foreground space-y-4">
+          <div className="bg-primary p-4 md:p-6 lg:p-8 rounded-xl lg:rounded-[2.5rem] shadow-xl text-secondary-foreground space-y-3 md:space-y-4">
             <h3 className="font-black uppercase tracking-widest text-xs opacity-60">Security Protocol</h3>
             <div className="flex items-center gap-3">
               <ShieldCheck size={20} />
@@ -237,9 +246,9 @@ export default function AgentProfile() {
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden">
-            <div className="p-8 border-b border-border bg-background/20 flex items-center gap-4">
+        <div className="lg:col-span-2 space-y-4 md:space-y-6 lg:space-y-8">
+          <div className="bg-card border border-border shadow-2xl rounded-xl lg:rounded-[2.5rem] overflow-hidden">
+            <div className="p-4 md:p-6 lg:p-8 border-b border-border bg-background/20 flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                 <UserIcon size={20} />
               </div>
@@ -249,10 +258,10 @@ export default function AgentProfile() {
               </div>
             </div>
 
-            <div className="p-10">
+            <div className="p-4 md:p-6 lg:p-10">
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
                     <FormField
                       control={form.control}
                       name="name"
@@ -303,8 +312,8 @@ export default function AgentProfile() {
           </div>
 
           {isDemoAccount ? (
-            <div className="bg-amber-500/10 border border-amber-500/20 p-8 rounded-[2.5rem]">
-              <div className="flex items-start gap-4">
+            <div className="bg-amber-500/10 border border-amber-500/20 p-4 md:p-6 lg:p-8 rounded-xl lg:rounded-[2.5rem]">
+              <div className="flex items-start gap-3 md:gap-4">
                 <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500 shrink-0">
                   <ShieldAlert size={24} />
                 </div>
@@ -317,20 +326,20 @@ export default function AgentProfile() {
               </div>
             </div>
           ) : (
-            <div className="bg-card border border-border shadow-2xl rounded-[2.5rem] overflow-hidden">
-              <div className="p-8 border-b border-border bg-background/20 flex items-center gap-4">
+            <div className="bg-card border border-border shadow-2xl rounded-xl lg:rounded-[2.5rem] overflow-hidden">
+              <div className="p-4 md:p-6 lg:p-8 border-b border-border bg-background/20 flex items-center gap-3 md:gap-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                   <Lock size={20} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-white tracking-tight">Security</h3>
+                  <h3 className="text-lg md:text-xl font-black text-white tracking-tight">Security</h3>
                   <p className="text-xs text-muted-foreground font-medium">Change your password</p>
                 </div>
               </div>
 
-              <div className="p-10">
+              <div className="p-4 md:p-6 lg:p-10">
                 <Form {...passwordForm}>
-                  <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
+                  <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4 md:space-y-6">
                     <FormField
                       control={passwordForm.control}
                       name="currentPassword"

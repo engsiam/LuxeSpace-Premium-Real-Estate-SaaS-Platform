@@ -83,6 +83,7 @@ export interface Blog {
   content: string;
   excerpt?: string;
   coverImage: string;
+  image?: string;
   category: string;
   tags: string[];
   authorId: string;

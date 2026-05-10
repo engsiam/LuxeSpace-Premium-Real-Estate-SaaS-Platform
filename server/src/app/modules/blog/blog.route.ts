@@ -8,5 +8,7 @@ router.post('/', authGuard('ADMIN'), blogController.createBlog);
 router.get('/', blogController.getBlogs);
 router.get('/all', authGuard('ADMIN'), blogController.getAllBlogs);
 router.get('/:slug', blogController.getBlogBySlug);
+router.patch('/:id', authGuard('ADMIN'), blogController.updateBlog);
+router.delete('/:id', authGuard('ADMIN'), blogController.deleteBlog);
 
 export default router;

@@ -107,14 +107,14 @@ export default function AdminMessages() {
   const repliedCount = messages.filter((m) => m.status === 'REPLIED').length;
 
   return (
-    <div className="p-6 lg:p-10 space-y-6 bg-background min-h-screen">
+    <div className="p-4 md:p-6 lg:p-10 space-y-4 md:space-y-6 bg-background min-h-screen">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-1 bg-primary rounded-full" />
-          <span className="text-primary font-black uppercase tracking-[0.3em] text-xs">Communication</span>
+          <div className="w-8 lg:w-12 h-0.5 lg:h-1 bg-primary rounded-full" />
+          <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px] lg:text-xs">Communication</span>
         </div>
-        <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-foreground">
           Contact <span className="text-primary italic">Messages</span>
         </h1>
       </div>

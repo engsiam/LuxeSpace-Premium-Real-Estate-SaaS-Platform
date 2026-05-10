@@ -38,31 +38,31 @@ export default function UserBookings() {
   }, [page]);
 
   return (
-    <div className="p-10 space-y-12 bg-background min-h-screen">
+    <div className="p-4 md:p-6 lg:p-10 space-y-4 md:space-y-6 lg:space-y-12 bg-background min-h-screen">
       <div>
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-0.5 bg-primary rounded-full" />
           <span className="text-primary font-black uppercase tracking-[0.4em] text-xs">Bookings</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">My <span className="text-primary italic">Bookings</span></h1>
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter text-white">My <span className="text-primary italic">Bookings</span></h1>
       </div>
 
-      <div className="bg-card border border-border shadow-xl rounded-[2.5rem] overflow-hidden p-8 max-w-5xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-            <Calendar size={24} />
+      <div className="bg-card border border-border shadow-xl rounded-xl lg:rounded-[2.5rem] overflow-hidden p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+          <div className="w-10 md:w-12 h-10 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+            <Calendar className="md:w-6" size={20} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">Booking History</h2>
+            <h2 className="text-lg md:text-xl font-bold text-white">Booking History</h2>
             <p className="text-sm text-muted-foreground">{total} bookings found</p>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 md:space-y-6">
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-background border border-border rounded-xl animate-pulse" />
+                <div key={i} className="h-24 md:h-28 lg:h-32 bg-background border border-border rounded-xl lg:rounded-2xl animate-pulse" />
               ))}
             </div>
           ) : bookings.length === 0 ? (
@@ -72,11 +72,11 @@ export default function UserBookings() {
             </div>
           ) : (
             bookings.map((booking) => (
-            <div key={booking.id} className="bg-background border border-border rounded-xl p-6 hover:border-primary/30 transition-all">
-              <div className="flex justify-between items-start mb-4">
+            <div key={booking.id} className="bg-background border border-border rounded-xl lg:rounded-2xl p-4 md:p-6 lg:p-8 hover:border-primary/30 transition-all">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3 md:mb-4">
                 <div>
-                  <h3 className="font-semibold text-white text-lg">{booking.property?.title}</h3>
-                  <p className="text-muted-foreground mt-1">{booking.property?.location}</p>
+                  <h3 className="font-semibold text-white text-base md:text-lg">{booking.property?.title}</h3>
+                  <p className="text-muted-foreground mt-1 text-sm">{booking.property?.location}</p>
                 </div>
                 <Badge
                   className={
@@ -90,12 +90,12 @@ export default function UserBookings() {
                   {booking.status}
                 </Badge>
               </div>
-              <div className="flex gap-8 text-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-4 md:gap-8 text-sm text-muted-foreground">
                 <span className="flex items-center gap-2">
                   <DollarSign size={14} className="text-primary" />
                   ৳{booking.amount.toLocaleString()}
                 </span>
-                <span>bKash: {booking.bKashTrxId || 'N/A'}</span>
+                <span className="hidden sm:inline">bKash: {booking.bKashTrxId || 'N/A'}</span>
                 <span>{new Date(booking.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
@@ -104,7 +104,7 @@ export default function UserBookings() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6 pt-6 border-t border-border">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-border">
             <p className="text-sm text-muted-foreground">
               Page {page} of {totalPages}
             </p>
@@ -116,7 +116,7 @@ export default function UserBookings() {
                 disabled={page === 1}
               >
                 <ChevronLeft size={16} />
-                Previous
+                <span className="hidden sm:inline">Previous</span>
               </Button>
               <Button
                 variant="outline"
@@ -124,7 +124,7 @@ export default function UserBookings() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
               >
-                Next
+                <span className="hidden sm:inline">Next</span>
                 <ChevronRight size={16} />
               </Button>
             </div>
