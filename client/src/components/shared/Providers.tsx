@@ -5,7 +5,6 @@ import LenisProvider from '@/components/shared/LenisProvider';
 import { Toaster } from 'sonner';
 import ThemeInitializer from '@/components/shared/ThemeInitializer';
 import PWAProvider from '@/components/shared/PWAProvider';
-import { UserStoreProvider } from '@/components/providers/UserStoreProvider';
 import dynamic from 'next/dynamic';
 
 const AIChatSidebar = dynamic(() => import('@/components/shared/AIChatSidebar'), {
@@ -23,11 +22,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <LenisProvider>
         <ThemeInitializer />
         <PWAProvider>
-          <UserStoreProvider>
-            {children}
-            <AIChatSidebar />
-            <ScrollToTop />
-          </UserStoreProvider>
+          {children}
+          <AIChatSidebar />
+          <ScrollToTop />
         </PWAProvider>
       </LenisProvider>
       <Toaster richColors position="top-right" />

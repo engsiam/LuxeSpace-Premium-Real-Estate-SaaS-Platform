@@ -17,12 +17,13 @@ import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
+import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import FullScreenLoading from '@/components/shared/FullScreenLoading';
 import axios from 'axios';
-import { BASE_URL } from '@/lib/config';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -34,7 +35,6 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -55,24 +55,24 @@ export default function LoginPage() {
       const response = await axios.post(
         `${BASE_URL}/users/login`,
         { email: data.email, password: data.password },
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
 
       if (response.data.success) {
         toast.success('Welcome back!');
-        setRedirecting(true);
         
         const role = response.data.data.user?.role?.toLowerCase() || 'user';
-        setTimeout(() => {
-          window.location.href = `/dashboard/${role}`;
-        }, 500);
+        window.location.href = `/dashboard/${role}`;
       } else {
         toast.error(response.data.error || 'Login failed');
+        setIsLoggingIn(false);
       }
     } catch (error: any) {
       const message = error.response?.data?.error || error.message || 'Login failed';
       toast.error(message);
-    } finally {
       setIsLoggingIn(false);
     }
   }, []);
@@ -90,18 +90,17 @@ export default function LoginPage() {
   };
 
   if (!mounted) {
-    return <FullScreenLoading message="Loading" subMessage="Initializing..." />;
+    return <FullScreenLoading message="Loading" />;
   }
 
-  if (isLoggingIn || redirecting) {
-    return <FullScreenLoading message={redirecting ? "Redirecting to Dashboard" : "Authenticating"} />;
+  if (isLoggingIn) {
+    return <FullScreenLoading message="Authenticating" />;
   }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: 'easeOut' }}
       className="relative w-full max-w-7xl mx-auto overflow-hidden rounded-3xl border border-white/10 bg-[#020817]/90 backdrop-blur-2xl shadow-2xl mt-4 md:mt-10 lg:mt-20"
     >
       <div className="flex flex-col lg:flex-row min-h-[600px] lg:min-h-[850px]">
@@ -181,7 +180,7 @@ export default function LoginPage() {
                         <FormControl>
                           <div className="relative">
                             <UserIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
-                            <Input {...field} placeholder="you@example.com" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20 focus-visible:border-primary" />
+                            <Input {...field} placeholder="you@example.com" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20" />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -196,12 +195,11 @@ export default function LoginPage() {
                       <FormItem className="space-y-3">
                         <div className="flex items-center justify-between">
                           <FormLabel className="text-[11px] font-black uppercase tracking-[0.25em] text-white/60">Password</FormLabel>
-                          <Link href="#" className="text-xs font-bold text-primary hover:text-primary/80">Forgot password?</Link>
                         </div>
                         <FormControl>
                           <div className="relative">
                             <Lock className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
-                            <Input {...field} type="password" placeholder="••••••••" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20 focus-visible:border-primary" />
+                            <Input {...field} type="password" placeholder="••••••••" className="h-16 rounded-2xl border border-white/10 bg-white/[0.03] pl-14 pr-5 text-base text-white placeholder:text-white/20" />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -209,7 +207,7 @@ export default function LoginPage() {
                     )}
                   />
 
-                  <Button type="submit" className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-[0_10px_40px_rgba(255,215,0,0.25)]">
+                  <Button type="submit" className="h-16 w-full rounded-2xl bg-primary text-base font-black text-primary-foreground">
                     <span>SIGN IN</span>
                     <ChevronRight className="h-5 w-5 ml-2" />
                   </Button>

@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
@@ -20,7 +19,6 @@ import {
   ChevronRight,
   Wallet
 } from 'lucide-react';
-import { useAuthStore } from '@/store/useAuthStore';
 
 interface SidebarItem {
   href: string;
@@ -30,12 +28,11 @@ interface SidebarItem {
 
 interface DashboardSidebarProps {
   role: string;
+  onLogout: () => void;
 }
 
-export default function DashboardSidebar({ role }: DashboardSidebarProps) {
+export default function DashboardSidebar({ role, onLogout }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
 
   const adminItems: SidebarItem[] = [
     { href: '/dashboard/admin', label: 'Overview', icon: <LayoutDashboard size={20} /> },
@@ -64,11 +61,6 @@ export default function DashboardSidebar({ role }: DashboardSidebarProps) {
   ];
 
   const items = role === 'ADMIN' ? adminItems : role === 'AGENT' ? agentItems : userItems;
-
-  const handleLogout = async () => {
-    await logout();
-    window.location.href = '/';
-  };
 
   return (
     <aside className="w-80 bg-card/50 backdrop-blur-3xl border-r border-border h-screen sticky top-0 flex flex-col z-50 shadow-2xl">
@@ -122,7 +114,7 @@ export default function DashboardSidebar({ role }: DashboardSidebarProps) {
 
       <div className="p-4 lg:p-8 border-t border-border mt-auto bg-background/10">
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           className="w-full flex items-center gap-3 lg:gap-4 h-12 lg:h-14 px-4 lg:px-6 rounded-xl lg:rounded-2xl text-red-500 hover:bg-red-500/10 hover:text-red-500 font-black transition-all group"
         >
           <div className="p-2 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform">

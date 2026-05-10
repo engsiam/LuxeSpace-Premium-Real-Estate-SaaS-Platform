@@ -1,69 +1,64 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-
-import { useAuthStore } from '@/store/useAuthStore';
-
+import axios from 'axios';
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const router = useRouter();
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-  const user = useAuthStore((state) => state.user);
-  const isHydrated = useAuthStore((state) => state.isHydrated);
-
-  const [mounted, setMounted] = useState(false);
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
+    const checkSession = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/users/session`, {
+          withCredentials: true,
+        });
+
+        if (response.data.success && response.data.data?.isAuthenticated) {
+          setUser(response.data.data.user);
+        } else {
+          window.location.href = '/login';
+        }
+      } catch {
+        window.location.href = '/login';
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-    if (!isHydrated) return;
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${BASE_URL}/users/logout`, {}, { withCredentials: true });
+    } catch {}
+    window.location.href = '/';
+  };
 
-    console.log('Dashboard Layout Render', {
-      mounted,
-      isHydrated,
-      hasUser: !!user,
-      role: user?.role,
-    });
-
-    if (!user) {
-      router.replace('/login');
-    }
-  }, [mounted, isHydrated, user, router]);
-
-  if (!mounted || !isHydrated) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-primary font-bold">
-          Loading dashboard...
-        </div>
+        <div className="text-primary font-bold animate-pulse">Loading dashboard...</div>
       </div>
     );
   }
 
   if (!user) {
+    window.location.href = '/login';
     return null;
   }
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar role={user.role || 'USER'} />
-
-      <div className="flex flex-1 flex-col min-h-screen">
-        <DashboardHeader />
-
-        <main className="flex-1">
-          {children}
-        </main>
+      <DashboardSidebar role={user.role || 'USER'} onLogout={handleLogout} />
+      <div className="flex-1 flex flex-col min-h-screen">
+        <DashboardHeader user={user} onLogout={handleLogout} />
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );

@@ -12,28 +12,28 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, User as UserIcon, LayoutDashboard } from 'lucide-react';
-import { useAuthStore } from '@/store/useAuthStore';
 
-export default function DashboardHeader() {
+interface DashboardHeaderProps {
+  user: {
+    name?: string;
+    email?: string;
+    role?: string;
+    avatar?: string;
+  };
+  onLogout: () => void;
+}
+
+export default function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
 
-  if (!user) return null;
-
-  const userInitial = user.name?.charAt(0).toUpperCase() || 'U';
-  const userImage = user.avatar || '';
+  const userInitial = user?.name?.charAt(0).toUpperCase() || 'U';
+  const userImage = user?.avatar || '';
 
   const getDashboardLink = () => {
     const role = user?.role || 'USER';
     if (role === 'ADMIN') return '/dashboard/admin';
     if (role === 'AGENT') return '/dashboard/agent';
     return '/dashboard/user';
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    window.location.href = '/login';
   };
 
   return (
@@ -77,7 +77,7 @@ export default function DashboardHeader() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={handleLogout}
+                onClick={onLogout}
                 className="text-rose-500 cursor-pointer"
               >
                 <LogOut size={16} />
