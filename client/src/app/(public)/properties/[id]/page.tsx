@@ -17,10 +17,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, Maximize, BedDouble, Building2, CheckCircle2,
   Star, User, Phone, Mail, ShieldCheck, FileText,
-  Sparkles, MessageSquare, ChevronLeft, ChevronRight, Share2, Heart
+  Sparkles, MessageSquare, ChevronLeft, ChevronRight, Share2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
+import { WishlistButton } from '@/components/property/WishlistButton';
 
 const reviewSchema = z.object({
   rating: z.number().min(1).max(5),
@@ -168,9 +169,7 @@ export default function PropertyDetailsPage() {
             </div>
 
             <div className="absolute top-8 right-8 flex gap-3 z-20">
-              <button className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-rose-500 hover:border-rose-500 transition-all">
-                <Heart size={20} />
-              </button>
+              <WishlistButton propertyId={property.id} size="lg" />
               <button className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-primary hover:border-primary hover:text-secondary-foreground transition-all">
                 <Share2 size={20} />
               </button>

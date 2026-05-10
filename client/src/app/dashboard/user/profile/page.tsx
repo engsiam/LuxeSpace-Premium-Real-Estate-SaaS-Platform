@@ -3,14 +3,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
-import axiosInstance from '@/lib/axiosInstance';
+import axios from 'axios';
 import { toast } from 'sonner';
 import { User as UserIcon, Phone, CheckCircle2, Camera, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
-import { useAuthStore } from '@/store/useAuthStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -21,6 +19,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import FullScreenLoading from '@/components/shared/FullScreenLoading';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -30,16 +31,15 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function UserProfile() {
-  const router = useRouter();
-  const { user, fetchCurrentUser } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [avatar, setAvatar] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema) as any,
+    resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
       phone: '',
@@ -47,20 +47,41 @@ export default function UserProfile() {
   });
 
   useEffect(() => {
-    if (user) {
-      form.reset({
-        name: user.name,
-        phone: user.phone || '',
-      });
-      setAvatar(user.avatar || '');
-      setLoading(false);
-    }
-  }, [user, form]);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/users/me`, {
+          withCredentials: true,
+        });
+        const user = response.data.data;
+        form.reset({
+          name: user.name || '',
+          phone: user.phone || '',
+        });
+        if (user.avatar) {
+          setAvatar(user.avatar);
+        }
+      } catch {
+        toast.error('Failed to fetch profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [mounted, form]);
 
   const onSubmit = async (data: ProfileFormValues) => {
     setUpdating(true);
     try {
-      await axiosInstance.patch('/users/me', data);
+      await axios.patch(`${BASE_URL}/users/me`, data, {
+        withCredentials: true,
+      });
       toast.success('Profile updated successfully');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update profile');
@@ -78,7 +99,8 @@ export default function UserProfile() {
 
     setUploadingImage(true);
     try {
-      const response = await axiosInstance.post('/users/avatar', formData, {
+      const response = await axios.post(`${BASE_URL}/users/avatar`, formData, {
+        withCredentials: true,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (response.data.success) {
@@ -92,6 +114,10 @@ export default function UserProfile() {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+
+  if (!mounted) {
+    return <FullScreenLoading message="Loading" />;
+  }
 
   if (loading) {
     return (
@@ -148,13 +174,15 @@ export default function UserProfile() {
               {avatar ? (
                 <Avatar className="w-full h-full">
                   <AvatarImage src={avatar} alt={form.getValues().name} className="object-cover" />
-                  <AvatarFallback className="bg-primary/10 text-primary font-black text-2xl">{form.getValues().name?.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary font-black text-2xl">
+                    {form.getValues().name?.charAt(0)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
                 </Avatar>
               ) : (
                 <UserIcon size={48} className="text-primary" />
               )}
             </div>
-            <h2 className="text-2xl font-black text-white">{form.getValues().name}</h2>
+            <h2 className="text-2xl font-black text-white">{form.getValues().name || 'User'}</h2>
             <p className="text-sm text-muted-foreground font-medium mb-6 italic">Member since 2026</p>
             
             <div className="flex flex-col gap-2">
@@ -182,48 +210,46 @@ export default function UserProfile() {
               </div>
               <div>
                 <h3 className="text-xl font-black text-white tracking-tight">Edit Identity</h3>
-                <p className="text-xs text-muted-foreground font-medium">Update your professional details</p>
+                <p className="text-xs text-muted-foreground font-medium">Update your details</p>
               </div>
             </div>
 
             <div className="p-10">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  <div className="grid grid-cols-1 gap-8">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">Full Name</FormLabel>
-                          <FormControl>
-                            <div className="relative group">
-                              <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
-                              <Input {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-xs font-bold" />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">Full Name</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
+                            <Input {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-xs font-bold" />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">Phone Connection</FormLabel>
-                          <FormControl>
-                            <div className="relative group">
-                              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
-                              <Input placeholder="+880 1XXX XXXXXX" {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-xs font-bold" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1">Phone Connection</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
+                            <Input placeholder="+880 1XXX XXXXXX" {...field} className="h-14 bg-background/50 border-white/10 rounded-2xl pl-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-xs font-bold" />
+                      </FormItem>
+                    )}
+                  />
 
                   <div className="flex justify-end pt-4">
                     <Button 
@@ -231,7 +257,7 @@ export default function UserProfile() {
                       disabled={updating}
                       className="h-14 px-10 bg-primary text-secondary-foreground rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                     >
-                      {updating ? 'SAVING CHANGES...' : 'UPDATE IDENTITY'}
+                      {updating ? 'SAVING...' : 'UPDATE IDENTITY'}
                     </Button>
                   </div>
                 </form>

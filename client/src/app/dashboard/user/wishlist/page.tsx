@@ -3,28 +3,40 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { Property } from '@/types';
-import axiosInstance from '@/lib/axiosInstance';
+import axios from 'axios';
 import { toast } from 'sonner';
-import { Heart, Home } from 'lucide-react';
+import { Heart, Home, Trash2 } from 'lucide-react';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export default function WishlistPage() {
-  const { items, removeFromWishlist } = useWishlistStore();
+  const items = useWishlistStore((state) => state.items);
   const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     const fetchProperties = async () => {
       if (items.length === 0) {
+        setProperties([]);
         setLoading(false);
         return;
       }
 
+      setLoading(true);
       try {
-        const response = await axiosInstance.get('/properties?limit=100');
+        const response = await axios.get(`${BASE_URL}/properties?limit=100`, {
+          withCredentials: true,
+        });
         const allProperties = response.data.data || [];
 
         const wishlistProperties = allProperties.filter((p: Property) =>
@@ -32,7 +44,7 @@ export default function WishlistPage() {
         );
 
         setProperties(wishlistProperties);
-      } catch (error) {
+      } catch {
         toast.error('Failed to fetch wishlist properties');
       } finally {
         setLoading(false);
@@ -40,17 +52,18 @@ export default function WishlistPage() {
     };
 
     fetchProperties();
-  }, [items]);
+  }, [items, mounted]);
 
-  if (loading) {
+  const handleRemove = (propertyId: string) => {
+    useWishlistStore.getState().removeFromWishlist(propertyId);
+    setProperties(prev => prev.filter(p => p.id !== propertyId));
+    toast.success('Removed from wishlist');
+  };
+
+  if (!mounted) {
     return (
-      <div className="p-10">
-        <div className="h-8 w-64 bg-card animate-pulse rounded-xl mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-64 bg-card animate-pulse rounded-2xl" />
-          ))}
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-primary font-bold animate-pulse">Loading...</div>
       </div>
     );
   }
@@ -65,13 +78,18 @@ export default function WishlistPage() {
         <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">My <span className="text-primary italic">Wishlist</span></h1>
       </div>
 
-      {properties.length === 0 ? (
+      {loading ? (
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="text-primary font-bold animate-pulse">Loading wishlist...</div>
+        </div>
+      ) : properties.length === 0 ? (
         <div className="bg-card border border-border shadow-xl rounded-2xl overflow-hidden p-12">
           <div className="text-center py-12">
             <div className="w-20 h-20 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-6 text-primary">
               <Heart size={36} />
             </div>
-            <p className="text-muted-foreground mb-6 text-lg">Your wishlist is empty</p>
+            <p className="text-muted-foreground mb-2 text-lg font-medium">Your wishlist is empty</p>
+            <p className="text-muted-foreground mb-6 text-sm">Start exploring and save properties you love</p>
             <Link href="/explore">
               <Button className="bg-primary text-secondary-foreground hover:bg-white rounded-xl font-bold">
                 <Home size={18} className="mr-2" />
@@ -91,16 +109,17 @@ export default function WishlistPage() {
               <p className="text-sm text-muted-foreground">{properties.length} properties saved</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => (
               <div key={property.id} className="relative group">
                 <PropertyCard property={property} />
                 <Button
                   variant="destructive"
                   size="sm"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => removeFromWishlist(property.id)}
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500/80 hover:bg-red-600 z-10"
+                  onClick={() => handleRemove(property.id)}
                 >
+                  <Trash2 size={14} className="mr-1" />
                   Remove
                 </Button>
               </div>

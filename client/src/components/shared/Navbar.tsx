@@ -51,7 +51,7 @@ export default function Navbar() {
 
   const user = useUser();
   const isAuthenticated = useIsAuthenticated();
-  const { logout } = useAuthStore();
+  const { logout, hydrate } = useAuthStore();
 
   const {
     toggleChat,
@@ -70,9 +70,8 @@ export default function Navbar() {
   ] = useState(false);
 
   useEffect(() => {
-
     setMounted(true);
-
+    hydrate();
   }, []);
 
   useEffect(() => {
@@ -144,9 +143,8 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-
     await logout();
-
+    await hydrate();
     router.push('/login');
   };
 

@@ -10,22 +10,24 @@ export interface CookieOptions {
 }
 
 export const getCookieOptions = (maxAge?: number): CookieOptions => {
-  const isProduction = env.NODE_ENV === 'production';
+  const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
   
   return {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: !isDev,
+    sameSite: isDev ? 'lax' : 'none',
     path: '/',
     ...(maxAge && { maxAge: maxAge * 1000 }),
   };
 };
 
 export const getCrossDomainCookieOptions = (maxAge: number): CookieOptions => {
+  const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+  
   return {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: !isDev,
+    sameSite: isDev ? 'lax' : 'none',
     path: '/',
     maxAge: maxAge * 1000,
   };
