@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { GoogleButton } from '@/components/auth/GoogleButton';
@@ -37,7 +37,10 @@ export default function LoginPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [showRedirecting, setShowRedirecting] = useState(false);
   
-  const { login, user, isAuthenticated, isLoading } = useAuthStore();
+  const login = useAuthStore((state) => state.login);
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -60,10 +63,10 @@ export default function LoginPage() {
       const role = user.role || 'USER';
       const targetUrl = role === 'ADMIN' ? '/dashboard/admin' : role === 'AGENT' ? '/dashboard/agent' : '/dashboard/user';
       setTimeout(() => {
-        router.replace(targetUrl);
+        window.location.href = targetUrl;
       }, 500);
     }
-  }, [mounted, user, isAuthenticated, isLoading, isLoggingIn, router]);
+  }, [mounted, user, isAuthenticated, isLoading, isLoggingIn]);
 
   const onSubmit = useCallback(async (data: LoginFormValues) => {
     setIsLoggingIn(true);

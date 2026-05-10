@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
@@ -13,21 +12,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, User as UserIcon, LayoutDashboard } from 'lucide-react';
-import { useAuthStore, useIsHydrated } from '@/store/useAuthStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function DashboardHeader() {
-  const { user, logout } = useAuthStore();
-  const isHydrated = useIsHydrated();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  if (!user) return null;
 
-  if (!mounted || !user) return null;
-
-  const userInitial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+  const userInitial = user.name?.charAt(0).toUpperCase() || 'U';
   const userImage = user.avatar || '';
 
   const getDashboardLink = () => {
@@ -39,7 +33,7 @@ export default function DashboardHeader() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
+    window.location.href = '/login';
   };
 
   return (
@@ -67,30 +61,30 @@ export default function DashboardHeader() {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 mt-2">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>
-                  <p className="text-sm font-bold">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground font-normal">{user?.email}</p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(getDashboardLink())}>
-                  <LayoutDashboard size={16} />
-                  <span>Dashboard</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push(`${getDashboardLink()}/profile`)}>
-                  <UserIcon size={16} />
-                  <span>My Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={handleLogout}
-                  className="text-rose-500 cursor-pointer"
-                >
-                  <LogOut size={16} />
-                  <span>Logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>
+                <p className="text-sm font-bold">{user?.name}</p>
+                <p className="text-xs text-muted-foreground font-normal">{user?.email}</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push(getDashboardLink())}>
+                <LayoutDashboard size={16} />
+                <span>Dashboard</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(`${getDashboardLink()}/profile`)}>
+                <UserIcon size={16} />
+                <span>My Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="text-rose-500 cursor-pointer"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </header>
