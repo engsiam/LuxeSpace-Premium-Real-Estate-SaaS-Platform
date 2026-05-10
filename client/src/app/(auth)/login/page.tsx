@@ -15,13 +15,14 @@ import {
 } from '@/components/ui/form';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, ShieldCheck, User as UserIcon, Lock, Sparkles, ChevronRight, Building2, TrendingUp, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { GoogleButton } from '@/components/auth/GoogleButton';
+import FullScreenLoading from '@/components/shared/FullScreenLoading';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -34,11 +35,9 @@ export default function LoginPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [showRedirecting, setShowRedirecting] = useState(false);
   
-  const redirectRef = useRef(false);
   const { login, user, isAuthenticated, isLoading } = useAuthStore();
-
-  console.log('[Login] Render:', { user: !!user, isAuthenticated, isLoading, mounted });
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -55,40 +54,27 @@ export default function LoginPage() {
   useEffect(() => {
     if (!mounted) return;
     if (isLoading || isLoggingIn) return;
-    if (redirectRef.current) {
-      console.log('[Login] Redirect already triggered, skipping');
-      return;
-    }
     
     if (user && isAuthenticated) {
-      redirectRef.current = true;
-      console.log('[Login] REDIRECT START - user:', user.email, 'role:', user.role);
-      
+      setShowRedirecting(true);
       const role = user.role || 'USER';
       const targetUrl = role === 'ADMIN' ? '/dashboard/admin' : role === 'AGENT' ? '/dashboard/agent' : '/dashboard/user';
-      
-      console.log('[Login] Target URL:', targetUrl);
-      console.log('[Login] Calling router.replace...');
-      router.replace(targetUrl);
-      console.log('[Login] router.replace called, waiting for navigation...');
+      setTimeout(() => {
+        router.replace(targetUrl);
+      }, 500);
     }
   }, [mounted, user, isAuthenticated, isLoading, isLoggingIn, router]);
 
   const onSubmit = useCallback(async (data: LoginFormValues) => {
-    console.log('[Login] Submitting login...');
     setIsLoggingIn(true);
-    
     try {
       const success = await login(data.email, data.password);
-      console.log('[Login] Login result:', success);
-      
       if (success) {
         toast.success('Welcome back!');
       } else {
         toast.error('Invalid email or password');
       }
-    } catch (error) {
-      console.error('[Login] Login error:', error);
+    } catch {
       toast.error('Login failed. Please try again.');
     } finally {
       setIsLoggingIn(false);
@@ -101,35 +87,22 @@ export default function LoginPage() {
       agent: { email: 'agent1@luxespace.com', password: 'Agent@123' },
       user: { email: 'user1@luxespace.com', password: 'User@123' },
     };
-    
     const cred = credentials[role];
     form.setValue('email', cred.email);
     form.setValue('password', cred.password);
     toast.success(`${role.toUpperCase()} credentials loaded`);
   };
 
-  if (!mounted || isLoading || isLoggingIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">
-            {isLoggingIn ? 'Logging in...' : 'Loading...'}
-          </p>
-        </div>
-      </div>
-    );
+  if (!mounted) {
+    return <FullScreenLoading message="Loading" subMessage="Initializing..." />;
   }
 
-  if (user && isAuthenticated && redirectRef.current) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
+  if (isLoggingIn) {
+    return <FullScreenLoading message="Authenticating" subMessage="Verifying credentials..." />;
+  }
+
+  if (showRedirecting) {
+    return <FullScreenLoading message="Redirecting to Dashboard" />;
   }
 
   return (

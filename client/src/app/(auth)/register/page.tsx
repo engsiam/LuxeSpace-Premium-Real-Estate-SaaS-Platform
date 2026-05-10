@@ -27,21 +27,7 @@ import { motion } from 'framer-motion';
 import { Globe, User as UserIcon, Mail, Lock, Sparkles, ChevronRight, Eye, EyeOff, Check, Star, ShieldCheck, Briefcase } from 'lucide-react';
 import Image from 'next/image';
 import { useAuthStore, useUser } from '@/store/useAuthStore';
-
-
-function AuthLoader() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative">
-          <div className="h-12 w-12 rounded-full border-4 border-primary/20"></div>
-          <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-        </div>
-        <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
-      </div>
-    </div>
-  );
-}
+import FullScreenLoading from '@/components/shared/FullScreenLoading';
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -67,14 +53,9 @@ export default function RegisterPage() {
   useEffect(() => {
     if (user && !redirectedRef.current) {
       redirectedRef.current = true;
-
-      console.log('Redirecting registered user...');
-
       window.location.href = '/dashboard/user';
     }
   }, [user]);
-
-
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -115,7 +96,7 @@ export default function RegisterPage() {
   };
 
   if (user) {
-    return <AuthLoader />;
+    return <FullScreenLoading message="Redirecting" subMessage="Going to dashboard..." />;
   }
 
   return (
@@ -127,9 +108,7 @@ export default function RegisterPage() {
     >
       <div className="flex flex-col lg:flex-row min-h-[600px] lg:min-h-[850px]">
 
-        {/* Left Side - Image Panel */}
         <div className="relative overflow-hidden flex flex-col justify-between p-6 sm:p-8 lg:p-16 w-full lg:w-[58%] min-h-[300px] lg:min-h-auto order-1">
-          {/* Background Image & Overlay */}
           <div className="absolute inset-0 z-0">
             <Image
               src="https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=2070&auto=format&fit=crop"
@@ -166,7 +145,6 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* Feature List */}
             <div className="space-y-5 pt-4">
               {[
                 { icon: ShieldCheck, title: 'Bank-Grade Security', desc: 'Enterprise-level encryption for all your data.' },
@@ -187,7 +165,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Right Side - Form Panel */}
         <div className="flex items-center justify-center bg-[#020817] px-6 py-10 sm:px-8 sm:py-12 lg:px-16 lg:py-16 w-full lg:flex-1 order-2">
           <div className="w-full max-w-[480px]">
 
@@ -228,7 +205,6 @@ export default function RegisterPage() {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-                  {/* NAME */}
                   <FormField
                     control={form.control}
                     name="name"
@@ -252,7 +228,6 @@ export default function RegisterPage() {
                     )}
                   />
 
-                  {/* EMAIL + ROLE */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <FormField
                       control={form.control}
@@ -305,7 +280,6 @@ export default function RegisterPage() {
                     />
                   </div>
 
-                  {/* PASSWORD + CONFIRM */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <FormField
                       control={form.control}
@@ -370,7 +344,6 @@ export default function RegisterPage() {
                     />
                   </div>
 
-                  {/* TERMS */}
                   <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                     <button
                       type="button"
@@ -395,7 +368,6 @@ export default function RegisterPage() {
                     </p>
                   </div>
 
-                  {/* SUBMIT */}
                   <Button
                     type="submit"
                     disabled={isLoading || !agreedToTerms}
@@ -417,7 +389,6 @@ export default function RegisterPage() {
               </Form>
             </div>
 
-            {/* SIGN IN LINK */}
             <div className="mt-10 text-center">
               <p className="text-sm text-white/40">
                 Already have an account?{' '}
@@ -434,4 +405,3 @@ export default function RegisterPage() {
     </motion.div>
   );
 }
-

@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useUser, useIsHydrated } from '@/store/useAuthStore';
+
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
+import FullScreenLoading from '@/components/shared/FullScreenLoading';
 
 export default function DashboardLayout({
   children,
@@ -12,7 +14,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
 
   const user = useUser();
   const hydrated = useIsHydrated();
@@ -27,32 +28,39 @@ export default function DashboardLayout({
     if (!mounted) return;
     if (!hydrated) return;
 
-    if (!user) {
+    // only redirect if auth fully checked and no user
+    if (user === null) {
       router.replace('/login');
     }
-  }, [mounted, hydrated, user, pathname, router]);
+  }, [mounted, hydrated, user, router]);
 
+  // prevent hydration mismatch
   if (!mounted || !hydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading dashboard...
-      </div>
+      <FullScreenLoading
+        message="Loading"
+        subMessage="Preparing dashboard..."
+      />
     );
   }
 
+  // while redirecting
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Redirecting to login...
-      </div>
+      <FullScreenLoading
+        message="Redirecting"
+        subMessage="Going to login page..."
+      />
     );
   }
 
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar role={user.role || 'USER'} />
+
       <div className="flex-1 flex flex-col min-h-screen">
         <DashboardHeader />
+
         <main className="flex-1">
           {children}
         </main>
