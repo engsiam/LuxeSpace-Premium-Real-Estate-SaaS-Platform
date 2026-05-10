@@ -1,21 +1,7 @@
 'use client';
 
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from '@/components/ui/chart';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-} from 'recharts';
+import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 
 interface ChartData {
   name: string;
@@ -36,63 +22,46 @@ export function GenericChart({
   data, 
   label1, 
   label2, 
-  color1 = 'hsl(var(--primary))', 
-  color2 = 'hsl(var(--secondary))',
   height = 300 
 }: GenericChartProps) {
-  const chartConfig: ChartConfig = {
-    value1: { label: label1, color: color1 },
-    value2: { label: label2, color: color2 },
-  };
+  const maxValue = useMemo(() => {
+    if (!data || data.length === 0) return 1;
+    return Math.max(...data.map((d) => Math.max(d.value1, d.value2)));
+  }, [data]);
 
   return (
-    <ChartContainer config={chartConfig} className={`h-[${height}px] w-full`}>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="color1" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={color1} stopOpacity={0.3}/>
-              <stop offset="95%" stopColor={color1} stopOpacity={0}/>
-            </linearGradient>
-            <linearGradient id="color2" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={color2} stopOpacity={0.3}/>
-              <stop offset="95%" stopColor={color2} stopOpacity={0}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-          <XAxis 
-            dataKey="name" 
-            axisLine={false}
-            tickLine={false}
-            tickMargin={10}
-            style={{ fontSize: '10px', fontWeight: 'bold', fill: 'currentColor', opacity: 0.5 }}
-          />
-          <YAxis 
-            axisLine={false}
-            tickLine={false}
-            tickMargin={10}
-            style={{ fontSize: '10px', fontWeight: 'bold', fill: 'currentColor', opacity: 0.5 }}
-          />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Area
-            type="monotone"
-            dataKey="value1"
-            stroke={color1}
-            fillOpacity={1}
-            fill="url(#color1)"
-            strokeWidth={3}
-          />
-          <Area
-            type="monotone"
-            dataKey="value2"
-            stroke={color2}
-            fillOpacity={1}
-            fill="url(#color2)"
-            strokeWidth={3}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </ChartContainer>
+    <div className="space-y-6">
+      <div className="flex items-end gap-2 h-48">
+        {data.map((item, i) => (
+          <div key={item.name} className="flex-1 flex flex-col items-center gap-2">
+            <div className="w-full flex gap-1 items-end h-40">
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: `${Math.max((item.value1 / maxValue) * 100, 2)}%` }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="flex-1 bg-primary/60 rounded-t-lg"
+              />
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: `${Math.max((item.value2 / maxValue) * 100, 2)}%` }}
+                transition={{ delay: i * 0.1 + 0.05, duration: 0.5 }}
+                className="flex-1 bg-secondary/60 rounded-t-lg"
+              />
+            </div>
+            <span className="text-[10px] text-muted-foreground font-bold">{item.name}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-center gap-6">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-primary" />
+          <span className="text-xs font-bold text-muted-foreground">{label1}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-secondary" />
+          <span className="text-xs font-bold text-muted-foreground">{label2}</span>
+        </div>
+      </div>
+    </div>
   );
 }

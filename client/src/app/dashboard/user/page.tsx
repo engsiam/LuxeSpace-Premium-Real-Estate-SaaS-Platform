@@ -4,11 +4,9 @@ import { useEffect, useState } from 'react';
 import { OverviewCard } from '@/components/dashboard/OverviewCard';
 import { Calendar, Heart, DollarSign, Building2, ArrowUpRight } from 'lucide-react';
 import axiosInstance from '@/lib/axiosInstance';
-import { useWishlistStore } from '@/store/useWishlistStore';
+import { useWishlistItems } from '@/store/useWishlistStore';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
-import { GenericChart } from '@/components/dashboard/GenericChart';
 
 interface UserStats {
   totalBookings: number;
@@ -25,9 +23,13 @@ export default function UserDashboard() {
     activeBookings: 0,
   });
   const [loading, setLoading] = useState(true);
-  const { items } = useWishlistStore();
+  const { items: wishlistItems, hasHydrated: wishlistHydrated } = useWishlistItems();
+
+  console.log('[UserDashboard] Render - wishlistHydrated:', wishlistHydrated);
 
   useEffect(() => {
+    if (!wishlistHydrated) return;
+
     const fetchStats = async () => {
       try {
         const response = await axiosInstance.get('/bookings');
@@ -41,19 +43,19 @@ export default function UserDashboard() {
 
         setStats({
           totalBookings,
-          wishlistCount: items.length,
+          wishlistCount: wishlistItems.length,
           totalSpent,
           activeBookings,
         });
-      } catch (error) {
-        toast.error('Failed to fetch dashboard stats');
+      } catch {
+        setStats((prev) => ({ ...prev, wishlistCount: wishlistItems.length }));
       } finally {
         setLoading(false);
       }
     };
 
     fetchStats();
-  }, [items.length]);
+  }, [wishlistHydrated, wishlistItems.length]);
 
   if (loading) {
     return (
@@ -137,6 +139,46 @@ export default function UserDashboard() {
           />
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+function GenericChart({ data, label1, label2 }: { data: { name: string; value1: number; value2: number }[]; label1: string; label2: string }) {
+  const maxValue = Math.max(...data.map((d) => Math.max(d.value1, d.value2)));
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex items-end gap-2 h-48">
+        {data.map((item, i) => (
+          <div key={item.name} className="flex-1 flex flex-col items-center gap-2">
+            <div className="w-full flex gap-1 items-end h-40">
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: `${(item.value1 / maxValue) * 100}%` }}
+                transition={{ delay: i * 0.1 }}
+                className="flex-1 bg-primary/60 rounded-t-lg"
+              />
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: `${(item.value2 / maxValue) * 100}%` }}
+                transition={{ delay: i * 0.1 + 0.05 }}
+                className="flex-1 bg-secondary/60 rounded-t-lg"
+              />
+            </div>
+            <span className="text-[10px] text-muted-foreground font-bold">{item.name}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-center gap-6">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-primary" />
+          <span className="text-xs font-bold text-muted-foreground">{label1}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-secondary" />
+          <span className="text-xs font-bold text-muted-foreground">{label2}</span>
+        </div>
+      </div>
     </div>
   );
 }

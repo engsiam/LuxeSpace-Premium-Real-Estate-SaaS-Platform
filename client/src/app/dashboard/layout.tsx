@@ -3,10 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useIsHydrated } from '@/store/useAuthStore';
-
 import DashboardSidebar from '@/components/shared/DashboardSidebar';
 import DashboardHeader from '@/components/shared/DashboardHeader';
-import FullScreenLoading from '@/components/shared/FullScreenLoading';
 
 export default function DashboardLayout({
   children,
@@ -14,53 +12,36 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-
   const user = useUser();
-  const hydrated = useIsHydrated();
-
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isHydrated = useIsHydrated();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!mounted) return;
-    if (!hydrated) return;
+    if (isHydrated) {
+      setReady(true);
+    }
+  }, [isHydrated]);
 
-    // only redirect if auth fully checked and no user
-    if (user === null) {
+  useEffect(() => {
+    if (!ready) return;
+    if (!user) {
       router.replace('/login');
     }
-  }, [mounted, hydrated, user, router]);
+  }, [ready, user]);
 
-  // prevent hydration mismatch
-  if (!mounted || !hydrated) {
+  if (!ready || !user) {
     return (
-      <FullScreenLoading
-        message="Loading"
-        subMessage="Preparing dashboard..."
-      />
-    );
-  }
-
-  // while redirecting
-  if (!user) {
-    return (
-      <FullScreenLoading
-        message="Redirecting"
-        subMessage="Going to login page..."
-      />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-primary font-bold">Loading dashboard...</div>
+      </div>
     );
   }
 
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar role={user.role || 'USER'} />
-
       <div className="flex-1 flex flex-col min-h-screen">
         <DashboardHeader />
-
         <main className="flex-1">
           {children}
         </main>
