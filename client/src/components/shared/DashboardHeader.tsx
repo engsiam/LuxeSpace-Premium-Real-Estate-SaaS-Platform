@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User as UserIcon, LayoutDashboard, Menu } from 'lucide-react';
+import { LogOut, User as UserIcon, LayoutDashboard, Menu, ExternalLink } from 'lucide-react';
 import { useDashboardStore } from '@/store/useDashboardStore';
 
 interface DashboardHeaderProps {
@@ -40,10 +40,18 @@ export default function DashboardHeader({ user, onLogout }: DashboardHeaderProps
 
   return (
     <header className="flex items-center justify-between px-4 md:px-6 lg:px-8 py-3 md:py-4 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-30">
-      {/* Spacer for mobile menu button */}
-      <div className="lg:hidden w-12" />
+      {/* Left side - View Site button */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => window.open('/', '_blank')}
+          className="flex items-center gap-2 px-3 py-2 text-xs md:text-sm font-bold text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+        >
+          <ExternalLink size={16} className="md:w-[18px] md:h-[18px]" />
+          <span className="hidden sm:inline">View Site</span>
+        </button>
+      </div>
       
-      <div className="flex-1">
+      <div className="flex-1 flex justify-center">
         <h1 className="text-base md:text-lg lg:text-xl font-black tracking-tight">
           Dashboard
         </h1>

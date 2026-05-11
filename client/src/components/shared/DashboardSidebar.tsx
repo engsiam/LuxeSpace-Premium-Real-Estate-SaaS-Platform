@@ -81,7 +81,7 @@ export default function DashboardSidebar({ role, onLogout }: DashboardSidebarPro
 
   const SidebarContent = () => (
     <>
-      {/* <div className="p-4 lg:p-6 mb-2">
+      <div className="p-4 lg:p-6 mb-2">
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-[0_10px_30px_-5px_rgba(201,167,77,0.4)] transition-transform group-hover:rotate-12 duration-500">
             <Globe className="text-secondary-foreground w-5 h-5" />
@@ -95,7 +95,7 @@ export default function DashboardSidebar({ role, onLogout }: DashboardSidebarPro
             </span>
           </div>
         </Link>
-      </div> */}
+      </div>
 
       <nav className="flex-1 py-3 space-y-1 overflow-y-auto">
         <div className="px-3 mb-4">

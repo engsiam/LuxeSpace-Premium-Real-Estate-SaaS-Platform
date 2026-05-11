@@ -12,30 +12,52 @@ import { toast } from 'sonner';
 import { Users, ShieldCheck, Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
+import { Pagination } from '@/components/ui/pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/users');
-      setUsers(response.data.data || []);
+      const response = await axiosInstance.get(`/users?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const data = response.data.data;
+      const meta = response.data.meta;
+      
+      if (Array.isArray(data)) {
+        setUsers(data);
+        setTotalPages(meta?.totalPages || 1);
+        setTotalItems(meta?.total || data.length);
+      } else {
+        setUsers([]);
+        setTotalPages(1);
+        setTotalItems(0);
+      }
       setError(null);
     } catch {
       setError('Failed to synchronize user directory');
       toast.error('Directory synchronization failed');
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(currentPage);
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleEditRole = async (id: string) => {
     const newRole = prompt('Assign new Privilege Level (ADMIN, AGENT, USER):')?.toUpperCase();
@@ -83,7 +105,7 @@ export default function AdminUsers() {
             <ShieldCheck className="w-8 h-8 md:w-10 md:h-10 text-rose-500" />
           </div>
           <p className="text-rose-500 font-black uppercase tracking-widest text-xs">{error}</p>
-          <Button onClick={fetchUsers} variant="outline" className="rounded-xl lg:rounded-2xl border-white/10 text-white px-6 lg:px-10 py-3 lg:h-14 font-black uppercase tracking-widest text-xs">
+          <Button onClick={() => fetchUsers(currentPage)} variant="outline" className="rounded-xl lg:rounded-2xl border-white/10 text-white px-6 lg:px-10 py-3 lg:h-14 font-black uppercase tracking-widest text-xs">
             Try Again
           </Button>
         </div>
@@ -129,7 +151,7 @@ export default function AdminUsers() {
               <div>
                 <h2 className="text-lg lg:text-2xl font-black text-white tracking-tight">Active Accounts</h2>
                 <p className="text-[10px] lg:text-xs text-muted-foreground uppercase tracking-[0.3em] font-bold">
-                  {loading ? 'Analyzing...' : `${users.length} authenticated identities`}
+                  {loading ? 'Analyzing...' : `${totalItems} identities (Page ${currentPage} of ${totalPages})`}
                 </p>
               </div>
             </div>
@@ -150,6 +172,15 @@ export default function AdminUsers() {
               onDeactivate={handleToggleStatus}
             />
           </div>
+
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={handlePageChange}
+            totalItems={totalItems}
+            limit={ITEMS_PER_PAGE}
+            showLimitSelector={false}
+          />
         </div>
       </div>
     </div>

@@ -36,12 +36,13 @@ export const getBlogBySlug = catchAsync(async (req, res) => {
 });
 
 export const getAllBlogs = catchAsync(async (req, res) => {
-  const result = await blogService.getAllBlogs();
+  const result = await blogService.getAllBlogs(req.query);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'All blogs retrieved',
-    data: result,
+    data: result.data,
+    meta: result.meta,
   });
 });
 

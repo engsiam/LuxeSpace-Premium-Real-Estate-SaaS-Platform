@@ -9,5 +9,7 @@ router.post('/execute', authGuard('USER', 'ADMIN', 'AGENT'), bookingController.e
 router.get('/', authGuard(), bookingController.getMyBookings);
 router.get('/transactions', authGuard(), bookingController.getTransactionHistory);
 router.get('/all', authGuard('ADMIN'), bookingController.getAllBookings);
+router.get('/growth', authGuard('USER'), bookingController.getUserGrowth);
+router.get('/admin-growth', authGuard('ADMIN'), bookingController.getAdminGrowth);
 
 export default router;

@@ -3,13 +3,20 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OverviewCard } from '@/components/dashboard/OverviewCard';
-import { Building2, Eye, MessageSquare, TrendingUp, Plus } from 'lucide-react';
+import { Building2, Eye, MessageSquare, TrendingUp, Plus, X } from 'lucide-react';
 import axiosInstance from '@/lib/axiosInstance';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { GenericChart } from '@/components/dashboard/GenericChart';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+
+interface AgentGrowthData {
+  name: string;
+  value1: number;
+  value2: number;
+}
 
 export default function AgentDashboard() {
   const [stats, setStats] = useState({
@@ -18,7 +25,9 @@ export default function AgentDashboard() {
     totalInquiries: 0,
     totalRevenue: 0,
   });
+  const [growthData, setGrowthData] = useState<AgentGrowthData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showEngagementFullscreen, setShowEngagementFullscreen] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -31,6 +40,16 @@ export default function AgentDashboard() {
           totalInquiries: 0,
           totalRevenue: 0,
         });
+
+        if (properties.length > 0) {
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+          const data = months.map((month, i) => ({
+            name: month,
+            value1: Math.floor(Math.random() * 300) + 100,
+            value2: Math.floor(Math.random() * 200) + 50,
+          }));
+          setGrowthData(data);
+        }
       } catch (error) {
         toast.error('Failed to fetch stats');
       } finally {
@@ -109,14 +128,8 @@ export default function AgentDashboard() {
         </div>
         <div className="p-4 md:p-6 lg:p-10">
           <GenericChart 
-            data={[
-              { name: 'Jan', value1: 400, value2: 240 },
-              { name: 'Feb', value1: 300, value2: 139 },
-              { name: 'Mar', value1: 200, value2: 980 },
-              { name: 'Apr', value1: 278, value2: 390 },
-              { name: 'May', value1: 189, value2: 480 },
-              { name: 'Jun', value1: 239, value2: 380 },
-              { name: 'Jul', value1: 349, value2: 430 },
+            data={growthData.length > 0 ? growthData : [
+              { name: 'No Data', value1: 0, value2: 0 },
             ]} 
             label1="Views" 
             label2="Inquiries" 

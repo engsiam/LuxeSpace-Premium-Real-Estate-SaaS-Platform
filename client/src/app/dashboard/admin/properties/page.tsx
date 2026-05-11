@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import PropertyTableWrapper from '@/components/dashboard/PropertyTableWrapper';
+import { Pagination } from '@/components/ui/pagination';
 import { Plus, Building2, Search, RefreshCw } from 'lucide-react';
 import axiosInstance from '@/lib/axiosInstance';
 import { Property } from '@/types';
@@ -10,24 +11,32 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (page = 1) => {
     setLoading(true);
     try {
-      const query = searchTerm ? `?searchTerm=${encodeURIComponent(searchTerm)}` : '';
-      const response = await axiosInstance.get(`/properties${query}`);
+      const searchQuery = searchTerm ? `&searchTerm=${encodeURIComponent(searchTerm)}` : '';
+      const response = await axiosInstance.get(`/properties?page=${page}&limit=${ITEMS_PER_PAGE}${searchQuery}`);
       const data = response.data.data;
+      const meta = response.data.meta;
       
-      if (data && data.data) {
-        setProperties(data.data);
-      } else if (Array.isArray(data)) {
+      if (Array.isArray(data)) {
         setProperties(data);
+        setTotalPages(meta?.totalPages || 1);
+        setTotalItems(meta?.total || data.length);
       } else {
         setProperties([]);
+        setTotalPages(1);
+        setTotalItems(0);
       }
     } catch {
       toast.error('Failed to fetch properties');
@@ -38,8 +47,17 @@ export default function AdminProperties() {
   };
 
   useEffect(() => {
-    fetchProperties();
-  }, []);
+    fetchProperties(currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    fetchProperties(1);
+  }, [searchTerm]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="p-4 md:p-6 lg:p-10 space-y-6 lg:space-y-12 bg-background min-h-screen">
@@ -52,7 +70,7 @@ export default function AdminProperties() {
           <h1 className="text-2xl md:text-3xl lg:text-5xl font-black tracking-tighter text-white">Manage <span className="text-primary italic">Properties</span></h1>
         </div>
         <div className="flex gap-3 w-full lg:w-auto">
-          <Button onClick={fetchProperties} variant="outline" className="h-10 lg:h-12 rounded-xl border-white/10 text-white hover:bg-white/10">
+          <Button onClick={() => fetchProperties(currentPage)} variant="outline" className="h-10 lg:h-12 rounded-xl border-white/10 text-white hover:bg-white/10">
             <RefreshCw size={16} className="mr-2" />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
@@ -71,7 +89,7 @@ export default function AdminProperties() {
             </div>
             <div>
               <h2 className="text-lg lg:text-xl font-bold text-white">All Properties</h2>
-              <p className="text-xs lg:text-sm text-muted-foreground">{loading ? 'Loading...' : `${properties.length} properties`}</p>
+              <p className="text-xs lg:text-sm text-muted-foreground">{loading ? 'Loading...' : `${totalItems} properties (Page ${currentPage} of ${totalPages})`}</p>
             </div>
           </div>
           
@@ -102,6 +120,15 @@ export default function AdminProperties() {
             <PropertyTableWrapper properties={properties} />
           )}
         </div>
+        
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={handlePageChange}
+          totalItems={totalItems}
+          limit={ITEMS_PER_PAGE}
+          showLimitSelector={false}
+        />
       </div>
     </div>
   );

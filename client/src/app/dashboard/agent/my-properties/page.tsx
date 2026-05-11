@@ -9,27 +9,34 @@ import { Property } from '@/types';
 import { toast } from 'sonner';
 import { Building2, Plus, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Pagination } from '@/components/ui/pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function AgentProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (page = 1) => {
     setLoading(true);
     try {
-      const query = searchTerm ? `?searchTerm=${encodeURIComponent(searchTerm)}` : '';
-      const response = await axiosInstance.get(`/properties${query}`);
+      const searchQuery = searchTerm ? `&searchTerm=${encodeURIComponent(searchTerm)}` : '';
+      const response = await axiosInstance.get(`/properties?page=${page}&limit=${ITEMS_PER_PAGE}${searchQuery}`);
       const data = response.data.data;
+      const meta = response.data.meta;
       
-      console.log('API Response:', data);
-      
-      if (data && data.data) {
-        setProperties(data.data);
-      } else if (Array.isArray(data)) {
+      if (Array.isArray(data)) {
         setProperties(data);
+        setTotalPages(meta?.totalPages || 1);
+        setTotalItems(meta?.total || data.length);
       } else {
         setProperties([]);
+        setTotalPages(1);
+        setTotalItems(0);
       }
     } catch (error) {
       console.error('Fetch error:', error);
@@ -41,8 +48,18 @@ export default function AgentProperties() {
   };
 
   useEffect(() => {
-    fetchProperties();
-  }, []);
+    fetchProperties(currentPage);
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchProperties(1);
+  };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this property?')) {
@@ -56,11 +73,6 @@ export default function AgentProperties() {
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to delete property');
     }
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchProperties();
   };
 
   return (
@@ -89,7 +101,7 @@ export default function AgentProperties() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Inventory</h2>
-              <p className="text-sm text-muted-foreground">{properties.length} properties</p>
+              <p className="text-sm text-muted-foreground">{loading ? 'Loading...' : `${totalItems} properties (Page ${currentPage} of ${totalPages})`}</p>
             </div>
           </div>
           
@@ -138,6 +150,15 @@ export default function AgentProperties() {
             />
           </div>
         )}
+
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={handlePageChange}
+          totalItems={totalItems}
+          limit={ITEMS_PER_PAGE}
+          showLimitSelector={false}
+        />
       </div>
     </div>
   );

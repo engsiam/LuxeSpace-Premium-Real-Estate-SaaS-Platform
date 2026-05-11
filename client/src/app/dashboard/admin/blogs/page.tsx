@@ -8,12 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { Pagination } from '@/components/ui/pagination';
 import { Plus, BookOpen, Pencil, Trash2, X, Image as ImageIcon, Loader2, Upload, Eye, ImagePlus } from 'lucide-react';
 import axiosInstance from '@/lib/axiosInstance';
 import { Blog } from '@/types';
 import Image from 'next/image';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+const ITEMS_PER_PAGE = 8;
 
 export default function AdminBlogs() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -24,6 +26,9 @@ export default function AdminBlogs() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -35,18 +40,34 @@ export default function AdminBlogs() {
   });
 
   useEffect(() => {
-    fetchBlogs();
-  }, []);
+    fetchBlogs(currentPage);
+  }, [currentPage]);
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = async (page = 1) => {
+    setLoading(true);
     try {
-      const response = await axiosInstance.get('/blogs/all');
-      setBlogs(response.data.data || []);
+      const response = await axiosInstance.get(`/blogs/all?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const data = response.data.data;
+      const meta = response.data.meta;
+      if (Array.isArray(data)) {
+        setBlogs(data);
+        setTotalPages(meta?.totalPages || 1);
+        setTotalItems(meta?.total || data.length);
+      } else {
+        setBlogs([]);
+        setTotalPages(1);
+        setTotalItems(0);
+      }
     } catch {
       toast.error('Failed to fetch blogs');
+      setBlogs([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const openCreateModal = () => {
@@ -229,6 +250,15 @@ export default function AdminBlogs() {
           </div>
         )}
       </div>
+
+      <Pagination 
+        currentPage={currentPage} 
+        totalPages={totalPages} 
+        onPageChange={handlePageChange}
+        totalItems={totalItems}
+        limit={ITEMS_PER_PAGE}
+        showLimitSelector={false}
+      />
 
       {/* Create/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>

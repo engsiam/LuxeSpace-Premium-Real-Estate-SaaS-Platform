@@ -2,18 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { OverviewCard } from '@/components/dashboard/OverviewCard';
-import { Calendar, Heart, DollarSign, Building2, ArrowUpRight } from 'lucide-react';
+import { Calendar, Heart, DollarSign, Building2, ArrowUpRight, X } from 'lucide-react';
 import axiosInstance from '@/lib/axiosInstance';
 import { useWishlistItems } from '@/store/useWishlistStore';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { GenericChart } from '@/components/dashboard/GenericChart';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface UserStats {
   totalBookings: number;
   wishlistCount: number;
   totalSpent: number;
   activeBookings: number;
+}
+
+interface GrowthData {
+  name: string;
+  value1: number;
+  value2: number;
 }
 
 export default function UserDashboard() {
@@ -23,7 +31,9 @@ export default function UserDashboard() {
     totalSpent: 0,
     activeBookings: 0,
   });
+  const [growthData, setGrowthData] = useState<GrowthData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showGrowthFullscreen, setShowGrowthFullscreen] = useState(false);
   const { items: wishlistItems, hasHydrated: wishlistHydrated } = useWishlistItems();
 
   useEffect(() => {
@@ -31,8 +41,12 @@ export default function UserDashboard() {
 
     const fetchStats = async () => {
       try {
-        const response = await axiosInstance.get('/bookings');
-        const bookings = response.data.data || [];
+        const [bookingsRes, growthRes] = await Promise.all([
+          axiosInstance.get('/bookings'),
+          axiosInstance.get('/bookings/growth').catch(() => ({ data: { data: [] } })),
+        ]);
+        const bookings = bookingsRes.data.data || [];
+        const growthData = growthRes.data.data || [];
 
         const totalBookings = bookings.length;
         const activeBookings = bookings.filter((b: any) => b.status === 'PENDING' || b.status === 'CONFIRMED').length;
@@ -46,6 +60,10 @@ export default function UserDashboard() {
           totalSpent,
           activeBookings,
         });
+
+        if (growthData.length > 0) {
+          setGrowthData(growthData);
+        }
       } catch {
         setStats((prev) => ({ ...prev, wishlistCount: wishlistItems.length }));
       } finally {
@@ -112,73 +130,56 @@ export default function UserDashboard() {
             <h2 className="text-lg md:text-xl lg:text-2xl font-black text-white tracking-tight">Personal Growth</h2>
             <p className="text-xs md:text-sm text-muted-foreground font-medium hidden sm:block">Monthly spending and booking frequency</p>
           </div>
-          <div className="flex gap-3 md:gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-primary" />
-              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Investment</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-secondary" />
-              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Bookings</span>
-            </div>
-          </div>
+          <Button variant="outline" onClick={() => setShowGrowthFullscreen(true)} className="rounded-xl border-primary/20 text-primary font-bold hover:bg-primary hover:text-secondary-foreground text-xs h-10">
+            View Report
+          </Button>
         </div>
         <div className="p-4 md:p-6 lg:p-10">
           <GenericChart 
-            data={[
-              { name: 'Jan', value1: 200, value2: 120 },
-              { name: 'Feb', value1: 500, value2: 240 },
-              { name: 'Mar', value1: 300, value2: 380 },
-              { name: 'Apr', value1: 600, value2: 450 },
-              { name: 'May', value1: 400, value2: 300 },
-              { name: 'Jun', value1: 800, value2: 500 },
-              { name: 'Jul', value1: 700, value2: 550 },
-            ]} 
-            label1="Investment" 
-            label2="Bookings" 
+            data={growthData.length > 0 ? growthData : []} 
+            label1="Spending (৳)" 
+            label2="Bookings"
+            color1="#c9a74d"
+            color2="#22c55e"
           />
         </div>
       </motion.div>
-    </div>
-  );
-}
 
-function GenericChart({ data, label1, label2 }: { data: { name: string; value1: number; value2: number }[]; label1: string; label2: string }) {
-  const maxValue = Math.max(...data.map((d) => Math.max(d.value1, d.value2)));
-  
-  return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="flex items-end gap-1 md:gap-2 h-32 md:h-48">
-        {data.map((item, i) => (
-          <div key={item.name} className="flex-1 flex flex-col items-center gap-1 md:gap-2">
-            <div className="w-full flex gap-0.5 md:gap-1 items-end h-24 md:h-40">
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: `${(item.value1 / maxValue) * 100}%` }}
-                transition={{ delay: i * 0.1 }}
-                className="flex-1 bg-primary/60 rounded-t-md md:rounded-t-lg"
-              />
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: `${(item.value2 / maxValue) * 100}%` }}
-                transition={{ delay: i * 0.1 + 0.05 }}
-                className="flex-1 bg-secondary/60 rounded-t-md md:rounded-t-lg"
-              />
+      {/* Full Screen Growth Dialog */}
+      <Dialog open={showGrowthFullscreen} onOpenChange={setShowGrowthFullscreen}>
+        <DialogContent className="max-w-[98vw] max-h-[98vh] w-full h-full bg-card border-border p-0 overflow-hidden">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <div>
+                <h2 className="text-2xl lg:text-3xl font-black text-white">Personal Growth</h2>
+                <p className="text-sm text-muted-foreground">Monthly spending and booking frequency</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setShowGrowthFullscreen(false)} className="rounded-xl">
+                <X size={24} />
+              </Button>
             </div>
-            <span className="text-[8px] md:text-[10px] text-muted-foreground font-bold">{item.name}</span>
+            <div className="flex-1 p-6 lg:p-10">
+              <div className="h-full min-h-[500px]">
+                <GenericChart 
+                  data={growthData.length > 0 ? growthData : []} 
+                  label1="Spending (৳)" 
+                  label2="Bookings"
+                  color1="#c9a74d"
+                  color2="#22c55e"
+                />
+              </div>
+            </div>
+            <div className="p-6 border-t border-border flex gap-4">
+              <Link href="/dashboard/user/wishlist" onClick={() => setShowGrowthFullscreen(false)} className="flex-1">
+                <Button variant="outline" className="w-full rounded-xl h-12 font-bold">My Wishlist</Button>
+              </Link>
+              <Link href="/dashboard/user/my-bookings" onClick={() => setShowGrowthFullscreen(false)} className="flex-1">
+                <Button className="w-full rounded-xl h-12 font-bold bg-primary">My Bookings</Button>
+              </Link>
+            </div>
           </div>
-        ))}
-      </div>
-      <div className="flex justify-center gap-4 md:gap-6">
-        <div className="flex items-center gap-1 md:gap-2">
-          <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-primary" />
-          <span className="text-[10px] md:text-xs font-bold text-muted-foreground">{label1}</span>
-        </div>
-        <div className="flex items-center gap-1 md:gap-2">
-          <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-secondary" />
-          <span className="text-[10px] md:text-xs font-bold text-muted-foreground">{label2}</span>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

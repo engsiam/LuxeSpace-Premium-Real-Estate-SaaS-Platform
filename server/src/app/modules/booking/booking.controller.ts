@@ -79,3 +79,23 @@ export const getTransactionHistory = catchAsync(async (req: AuthRequest, res) =>
     meta: result.pagination,
   });
 });
+
+export const getUserGrowth = catchAsync(async (req: AuthRequest, res) => {
+  const result = await bookingService.getUserGrowthStats(req.user!.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User growth data retrieved',
+    data: result,
+  });
+});
+
+export const getAdminGrowth = catchAsync(async (req: AuthRequest, res) => {
+  const result = await bookingService.getAdminGrowthStats();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Admin growth data retrieved',
+    data: result,
+  });
+});

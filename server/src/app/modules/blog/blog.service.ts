@@ -85,15 +85,36 @@ export const getBlogBySlug = async (slug: string) => {
   return blog;
 };
 
-export const getAllBlogs = async () => {
-  return prisma.blog.findMany({
-    include: {
-      author: {
-        select: { id: true, name: true },
+export const getAllBlogs = async (filters: { page?: string; limit?: string }) => {
+  const { page = '1', limit = '10' } = filters;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const take = parseInt(limit);
+
+  const [blogs, total] = await Promise.all([
+    prisma.blog.findMany({
+      include: {
+        author: {
+          select: { id: true, name: true, avatar: true },
+        },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take,
+    }),
+    prisma.blog.count(),
+  ]);
+
+  if (blogs.length === 0) {
+    return {
+      data: PLACEHOLDER_BLOGS.slice(0, take),
+      meta: { total: PLACEHOLDER_BLOGS.length, page: 1, limit: take, totalPages: 1 },
+    };
+  }
+
+  return {
+    data: blogs,
+    meta: { total, page: parseInt(page), limit: take, totalPages: Math.ceil(total / take) },
+  };
 };
 
 export const updateBlog = async (id: string, data: any) => {
