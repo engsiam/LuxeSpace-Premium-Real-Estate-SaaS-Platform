@@ -166,3 +166,13 @@ export const getPropertiesByCity = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+export const getAgentStats = catchAsync(async (req: AuthRequest, res) => {
+  const result = await propertyService.getAgentStats(req.user!.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Agent stats retrieved',
+    data: result,
+  });
+});

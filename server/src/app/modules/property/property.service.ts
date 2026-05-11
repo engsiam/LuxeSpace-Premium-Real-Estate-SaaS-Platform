@@ -249,3 +249,104 @@ export const getPropertiesByCity = async () => {
     count: item._count.city,
   }));
 };
+
+export const getAgentStats = async (agentId: string) => {
+  const now = new Date();
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+
+  // Debug: list all users with AGENT role to see which IDs exist
+  const allAgents = await prisma.user.findMany({
+    where: { role: 'AGENT' },
+    select: { id: true, name: true, email: true },
+    take: 10
+  });
+  console.log('[AgentStats] All AGENT users:', JSON.stringify(allAgents.map(a => ({ id: a.id, name: a.name }))));
+
+  // Get all properties with their agent IDs to understand the data
+  const allProps = await prisma.property.findMany({
+    select: { id: true, title: true, agentId: true },
+    take: 5
+  });
+  console.log('[AgentStats] Sample properties:', JSON.stringify(allProps.map(p => ({ id: p.id, agentId: p.agentId, title: p.title.substring(0, 20) }))));
+
+  // Check the exact agentId we're searching with
+  console.log('[AgentStats] Looking for properties where agentId =', agentId);
+
+  const [properties, revenueData, bookingsData, allBookings, paidBookings] = await Promise.all([
+    prisma.property.findMany({ 
+      where: { agentId },
+      include: { _count: { select: { bookings: true } } }
+    }),
+    prisma.booking.aggregate({
+      where: {
+        property: { agentId },
+        status: 'PAID',
+      },
+      _sum: { amount: true },
+    }),
+    prisma.booking.findMany({
+      where: {
+        property: { agentId },
+        createdAt: { gte: sixMonthsAgo },
+      },
+      select: { amount: true, status: true, createdAt: true },
+    }),
+    prisma.booking.findMany({
+      where: { property: { agentId } },
+      select: { id: true },
+    }),
+    prisma.booking.findMany({
+      where: { property: { agentId }, status: 'PAID' },
+      select: { amount: true },
+    }),
+  ]);
+
+  console.log('[AgentStats] Found properties:', properties.length);
+
+  const propertyCount = properties.length;
+  const totalRevenue = revenueData._sum.amount || 0;
+  const totalInquiries = allBookings.length;
+  const totalBookings = paidBookings.length;
+  
+  const totalViews = properties.reduce((sum, p) => sum + (p._count?.bookings || 0), 0);
+
+  const monthlyData: Record<string, { views: number; inquiries: number }> = {};
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+    const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    
+    const monthBookings = bookingsData.filter(b => {
+      const created = new Date(b.createdAt);
+      return created >= monthStart && created <= monthEnd;
+    });
+    
+    const monthProperties = properties.filter(p => {
+      const created = new Date(p.createdAt);
+      return created >= monthStart && created <= monthEnd;
+    });
+    
+    monthlyData[months[d.getMonth()]] = { 
+      views: monthProperties.length + monthBookings.length,
+      inquiries: monthBookings.length,
+    };
+  }
+
+  const engagementData = Object.entries(monthlyData).reverse().map(([name, data]) => ({
+    name,
+    value1: data.views,
+    value2: data.inquiries,
+  }));
+
+  console.log('[AgentStats] returning:', { totalProperties: propertyCount, totalViews, totalInquiries, totalRevenue, totalBookings });
+
+  return {
+    totalProperties: propertyCount,
+    totalViews,
+    totalInquiries,
+    totalRevenue,
+    engagementData,
+    totalBookings,
+  };
+};

@@ -60,7 +60,7 @@ export default function DashboardSidebar({ role, onLogout }: DashboardSidebarPro
 
   const userItems: SidebarItem[] = [
     { href: '/dashboard/user', label: 'Overview', icon: <LayoutDashboard size={20} /> },
-    { href: '/dashboard/user/my-bookings', label: 'My Sanctuary', icon: <Calendar size={20} /> },
+    { href: '/dashboard/user/my-bookings', label: 'My Bookings', icon: <Calendar size={20} /> },
     { href: '/dashboard/user/transactions', label: 'Transactions', icon: <Wallet size={20} /> },
     { href: '/dashboard/user/wishlist', label: 'Collection', icon: <Heart size={20} /> },
     { href: '/dashboard/user/profile', label: 'Identity', icon: <UserCircle size={20} /> },

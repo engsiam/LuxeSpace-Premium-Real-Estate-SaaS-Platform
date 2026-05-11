@@ -32,25 +32,20 @@ export default function AgentDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axiosInstance.get('/properties?limit=100');
-        const properties = response.data.data || [];
+        const response = await axiosInstance.get('/properties/agent-stats');
+        console.log('Agent stats response:', response.data.data);
+        const data = response.data.data;
+        
         setStats({
-          totalProperties: response.data.meta?.total || properties.length || 0,
-          totalViews: 0,
-          totalInquiries: 0,
-          totalRevenue: 0,
+          totalProperties: data.totalProperties || 0,
+          totalViews: data.totalViews || 0,
+          totalInquiries: data.totalInquiries || 0,
+          totalRevenue: data.totalRevenue || 0,
         });
 
-        if (properties.length > 0) {
-          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-          const data = months.map((month, i) => ({
-            name: month,
-            value1: Math.floor(Math.random() * 300) + 100,
-            value2: Math.floor(Math.random() * 200) + 50,
-          }));
-          setGrowthData(data);
-        }
-      } catch (error) {
+        setGrowthData(data.engagementData || []);
+      } catch (error: any) {
+        console.error('Failed to fetch stats:', error.response?.data || error.message);
         toast.error('Failed to fetch stats');
       } finally {
         setLoading(false);
@@ -115,7 +110,7 @@ export default function AgentDashboard() {
             <h2 className="text-lg md:text-xl lg:text-2xl font-black text-white tracking-tight">Property Engagement</h2>
             <p className="text-xs md:text-sm text-muted-foreground font-medium">Monthly views and inquiries performance</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-primary" />
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Views</span>
@@ -124,18 +119,57 @@ export default function AgentDashboard() {
               <div className="w-3 h-3 rounded-full bg-secondary" />
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Inquiries</span>
             </div>
+            <Button variant="outline" onClick={() => setShowEngagementFullscreen(true)} className="rounded-xl border-primary/20 text-primary font-bold hover:bg-primary hover:text-secondary-foreground text-xs h-10 ml-2">
+              View Report
+            </Button>
           </div>
         </div>
         <div className="p-4 md:p-6 lg:p-10">
           <GenericChart 
-            data={growthData.length > 0 ? growthData : [
-              { name: 'No Data', value1: 0, value2: 0 },
-            ]} 
+            data={growthData.length > 0 ? growthData : []} 
             label1="Views" 
-            label2="Inquiries" 
+            label2="Inquiries"
+            color1="#c9a74d"
+            color2="#22c55e"
           />
         </div>
       </motion.div>
+
+      {/* Full Screen Engagement Dialog */}
+      <Dialog open={showEngagementFullscreen} onOpenChange={setShowEngagementFullscreen}>
+        <DialogContent className="max-w-[98vw] max-h-[98vh] w-full h-full bg-card border-border p-0 overflow-hidden">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <div>
+                <h2 className="text-2xl lg:text-3xl font-black text-white">Property Engagement</h2>
+                <p className="text-sm text-muted-foreground">Monthly views and inquiries performance</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setShowEngagementFullscreen(false)} className="rounded-xl">
+                <X size={24} />
+              </Button>
+            </div>
+            <div className="flex-1 p-6 lg:p-10">
+              <div className="h-full min-h-[500px]">
+                <GenericChart 
+                  data={growthData.length > 0 ? growthData : []} 
+                  label1="Views" 
+                  label2="Inquiries"
+                  color1="#c9a74d"
+                  color2="#22c55e"
+                />
+              </div>
+            </div>
+            <div className="p-6 border-t border-border flex gap-4">
+              <Link href="/dashboard/agent/my-properties" onClick={() => setShowEngagementFullscreen(false)} className="flex-1">
+                <Button variant="outline" className="w-full rounded-xl h-12 font-bold">My Properties</Button>
+              </Link>
+              <Link href="/dashboard/agent/add-property" onClick={() => setShowEngagementFullscreen(false)} className="flex-1">
+                <Button className="w-full rounded-xl h-12 font-bold bg-primary">Add Property</Button>
+              </Link>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

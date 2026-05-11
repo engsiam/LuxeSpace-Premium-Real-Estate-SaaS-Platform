@@ -21,6 +21,7 @@ router.post(
 router.get('/', propertyController.getProperties);
 router.get('/featured', propertyController.getFeaturedProperties);
 router.get('/by-city', propertyController.getPropertiesByCity);
+router.get('/agent-stats', authGuard('AGENT', 'ADMIN'), propertyController.getAgentStats);
 
 // AI Chat - Get recent properties in formatted way
 router.get('/ai-recent', async (req, res) => {

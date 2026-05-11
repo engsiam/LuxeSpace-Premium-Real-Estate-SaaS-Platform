@@ -49,7 +49,7 @@ export default function UserDashboard() {
         const growthData = growthRes.data.data || [];
 
         const totalBookings = bookings.length;
-        const activeBookings = bookings.filter((b: any) => b.status === 'PENDING' || b.status === 'CONFIRMED').length;
+        const activeBookings = bookings.filter((b: any) => b.status === 'PENDING').length;
         const totalSpent = bookings
           .filter((b: any) => b.status === 'PAID')
           .reduce((sum: number, b: any) => sum + (b.amount || 0), 0);
@@ -130,6 +130,18 @@ export default function UserDashboard() {
             <h2 className="text-lg md:text-xl lg:text-2xl font-black text-white tracking-tight">Personal Growth</h2>
             <p className="text-xs md:text-sm text-muted-foreground font-medium hidden sm:block">Monthly spending and booking frequency</p>
           </div>
+          <div className="flex gap-3 md:gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-primary" />
+              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Spending</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-secondary" />
+              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Bookings</span>
+            </div>
+          </div>
+        </div>
+        <div className="p-4 md:p-6 lg:p-10 flex justify-end">
           <Button variant="outline" onClick={() => setShowGrowthFullscreen(true)} className="rounded-xl border-primary/20 text-primary font-bold hover:bg-primary hover:text-secondary-foreground text-xs h-10">
             View Report
           </Button>

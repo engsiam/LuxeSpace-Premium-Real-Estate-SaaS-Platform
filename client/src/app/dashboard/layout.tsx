@@ -42,8 +42,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-primary font-bold animate-pulse">Loading dashboard...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background" suppressHydrationWarning>
+        <div className="text-primary font-bold animate-pulse" suppressHydrationWarning>Loading dashboard...</div>
       </div>
     );
   }
