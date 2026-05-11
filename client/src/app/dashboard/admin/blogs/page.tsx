@@ -194,17 +194,17 @@ export default function AdminBlogs() {
           <div className="divide-y divide-border">
             {blogs.map((blog) => (
               <div key={blog.id} className="p-4 lg:p-6 hover:bg-background/30 transition-all">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <div className="w-full sm:w-24 lg:w-32 h-16 lg:h-20 rounded-xl overflow-hidden bg-background shrink-0">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6">
+                  <div className="w-32 sm:w-40 lg:w-48 h-20 lg:h-24 rounded-xl overflow-hidden bg-background shrink-0">
                     {blog.coverImage || blog.image ? (
-                      <Image src={blog.coverImage || blog.image} alt={blog.title} width={128} height={80} className="w-full h-full object-cover" unoptimized />
+                      <Image src={blog.coverImage || blog.image || ''} alt={blog.title} width={192} height={96} className="w-full h-full object-cover" unoptimized />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
                         <ImageIcon size={24} />
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0 w-full">
+                  <div className="flex-1 w-full min-w-[200px]">
                     <h3 className="font-bold text-white text-sm lg:text-lg truncate">{blog.title}</h3>
                     <div className="flex flex-wrap items-center gap-2 lg:gap-3 mt-2">
                       <Badge className={`text-[10px] lg:text-xs ${blog.isPublished ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30' : 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30'}`}>
@@ -232,7 +232,7 @@ export default function AdminBlogs() {
 
       {/* Create/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="bg-card border-border max-w-lg w-full max-h-[95vh] overflow-y-auto rounded-3xl p-0">
+        <DialogContent className="bg-card border-border w-[98vw] max-w-[1200px] max-h-[95vh] overflow-y-auto rounded-3xl p-0">
           <div className="sticky top-0 bg-card/95 backdrop-blur-md border-b border-border p-4 lg:p-6 z-10">
             <div className="flex items-center justify-between">
               <div>
@@ -247,8 +247,8 @@ export default function AdminBlogs() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-4 lg:p-6 space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 lg:p-10 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Title *</Label>
                 <Input
@@ -326,7 +326,7 @@ export default function AdminBlogs() {
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 placeholder="Write your blog content here..."
-                className="min-h-[250px] lg:min-h-[350px] bg-background/50 border-white/10 rounded-xl text-white focus-visible:border-primary resize-none text-sm lg:text-base"
+                className="min-h-[300px] md:min-h-[400px] lg:min-h-[500px] bg-background/50 border-white/10 rounded-xl text-white focus-visible:border-primary resize-none text-sm lg:text-base leading-relaxed"
                 required
               />
             </div>

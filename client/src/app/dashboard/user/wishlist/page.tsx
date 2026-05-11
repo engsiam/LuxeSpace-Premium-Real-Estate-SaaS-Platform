@@ -86,7 +86,7 @@ export default function WishlistPage() {
         <div className="bg-card border border-border shadow-xl rounded-xl lg:rounded-2xl overflow-hidden p-6 md:p-12">
           <div className="text-center py-8 md:py-12">
             <div className="w-16 md:w-20 h-16 md:h-20 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 md:mb-6 text-primary">
-              <Heart size={28} md:size={36} />
+              <Heart size={28} />
             </div>
             <p className="text-muted-foreground mb-2 text-base md:text-lg font-medium">Your wishlist is empty</p>
             <p className="text-muted-foreground mb-4 md:mb-6 text-sm">Start exploring and save properties you love</p>
@@ -102,7 +102,7 @@ export default function WishlistPage() {
         <div className="bg-card border border-border shadow-xl rounded-xl lg:rounded-2xl overflow-hidden p-4 md:p-6 lg:p-8">
           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="w-10 md:w-12 h-10 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <Heart size={20} md:size={24} />
+              <Heart size={20} />
             </div>
             <div>
               <h2 className="text-lg md:text-xl font-bold text-white">Saved Properties</h2>

@@ -97,7 +97,7 @@ export default function DashboardSidebar({ role, onLogout }: DashboardSidebarPro
         </Link>
       </div> */}
 
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 py-3 space-y-1 overflow-y-auto">
         <div className="px-3 mb-4">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 border-b border-border/50 pb-2">
             {role} Hub
@@ -137,13 +137,13 @@ export default function DashboardSidebar({ role, onLogout }: DashboardSidebarPro
           }}
           className="w-full flex items-center gap-3 h-12 px-4 rounded-xl text-red-500 hover:bg-red-500/10 hover:text-red-500 font-black transition-all group"
         >
-          <div className="p-2 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform">
+          <div className="bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform">
             <LogOut size={18} />
           </div>
           <span className="text-sm tracking-tight uppercase">Log Out</span>
         </button>
       
-        <div className="mt-4 flex items-center justify-center gap-2 grayscale opacity-40">
+        <div className="mt-4 flex items-center gap-2 grayscale opacity-40">
           <Globe size={12} className="text-white" />
           <span className="text-xs font-black uppercase tracking-widest text-white">
             LuxeSpace v2.0

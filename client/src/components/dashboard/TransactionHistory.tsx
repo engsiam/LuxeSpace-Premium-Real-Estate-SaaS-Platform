@@ -95,7 +95,7 @@ export default function TransactionHistory() {
                 <TableCell className="py-4 md:py-6 pl-4 md:pl-8">
                   <div className="flex items-center gap-3 md:gap-4">
                     <div className="w-8 md:w-10 h-8 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <Receipt size={16} md:size={20} />
+                      <Receipt size={16} />
                     </div>
                     <div>
                       <p className="text-white font-black tracking-tight text-sm mb-1">{trx.trxId || 'PENDING'}</p>

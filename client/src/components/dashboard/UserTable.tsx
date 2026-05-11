@@ -117,7 +117,7 @@ export default function UserTable({
               </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger>
                     <Button variant="ghost" size="icon" className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl hover:bg-white/10 transition-all">
                       <MoreVertical size={14} className="lg:w-[18px] lg:h-[18px] text-muted-foreground" />
                     </Button>

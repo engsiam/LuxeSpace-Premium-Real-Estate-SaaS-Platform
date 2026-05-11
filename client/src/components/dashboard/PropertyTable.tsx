@@ -40,7 +40,7 @@ export default function PropertyTable({
   if (properties.length === 0) {
     return (
       <div className="text-center py-12 lg:py-20 bg-white/5 rounded-xl lg:rounded-[2rem] border border-dashed border-white/10">
-        <Home className="mx-auto text-muted-foreground mb-4 opacity-20" size={36} className="lg:w-12 lg:h-12" />
+        <Home className="mx-auto text-muted-foreground mb-4 opacity-20 lg:w-12 lg:h-12" size={36} />
         <p className="text-muted-foreground font-black uppercase tracking-widest text-xs lg:text-sm">No properties found</p>
       </div>
     );

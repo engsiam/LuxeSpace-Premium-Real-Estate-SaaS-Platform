@@ -247,7 +247,7 @@ export default function UserProfile() {
           <div className="bg-primary p-4 md:p-6 lg:p-8 rounded-xl lg:rounded-[2.5rem] shadow-xl text-secondary-foreground space-y-3 md:space-y-4">
             <h3 className="font-black uppercase tracking-widest text-xs opacity-60">Security Protocol</h3>
             <div className="flex items-center gap-3">
-              <CheckCircle2 size={18} md:size={20} />
+              <CheckCircle2 size={18} />
               <p className="text-sm font-bold">2FA is currently active</p>
             </div>
           </div>
@@ -356,7 +356,7 @@ export default function UserProfile() {
                               <Lock className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
                               <Input type={showPasswords.current ? 'text' : 'password'} {...field} className="h-12 md:h-14 bg-background/50 border-white/10 rounded-xl lg:rounded-2xl pl-10 md:pl-12 pr-10 md:pr-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
                               <button type="button" onClick={() => setShowPasswords(p => ({ ...p, current: !p.current }))} className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
-                                {showPasswords.current ? <EyeOff size={16} md:size={18} /> : <Eye size={16} md:size={18} />}
+                                {showPasswords.current ? <EyeOff size={16} /> : <Eye size={16} />}
                               </button>
                             </div>
                           </FormControl>
@@ -376,7 +376,7 @@ export default function UserProfile() {
                               <Lock className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
                               <Input type={showPasswords.new ? 'text' : 'password'} {...field} className="h-12 md:h-14 bg-background/50 border-white/10 rounded-xl lg:rounded-2xl pl-10 md:pl-12 pr-10 md:pr-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
                               <button type="button" onClick={() => setShowPasswords(p => ({ ...p, new: !p.new }))} className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
-                                {showPasswords.new ? <EyeOff size={16} md:size={18} /> : <Eye size={16} md:size={18} />}
+                                {showPasswords.new ? <EyeOff size={16} /> : <Eye size={16} />}
                               </button>
                             </div>
                           </FormControl>
@@ -396,7 +396,7 @@ export default function UserProfile() {
                               <Lock className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-primary/40 w-4 h-4" />
                               <Input type={showPasswords.confirm ? 'text' : 'password'} {...field} className="h-12 md:h-14 bg-background/50 border-white/10 rounded-xl lg:rounded-2xl pl-10 md:pl-12 pr-10 md:pr-12 text-white focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/20" />
                               <button type="button" onClick={() => setShowPasswords(p => ({ ...p, confirm: !p.confirm }))} className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
-                                {showPasswords.confirm ? <EyeOff size={16} md:size={18} /> : <Eye size={16} md:size={18} />}
+                                {showPasswords.confirm ? <EyeOff size={16} /> : <Eye size={16} />}
                               </button>
                             </div>
                           </FormControl>
