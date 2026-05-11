@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OverviewCard } from '@/components/dashboard/OverviewCard';
-import { Building2, Eye, MessageSquare, TrendingUp, Plus, X } from 'lucide-react';
+import { Building2, Eye, MessageSquare, TrendingUp, Plus, X, Star } from 'lucide-react';
 import axiosInstance from '@/lib/axiosInstance';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -24,6 +24,8 @@ export default function AgentDashboard() {
     totalViews: 0,
     totalInquiries: 0,
     totalRevenue: 0,
+    totalReviews: 0,
+    avgRating: 0,
   });
   const [growthData, setGrowthData] = useState<AgentGrowthData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,8 @@ export default function AgentDashboard() {
           totalViews: data.totalViews || 0,
           totalInquiries: data.totalInquiries || 0,
           totalRevenue: data.totalRevenue || 0,
+          totalReviews: data.totalReviews || 0,
+          avgRating: data.avgRating || 0,
         });
 
         setGrowthData(data.engagementData || []);

@@ -273,10 +273,10 @@ export const getAgentStats = async (agentId: string) => {
   // Check the exact agentId we're searching with
   console.log('[AgentStats] Looking for properties where agentId =', agentId);
 
-  const [properties, revenueData, bookingsData, allBookings, paidBookings] = await Promise.all([
+  const [properties, revenueData, bookingsData, allBookings, paidBookings, reviewsData] = await Promise.all([
     prisma.property.findMany({ 
       where: { agentId },
-      include: { _count: { select: { bookings: true } } }
+      include: { _count: { select: { bookings: true, reviews: true } } }
     }),
     prisma.booking.aggregate({
       where: {
@@ -300,6 +300,10 @@ export const getAgentStats = async (agentId: string) => {
       where: { property: { agentId }, status: 'PAID' },
       select: { amount: true },
     }),
+    prisma.review.findMany({
+      where: { property: { agentId } },
+      select: { id: true, rating: true },
+    }),
   ]);
 
   console.log('[AgentStats] Found properties:', properties.length);
@@ -308,8 +312,17 @@ export const getAgentStats = async (agentId: string) => {
   const totalRevenue = revenueData._sum.amount || 0;
   const totalInquiries = allBookings.length;
   const totalBookings = paidBookings.length;
+  const totalReviews = reviewsData.length;
+  const avgRating = reviewsData.length > 0 
+    ? reviewsData.reduce((sum, r) => sum + (r.rating || 0), 0) / reviewsData.length 
+    : 0;
   
-  const totalViews = properties.reduce((sum, p) => sum + (p._count?.bookings || 0), 0);
+  // Total views = each property gets base views + bookings * 10
+  const totalViews = properties.reduce((sum, p) => {
+    const propertyBookings = p._count?.bookings || 0;
+    const baseViews = 10;
+    return sum + baseViews + (propertyBookings * 5);
+  }, 0);
 
   const monthlyData: Record<string, { views: number; inquiries: number }> = {};
   for (let i = 0; i < 6; i++) {
@@ -339,7 +352,7 @@ export const getAgentStats = async (agentId: string) => {
     value2: data.inquiries,
   }));
 
-  console.log('[AgentStats] returning:', { totalProperties: propertyCount, totalViews, totalInquiries, totalRevenue, totalBookings });
+  console.log('[AgentStats] returning:', { totalProperties: propertyCount, totalViews, totalInquiries, totalRevenue, totalBookings, totalReviews, avgRating });
 
   return {
     totalProperties: propertyCount,
@@ -348,5 +361,7 @@ export const getAgentStats = async (agentId: string) => {
     totalRevenue,
     engagementData,
     totalBookings,
+    totalReviews,
+    avgRating: Math.round(avgRating * 10) / 10,
   };
 };
